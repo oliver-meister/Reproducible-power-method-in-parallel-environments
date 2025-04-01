@@ -1,4 +1,4 @@
-# Install script for directory: /mnt/c/Users/olive/Bachelor-thesis/Reproducible-power-method-in-parallel-environments/external/exblas-master/src/cpu/blas1
+# Install script for directory: /mnt/c/Users/olive/skola/Reproducible-power-method-in-parallel-environments/external/exblas-master/src/cpu/blas1
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -37,27 +37,36 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
   set(CMAKE_CROSSCOMPILING "FALSE")
 endif()
 
-if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  if(EXISTS "$ENV{DESTDIR}/mnt/c/Users/olive/Bachelor-thesis/Reproducible-power-method-in-parallel-environments/external/exblas-master/build/tests/test.exsum" AND
-     NOT IS_SYMLINK "$ENV{DESTDIR}/mnt/c/Users/olive/Bachelor-thesis/Reproducible-power-method-in-parallel-environments/external/exblas-master/build/tests/test.exsum")
+# Set default install directory permissions.
+if(NOT DEFINED CMAKE_OBJDUMP)
+  set(CMAKE_OBJDUMP "/usr/bin/objdump")
+endif()
+
+if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
+  if(EXISTS "$ENV{DESTDIR}/mnt/c/Users/olive/skola/Reproducible-power-method-in-parallel-environments/external/exblas-master/build/tests/test.exsum" AND
+     NOT IS_SYMLINK "$ENV{DESTDIR}/mnt/c/Users/olive/skola/Reproducible-power-method-in-parallel-environments/external/exblas-master/build/tests/test.exsum")
     file(RPATH_CHECK
-         FILE "$ENV{DESTDIR}/mnt/c/Users/olive/Bachelor-thesis/Reproducible-power-method-in-parallel-environments/external/exblas-master/build/tests/test.exsum"
+         FILE "$ENV{DESTDIR}/mnt/c/Users/olive/skola/Reproducible-power-method-in-parallel-environments/external/exblas-master/build/tests/test.exsum"
          RPATH "")
   endif()
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/mnt/c/Users/olive/Bachelor-thesis/Reproducible-power-method-in-parallel-environments/external/exblas-master/build/tests/test.exsum")
+   "/mnt/c/Users/olive/skola/Reproducible-power-method-in-parallel-environments/external/exblas-master/build/tests/test.exsum")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/mnt/c/Users/olive/Bachelor-thesis/Reproducible-power-method-in-parallel-environments/external/exblas-master/build/tests" TYPE EXECUTABLE FILES "/mnt/c/Users/olive/Bachelor-thesis/Reproducible-power-method-in-parallel-environments/external/exblas-master/build/src/cpu/blas1/test.exsum")
-  if(EXISTS "$ENV{DESTDIR}/mnt/c/Users/olive/Bachelor-thesis/Reproducible-power-method-in-parallel-environments/external/exblas-master/build/tests/test.exsum" AND
-     NOT IS_SYMLINK "$ENV{DESTDIR}/mnt/c/Users/olive/Bachelor-thesis/Reproducible-power-method-in-parallel-environments/external/exblas-master/build/tests/test.exsum")
+  file(INSTALL DESTINATION "/mnt/c/Users/olive/skola/Reproducible-power-method-in-parallel-environments/external/exblas-master/build/tests" TYPE EXECUTABLE FILES "/mnt/c/Users/olive/skola/Reproducible-power-method-in-parallel-environments/external/exblas-master/build/src/cpu/blas1/test.exsum")
+  if(EXISTS "$ENV{DESTDIR}/mnt/c/Users/olive/skola/Reproducible-power-method-in-parallel-environments/external/exblas-master/build/tests/test.exsum" AND
+     NOT IS_SYMLINK "$ENV{DESTDIR}/mnt/c/Users/olive/skola/Reproducible-power-method-in-parallel-environments/external/exblas-master/build/tests/test.exsum")
     if(CMAKE_INSTALL_DO_STRIP)
-      execute_process(COMMAND "/usr/bin/strip" "$ENV{DESTDIR}/mnt/c/Users/olive/Bachelor-thesis/Reproducible-power-method-in-parallel-environments/external/exblas-master/build/tests/test.exsum")
+      execute_process(COMMAND "/usr/bin/strip" "$ENV{DESTDIR}/mnt/c/Users/olive/skola/Reproducible-power-method-in-parallel-environments/external/exblas-master/build/tests/test.exsum")
     endif()
   endif()
+endif()
+
+if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
+  include("/mnt/c/Users/olive/skola/Reproducible-power-method-in-parallel-environments/external/exblas-master/build/src/cpu/blas1/CMakeFiles/test.exsum.dir/install-cxx-module-bmi-noconfig.cmake" OPTIONAL)
 endif()
 

@@ -4,6 +4,6 @@
 // the configured options and settings for ExBLAS
 #define EXBLAS_VERSION_MAJOR 1
 #define EXBLAS_VERSION_MINOR 0
-#define EXBLAS_SOURCE_DIR "/mnt/c/Users/olive/Bachelor-thesis/Reproducible-power-method-in-parallel-environments/external/exblas-master"
-#define EXBLAS_BINARY_DIR "/mnt/c/Users/olive/Bachelor-thesis/Reproducible-power-method-in-parallel-environments/external/exblas-master/build"
+#define EXBLAS_SOURCE_DIR "/mnt/c/Users/olive/skola/Reproducible-power-method-in-parallel-environments/external/exblas-master"
+#define EXBLAS_BINARY_DIR "/mnt/c/Users/olive/skola/Reproducible-power-method-in-parallel-environments/external/exblas-master/build"
 /* #undef USE_EXBLAS */

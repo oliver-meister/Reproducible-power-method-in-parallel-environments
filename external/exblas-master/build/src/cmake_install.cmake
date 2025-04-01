@@ -1,4 +1,4 @@
-# Install script for directory: /mnt/c/Users/olive/Bachelor-thesis/Reproducible-power-method-in-parallel-environments/external/exblas-master/src
+# Install script for directory: /mnt/c/Users/olive/skola/Reproducible-power-method-in-parallel-environments/external/exblas-master/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -37,9 +37,14 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
   set(CMAKE_CROSSCOMPILING "FALSE")
 endif()
 
+# Set default install directory permissions.
+if(NOT DEFINED CMAKE_OBJDUMP)
+  set(CMAKE_OBJDUMP "/usr/bin/objdump")
+endif()
+
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/mnt/c/Users/olive/Bachelor-thesis/Reproducible-power-method-in-parallel-environments/external/exblas-master/build/src/cpu/cmake_install.cmake")
+  include("/mnt/c/Users/olive/skola/Reproducible-power-method-in-parallel-environments/external/exblas-master/build/src/cpu/cmake_install.cmake")
 
 endif()
 

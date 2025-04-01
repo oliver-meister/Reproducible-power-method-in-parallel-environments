@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/test.exsum.dir/__/__/__/tests/test.exsum.cpu.cpp.o"
+  "CMakeFiles/test.exsum.dir/__/__/__/tests/test.exsum.cpu.cpp.o.d"
   "test.exsum"
   "test.exsum.pdb"
 )
