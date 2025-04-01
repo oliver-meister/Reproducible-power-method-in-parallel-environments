@@ -1,0 +1,3 @@
+[submodule "external/exblas"]
+	path = external/exblas
+	url = https://github.com/riakymch/exblas.git
