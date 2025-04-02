@@ -1,8 +1,8 @@
-#include "power_method_serial.h"
+#include "../../include/power_method_serial.h"
 #include <stdio.h>
 #include <stdbool.h>
-#include "matrix.h"
-#include "vector.h"
+#include "../../include/matrix.h"
+#include "../../include/vector.h"
 
 // Matrix is of size n*n
 #define SIZE 20

@@ -1,7 +1,7 @@
 # Define directories
 EXBLAS_DIR = external/exblas-master
 BUILD_DIR = $(EXBLAS_DIR)/build
-EXECUTABLE = power_method_serial
+EXECUTABLE_SERIAL = power_method_serial
 
 # Default target
 all: build
@@ -19,9 +19,10 @@ make:
 # Clean the build directory
 clean:
 	rm -rf $(BUILD_DIR)  # Clean the build directory
-	rm -f $(EXECUTABLE)
+	rm -f $(EXECUTABLE_SERIAL)
+# Creates and run executable
+run_serial: build_serial 
+	./$(EXECUTABLE_SERIAL)
 
-run: 
-	gcc Serial/$(EXECUTABLE).c -o $(EXECUTABLE)
-	./$(EXECUTABLE)
-
+build_serial:
+	gcc src/Serial/$(EXECUTABLE_SERIAL).c -o $(EXECUTABLE_SERIAL)
