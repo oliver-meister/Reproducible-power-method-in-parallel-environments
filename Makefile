@@ -3,6 +3,8 @@ EXBLAS_DIR = external/exblas-master
 BUILD_DIR = $(EXBLAS_DIR)/build
 EXECUTABLE_SERIAL = power_method_serial
 
+CFLAGS = -Wall -Wextra
+
 # Default target
 all: build
 
@@ -20,9 +22,14 @@ make:
 clean:
 	rm -rf $(BUILD_DIR)  # Clean the build directory
 	rm -f $(EXECUTABLE_SERIAL)
+	rm -f test*
 # Creates and run executable
 run_serial: build_serial 
 	./$(EXECUTABLE_SERIAL)
 
 build_serial:
 	gcc src/Serial/$(EXECUTABLE_SERIAL).c -o $(EXECUTABLE_SERIAL)
+
+test_serial:
+	gcc -o test_serial tests/tests_serial/test_power_method_serial.c src/serial/power_method_serial.c $(CFLAGS) -lcunit
+
