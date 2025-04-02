@@ -1,4 +1,4 @@
-#include "power-method-serial.h"
+#include "power_method_serial.h"
 #include <stdio.h>
 #include <stdbool.h>
 #include "matrix.h"

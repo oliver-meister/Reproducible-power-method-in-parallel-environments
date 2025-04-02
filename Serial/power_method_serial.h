@@ -5,7 +5,7 @@
 #include "vector.h"
 
 // Function to run the power method
-void power_method(const Matrix*);
+void power_method(Matrix*);
 void convergence();
 void matvec_mult();
 void normalize_vector();
