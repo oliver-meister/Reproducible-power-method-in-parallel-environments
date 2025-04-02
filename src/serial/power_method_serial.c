@@ -36,10 +36,24 @@ void serial_matvec_mult(Matrix* A, Vector* V){
     free(temp);
 }
 
-void serial_normalize_vector(){
-    
+// Normalize the vector
+void serial_normalize_vector(Vector* V){
+    double norm = sqrt(dot_product(V));
+    if (norm == 0) return;
+    for(int i = 0; i < V->size; i++){
+        V->data[i] =  V->data[i] / norm;
+    }
 }
 
 void serial_approximate_eigenvalue(){
     
+}
+
+// Move to vector.c
+double dot_product(Vector* V){
+    double dot = 0;
+    for(int i = 0; i < V->size; i++){
+        dot += V->data[i] * V->data[i];
+    }
+    return dot;
 }
