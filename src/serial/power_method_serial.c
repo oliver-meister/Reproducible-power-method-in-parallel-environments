@@ -7,22 +7,15 @@
 #include <stdlib.h>
 #include <time.h>
 
-// Generate a random double between min and max
-double generate_random_double(double min, double max){
-    return (max - min) * ( (double)rand() / (double)RAND_MAX ) + min;
-}
 
-Vector* generate_random_vector(double size){
-    Vector* x = malloc(sizeof(Vector));
-    x->size = size;
-    x->data = malloc(sizeof(double) * size);
 
-    for(int i = 0; i < size; i++){
-        x->data[i] = generate_random_double(-1, 1);
-    }
-    return x;
-}
-
+/**
+ * @brief Calculates the dominant eigenvalue and its coresponding eigenvector of a matrix.
+ * 
+ * @param A The matrix.
+ * 
+ * @return The dominant eigenvalue of matrix A.
+ */
 double serial_power_method(Matrix* A){
    
     // initial vector
@@ -42,11 +35,28 @@ double serial_power_method(Matrix* A){
     return lambda_new;
 }
 
-
+/**
+ * @brief Compares two eigenvalues and determines whether they have converged
+ *          (i.e., if the difference between them is less than a given threshold).
+ * 
+ * @param lambda_new he most recent eigenvalue estimate.
+ * @param lambda_old The previous eigenvalue estimate.
+ * @param threshold The threshold below which convergence is assumed.
+ * 
+ * @return True if the difference between the two eigenvalues is less than the threshold, false otherwise.
+ */
 bool serial_convergence(double lambda_new, double lambda_old, double threshold){
     return (fabs(lambda_new - lambda_old) > threshold);
 }
 
+/**
+ * @brief Computes the matrix-vector multiplication.
+ * 
+ * @param A The input matrix.
+ * @param x The input/output vector. It is overwritten with the result A * x.
+ * 
+ * @return Nothing. The result is stored directly in the vector x.
+ */
 void serial_matvec_mult(Matrix* A, Vector* x){
 
     double* temp = malloc(sizeof(double) * x->size);
@@ -66,7 +76,14 @@ void serial_matvec_mult(Matrix* A, Vector* x){
     free(temp);
 }
 
-// Normalize the vector
+
+/**
+ * @brief Normalize the vector into a unit vector.
+ * 
+ * @param x The input/output vector. It is overwritten by the unit vector.
+ * 
+ * @return Nothing. The result is stored directly in the vector x.
+ */
 void serial_normalize_vector(Vector* x){
 
     double norm = sqrt(dot_product(x, x));
@@ -76,7 +93,15 @@ void serial_normalize_vector(Vector* x){
     }
 }
 
-// Aproximate eigenvalue
+
+/**
+ * @brief  Approximates the dominant eigenvalue.
+ * 
+ * @param A The input matrix.
+ * @param x The normalized input vector.
+ * 
+ * @return The approximated dominant eigenvalue.
+ */
 double serial_approximate_eigenvalue(Matrix* A, Vector* x){
     Vector copy;
     copy.size = x->size;

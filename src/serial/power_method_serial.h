@@ -11,7 +11,5 @@ bool serial_convergence(double, double, double);
 void serial_matvec_mult(Matrix*, Vector*);
 void serial_normalize_vector(Vector*);
 double serial_approximate_eigenvalue(Matrix*, Vector*);
-Vector* generate_random_vector(double);
-double generate_random_double(double, double);
 
 #endif 
