@@ -5,7 +5,7 @@
 #include "../../include/matrix.h"
 #include "../../include/vector.h"
 
-void test_matvec_mult(){
+void test_serial_matvec_mult(){
 
     Matrix A;
     A.rows = 2;
@@ -35,7 +35,7 @@ void test_matvec_mult(){
     free(test_array);
 }
 
-test_norm(){
+test_serial_norm(){
 
     Vector x;
     x.size = 2;
@@ -50,11 +50,36 @@ test_norm(){
 
 }
 
+test_serial_approximate_eigenvalue(){
+
+    Matrix A;
+    A.rows = 2;
+    A.cols = 2;
+    A.data = malloc(sizeof(double) * 4);
+    A.data[0] = 2;
+    A.data[1] = 0; 
+    A.data[2] = 0; 
+    A.data[3] = 3;
+
+    Vector x;
+    x.size = 2;
+    x.data = malloc(sizeof(double) * 2);
+    x.data[0] = 1;
+    x.data[1] = 0;
+
+    double lambda = serial_approximate_eigenvalue(&A, &x);
+    CU_ASSERT_DOUBLE_EQUAL(lambda, 2.0, 0.0001);
+    free(A.data);
+    free(x.data);
+
+}
+
 int main(){
     CU_initialize_registry();
     CU_pSuite suite = CU_add_suite("Power Method Serial Tests", NULL, NULL);
-    CU_add_test(suite, "Matrix vector multiplication test", test_matvec_mult);
-    CU_add_test(suite, "Vector normalization test", test_matvec_mult);
+    CU_add_test(suite, "Matrix vector multiplication test", test_serial_matvec_mult);
+    CU_add_test(suite, "Vector normalization test", test_serial_matvec_mult);
+    CU_add_test(suite, "Approximate eigenvalue test", test_serial_matvec_mult);
     CU_basic_run_tests();
     CU_cleanup_registry();
     return 0;
