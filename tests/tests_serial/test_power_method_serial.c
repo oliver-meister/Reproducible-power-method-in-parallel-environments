@@ -35,10 +35,26 @@ void test_matvec_mult(){
     free(test_array);
 }
 
+test_norm(){
+
+    Vector x;
+    x.size = 2;
+    x.data = malloc(sizeof(double) * 2);
+    x.data[0] = 3.0;
+    x.data[1] = 4.0;
+
+    serial_normalize_vector(x);
+    CU_ASSERT_DOUBLE_EQUAL(x.data[0], 0.6, 0.0001);
+    CU_ASSERT_DOUBLE_EQUAL(x.data[1], 0.8, 0.0001);
+    free(x.data);
+
+}
+
 int main(){
     CU_initialize_registry();
     CU_pSuite suite = CU_add_suite("Power Method Serial Tests", NULL, NULL);
     CU_add_test(suite, "Matrix vector multiplication test", test_matvec_mult);
+    CU_add_test(suite, "Vector normalization test", test_matvec_mult);
     CU_basic_run_tests();
     CU_cleanup_registry();
     return 0;
