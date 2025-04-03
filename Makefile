@@ -3,7 +3,7 @@ EXBLAS_DIR = external/exblas-master
 BUILD_DIR = $(EXBLAS_DIR)/build
 EXECUTABLE_SERIAL = power_method_serial
 
-CFLAGS = -Wall -Wextra
+CFLAGS = -Wall -Wextra -lm
 
 # Default target
 all: build
@@ -31,5 +31,5 @@ build_serial:
 	gcc src/Serial/$(EXECUTABLE_SERIAL).c -o $(EXECUTABLE_SERIAL)
 
 test_serial:
-	gcc -o test_serial tests/tests_serial/test_power_method_serial.c src/serial/power_method_serial.c $(CFLAGS) -lcunit
+	gcc -o test_serial tests/tests_serial/test_power_method_serial.c src/serial/power_method_serial.c include/vector.c $(CFLAGS) -lcunit
 

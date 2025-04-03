@@ -6,4 +6,7 @@ typedef struct {
     int size;
 } Vector;
 
+double dot_product(Vector*);
+
 #endif 
+

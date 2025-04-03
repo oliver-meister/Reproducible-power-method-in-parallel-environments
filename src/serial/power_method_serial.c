@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "../../include/matrix.h"
 #include "../../include/vector.h"
+#include <math.h>
 
 // Matrix is of size n*n
 #define SIZE 20
@@ -25,6 +26,7 @@ void serial_matvec_mult(Matrix* A, Vector* V){
     for(int i = 0; i < A->rows; i++){
         sum = 0;
         for (int j = 0; j < A->cols; j++){
+            // each row has cols elements
             double value = A->data[i * A->cols + j];
             sum += value * V->data[j];
         }
@@ -38,6 +40,7 @@ void serial_matvec_mult(Matrix* A, Vector* V){
 
 // Normalize the vector
 void serial_normalize_vector(Vector* V){
+
     double norm = sqrt(dot_product(V));
     if (norm == 0) return;
     for(int i = 0; i < V->size; i++){
@@ -47,13 +50,4 @@ void serial_normalize_vector(Vector* V){
 
 void serial_approximate_eigenvalue(){
     
-}
-
-// Move to vector.c
-double dot_product(Vector* V){
-    double dot = 0;
-    for(int i = 0; i < V->size; i++){
-        dot += V->data[i] * V->data[i];
-    }
-    return dot;
 }

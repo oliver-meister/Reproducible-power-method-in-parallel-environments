@@ -10,5 +10,5 @@ void serial_convergence();
 void serial_matvec_mult(Matrix*, Vector*);
 void serial_normalize_vector();
 void serial_approximate_eigenvalue();
-double dot_product(Vector*);
+
 #endif 
