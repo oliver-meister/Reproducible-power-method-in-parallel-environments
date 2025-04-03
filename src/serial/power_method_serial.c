@@ -4,18 +4,47 @@
 #include "../../include/matrix.h"
 #include "../../include/vector.h"
 #include <math.h>
+#include <stdlib.h>
+#include <time.h>
 
-// Matrix is of size n*n
-#define SIZE 20
+// Generate a random double between min and max
+double generate_random_double(double min, double max){
+    return (max - min) * ( (double)rand() / (double)RAND_MAX ) + min;
+}
 
+Vector* generate_random_vector(double size){
+    Vector* x = malloc(sizeof(Vector));
+    x->size = size;
+    x->data = malloc(sizeof(double) * size);
 
-void serial_power_method(Matrix* A){
-    
+    for(int i = 0; i < size; i++){
+        x->data[i] = generate_random_double(-1, 1);
+    }
+    return x;
+}
+
+double serial_power_method(Matrix* A){
+   
+    // initial vector
+    double lambda_old = 0;
+    double lambda_new = 0;
+    Vector* x = generate_random_vector(A->rows);
+
+    do{
+        lambda_old = lambda_new;
+        serial_matvec_mult(A, x);
+        serial_normalize_vector(x);
+        lambda_new = serial_approximate_eigenvalue(A, x);
+    } while(serial_convergence(lambda_new, lambda_old, 0.00001));
+
+    free(x->data);
+    free(x);
+    return lambda_new;
 }
 
 
-void serial_convergence(){
-    
+bool serial_convergence(double lambda_new, double lambda_old, double threshold){
+    return (fabs(lambda_new - lambda_old) > threshold);
 }
 
 void serial_matvec_mult(Matrix* A, Vector* x){

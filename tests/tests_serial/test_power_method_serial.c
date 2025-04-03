@@ -43,7 +43,7 @@ test_serial_norm(){
     x.data[0] = 3.0;
     x.data[1] = 4.0;
 
-    serial_normalize_vector(x);
+    serial_normalize_vector(&x);
     CU_ASSERT_DOUBLE_EQUAL(x.data[0], 0.6, 0.0001);
     CU_ASSERT_DOUBLE_EQUAL(x.data[1], 0.8, 0.0001);
     free(x.data);
@@ -74,12 +74,42 @@ test_serial_approximate_eigenvalue(){
 
 }
 
+test_serial_generate_random_vector(){
+    Vector* x = generate_random_vector(2);
+    CU_ASSERT_EQUAL(2, x->size);
+    for(int i = 0; i < x->size; i++){
+        printf("index %d: %f\n", i, x->data[i]);
+        CU_ASSERT(x->data[i] >= -1.0 && x->data[i] <= 1.0);
+    }
+    free(x->data);
+    free(x);
+}
+
+test_serial_power_method(){
+    Matrix A;
+    A.rows = 2;
+    A.cols = 2;
+    A.data = malloc(sizeof(double) * 4);
+    A.data[0] = 2.0; 
+    A.data[1] = 1.0; 
+    A.data[2] = 1.0; 
+    A.data[3] = 3.0; 
+
+    double lambda = serial_power_method(&A);
+    printf("Eigenvalue %f\n", lambda);
+    CU_ASSERT_DOUBLE_EQUAL(lambda, 3.6180, 0.001);
+    free(A.data);
+}
+
 int main(){
+    srand(time(0));
     CU_initialize_registry();
     CU_pSuite suite = CU_add_suite("Power Method Serial Tests", NULL, NULL);
     CU_add_test(suite, "Matrix vector multiplication test", test_serial_matvec_mult);
-    CU_add_test(suite, "Vector normalization test", test_serial_matvec_mult);
-    CU_add_test(suite, "Approximate eigenvalue test", test_serial_matvec_mult);
+    CU_add_test(suite, "Vector normalization test", test_serial_norm);
+    CU_add_test(suite, "Approximate eigenvalue test", test_serial_approximate_eigenvalue);
+    CU_add_test(suite, "Generate random vector test", test_serial_generate_random_vector);
+    CU_add_test(suite, "Power method test", test_serial_power_method);
     CU_basic_run_tests();
     CU_cleanup_registry();
     return 0;
