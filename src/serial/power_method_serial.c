@@ -9,6 +9,9 @@
 
 
 
+
+// Dense power method
+
 /**
  * @brief Calculates the dominant eigenvalue and its coresponding eigenvector of a matrix.
  * 
@@ -16,7 +19,7 @@
  * 
  * @return The dominant eigenvalue of matrix A.
  */
-double serial_power_method(Matrix* A){
+double serial_dense_power_method(denseMatrix* A){
    
     // initial vector
     double lambda_old = 0;
@@ -25,9 +28,9 @@ double serial_power_method(Matrix* A){
 
     do{
         lambda_old = lambda_new;
-        serial_matvec_mult(A, x);
+        serial_dense_matvec_mult(A, x);
         serial_normalize_vector(x);
-        lambda_new = serial_approximate_eigenvalue(A, x);
+        lambda_new = serial_dense_approximate_eigenvalue(A, x);
     } while(serial_convergence(lambda_new, lambda_old, 0.00001));
 
     free(x->data);
@@ -57,7 +60,7 @@ bool serial_convergence(double lambda_new, double lambda_old, double threshold){
  * 
  * @return Nothing. The result is stored directly in the vector x.
  */
-void serial_matvec_mult(Matrix* A, Vector* x){
+void serial_dense_matvec_mult(denseMatrix* A, Vector* x){
 
     double* temp = malloc(sizeof(double) * x->size);
     double sum;
@@ -102,14 +105,96 @@ void serial_normalize_vector(Vector* x){
  * 
  * @return The approximated dominant eigenvalue.
  */
-double serial_approximate_eigenvalue(Matrix* A, Vector* x){
+double serial_dense_approximate_eigenvalue(denseMatrix* A, Vector* x){
     Vector copy;
     copy.size = x->size;
     copy.data = malloc(sizeof(double) * copy.size);
     for(int i = 0; i < copy.size; i++){
         copy.data[i] = x->data[i];
     }
-    serial_matvec_mult(A, &copy);
+    serial_dense_matvec_mult(A, &copy);
+    double lambda = dot_product(x, &copy);
+
+    free(copy.data);
+    return lambda;
+}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+// Sparse power method
+
+
+
+/**
+ * @brief Calculates the dominant eigenvalue and its coresponding eigenvector of a matrix.
+ * 
+ * @param A The matrix.
+ * 
+ * @return The dominant eigenvalue of matrix A.
+ */
+double serial_sparse_power_method(sparseMatrix* A){
+   
+    // initial vector
+    double lambda_old = 0;
+    double lambda_new = 0;
+    Vector* x = generate_random_vector(A->rows);
+
+    do{
+        lambda_old = lambda_new;
+        serial_sparse_matvec_mult(A, x);
+        serial_normalize_vector(x);
+        lambda_new = serial_sparse_approximate_eigenvalue(A, x);
+    } while(serial_convergence(lambda_new, lambda_old, 0.00001));
+
+    free(x->data);
+    free(x);
+    return lambda_new;
+}
+
+
+/**
+ * @brief Computes the matrix-vector multiplication.
+ * 
+ * @param A The input matrix.
+ * @param x The input/output vector. It is overwritten with the result A * x.
+ * 
+ * @return Nothing. The result is stored directly in the vector x.
+ */
+void serial_sparse_matvec_mult(sparseMatrix* A, Vector* x){
+
+    double* temp = malloc(sizeof(double) * x->size);
+
+    for (int i = 0; i < x->size; ++i) {
+        temp[i] = 0;
+    }
+    // iterate thrue all non zero elemets
+    for (int i = 0; i < A->nnz ; i++){
+        double value = A->val[i];
+        int value_row = A->row[i];
+        int value_column = A->col[i];
+        // In contrast to the dense case, we must write results directly to temp,
+        // as we don't iterate in row-major order.
+        temp[value_row] += value * x->data[value_column];
+    }
+    for(int i = 0; i < x->size; i++){
+        x->data[i] = temp[i];
+    }
+    free(temp);
+}
+
+
+double serial_sparse_approximate_eigenvalue(sparseMatrix* A, Vector* x){
+    Vector copy;
+    copy.size = x->size;
+    copy.data = malloc(sizeof(double) * copy.size);
+    for(int i = 0; i < copy.size; i++){
+        copy.data[i] = x->data[i];
+    }
+    serial_sparse_matvec_mult(A, &copy);
     double lambda = dot_product(x, &copy);
 
     free(copy.data);
