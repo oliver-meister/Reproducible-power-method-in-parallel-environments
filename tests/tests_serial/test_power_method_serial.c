@@ -5,6 +5,9 @@
 #include "../../include/matrix.h"
 #include "../../include/vector.h"
 
+
+//Tests for dense matrices.
+
 void test_serial_dense_matvec_mult(){
 
     denseMatrix A;
@@ -35,20 +38,6 @@ void test_serial_dense_matvec_mult(){
     free(test_array);
 }
 
-test_serial_dense_norm(){
-
-    Vector x;
-    x.size = 2;
-    x.data = malloc(sizeof(double) * 2);
-    x.data[0] = 3.0;
-    x.data[1] = 4.0;
-
-    serial_normalize_vector(&x);
-    CU_ASSERT_DOUBLE_EQUAL(x.data[0], 0.6, 0.0001);
-    CU_ASSERT_DOUBLE_EQUAL(x.data[1], 0.8, 0.0001);
-    free(x.data);
-
-}
 
 test_serial_dense_approximate_eigenvalue(){
 
@@ -74,15 +63,6 @@ test_serial_dense_approximate_eigenvalue(){
 
 }
 
-test_serial_dense_generate_random_vector(){
-    Vector* x = generate_random_vector(2);
-    CU_ASSERT_EQUAL(2, x->size);
-    for(int i = 0; i < x->size; i++){
-        CU_ASSERT(x->data[i] >= -1.0 && x->data[i] <= 1.0);
-    }
-    free(x->data);
-    free(x);
-}
 
 test_serial_dense_power_method(){
     denseMatrix A;
@@ -102,6 +82,8 @@ test_serial_dense_power_method(){
 
 
 ///////////////////////////////////////////////////////////////
+
+//Tests for sparse matrices.
 
 void test_serial_sparse_matvec_mult(){
     int row[] = {0, 0, 1, 2, 2};
@@ -132,23 +114,69 @@ void test_serial_sparse_matvec_mult(){
 
 }
 
-test_serial_sparse_norm(){
+/*
 
-}
+2, 0, 1     1                    1
+0, 3, 0     0    =   4 0 5   *   0   =   14
+1, 0, 2     2                    2
+
+
+
+*/
 
 test_serial_sparse_approximate_eigenvalue(){
 
+    int row[] = {0, 0, 1, 2, 2};
+    int col[] = {0, 2, 1, 0, 2};
+    double val[] = {2, 1, 3, 1, 2};
+
+    sparseMatrix A = {row, col, val, 3, 3, 5};
+    
+    Vector x;
+    x.size = 3;
+    x.data = malloc(sizeof(double) * 3);
+    x.data[0] = 1;
+    x.data[1] = 0;
+    x.data[2] = 2;
+
+
+    double lambda = serial_sparse_approximate_eigenvalue(&A, &x);
+    CU_ASSERT_DOUBLE_EQUAL(lambda, 14.0, 0.0001);
+    free(x.data);
+
+
 }
 
-test_serial_sparse_generate_random_vector(){
-
-}
 
 test_serial_sparse_power_method(){
 
 }
 
+///////////////////////////////////////////////////////////////
+test_serial_norm(){
 
+    Vector x;
+    x.size = 2;
+    x.data = malloc(sizeof(double) * 2);
+    x.data[0] = 3.0;
+    x.data[1] = 4.0;
+
+    serial_normalize_vector(&x);
+    CU_ASSERT_DOUBLE_EQUAL(x.data[0], 0.6, 0.0001);
+    CU_ASSERT_DOUBLE_EQUAL(x.data[1], 0.8, 0.0001);
+    free(x.data);
+
+}
+
+test_serial_generate_random_vector(){
+    Vector* x = generate_random_vector(2);
+    CU_ASSERT_EQUAL(2, x->size);
+    for(int i = 0; i < x->size; i++){
+        CU_ASSERT(x->data[i] >= -1.0 && x->data[i] <= 1.0);
+    }
+    free(x->data);
+    free(x);
+}
 
 int main(){
     srand(time(0));
@@ -157,17 +185,17 @@ int main(){
 
     // Tests for dense matrices.
     CU_add_test(suite, "Matrix vector multiplication dense test", test_serial_dense_matvec_mult);
-    CU_add_test(suite, "Vector normalization dense test", test_serial_dense_norm);
     CU_add_test(suite, "Approximate eigenvalue dense test", test_serial_dense_approximate_eigenvalue);
-    CU_add_test(suite, "Generate random vector dense test", test_serial_dense_generate_random_vector);
     CU_add_test(suite, "Power method dense test", test_serial_dense_power_method);
 
     // Tests for sparse matrices.
     CU_add_test(suite, "Matrix vector multiplication sparse test", test_serial_sparse_matvec_mult);
-    //CU_add_test(suite, "Vector normalization sparse test", test_serial_sparse_norm);
-    //CU_add_test(suite, "Approximate eigenvalue sparse test", test_serial_sparse_approximate_eigenvalue);
-    //CU_add_test(suite, "Generate random vector sparse test", test_serial_sparse_generate_random_vector);
+    CU_add_test(suite, "Approximate eigenvalue sparse test", test_serial_sparse_approximate_eigenvalue);
     //CU_add_test(suite, "Power method sparse test", test_serial_sparse_power_method);
+
+    // Tests for common functions.
+    CU_add_test(suite, "Generate random vector test", test_serial_generate_random_vector);
+    CU_add_test(suite, "Vector normalization test", test_serial_norm);
 
     CU_basic_run_tests();
     CU_cleanup_registry();
