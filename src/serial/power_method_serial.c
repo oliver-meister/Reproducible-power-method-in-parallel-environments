@@ -31,7 +31,8 @@ double serial_dense_power_method(denseMatrix* A){
         serial_dense_matvec_mult(A, x);
         serial_normalize_vector(x);
         lambda_new = serial_dense_approximate_eigenvalue(A, x);
-    } while(serial_convergence(lambda_new, lambda_old, 0.00001));
+        printf(" dense lambda approximation: %f\n", lambda_new);
+    } while(!serial_convergence(lambda_new, lambda_old, 0.00001));
 
     free(x->data);
     free(x);
@@ -49,7 +50,7 @@ double serial_dense_power_method(denseMatrix* A){
  * @return True if the difference between the two eigenvalues is less than the threshold, false otherwise.
  */
 bool serial_convergence(double lambda_new, double lambda_old, double threshold){
-    return (fabs(lambda_new - lambda_old) > threshold);
+    return (fabs(lambda_new - lambda_old) < threshold);
 }
 
 /**
@@ -112,7 +113,9 @@ double serial_dense_approximate_eigenvalue(denseMatrix* A, Vector* x){
     for(int i = 0; i < copy.size; i++){
         copy.data[i] = x->data[i];
     }
+    // Ax_{i+1}
     serial_dense_matvec_mult(A, &copy);
+
     double lambda = dot_product(x, &copy);
 
     free(copy.data);
@@ -148,7 +151,8 @@ double serial_sparse_power_method(sparseMatrix* A){
         serial_sparse_matvec_mult(A, x);
         serial_normalize_vector(x);
         lambda_new = serial_sparse_approximate_eigenvalue(A, x);
-    } while(serial_convergence(lambda_new, lambda_old, 0.00001));
+        printf("sparse lambda approximation: %f\n", lambda_new);
+    } while(!serial_convergence(lambda_new, lambda_old, 0.000001));
 
     free(x->data);
     free(x);
