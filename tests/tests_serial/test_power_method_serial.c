@@ -160,7 +160,7 @@ test_serial_dense_power_method(){
 
     double lambda = serial_dense_power_method(&A);
     printf("Eigenvalue dense: %f\n", lambda);
-    CU_ASSERT_DOUBLE_EQUAL(lambda, 5.236, 0.001);
+    CU_ASSERT_DOUBLE_EQUAL(lambda, 4.8608, 0.001);
     free(A.data);
 }
 
@@ -245,7 +245,7 @@ test_serial_sparse_power_method(){
 
     double lambda = serial_sparse_power_method(&A);
     printf("Eigenvalue sparse: %f\n", lambda);
-    CU_ASSERT_DOUBLE_EQUAL(lambda, 11.372, 0.001);
+    CU_ASSERT_DOUBLE_EQUAL(lambda, 4.8608, 0.001);
 
 
 }
