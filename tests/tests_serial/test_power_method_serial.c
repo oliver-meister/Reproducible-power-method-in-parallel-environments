@@ -1,9 +1,11 @@
 #include <CUnit/CUnit.h>
 #include <CUnit/Basic.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "../../src/serial/power_method_serial.h"
 #include "../../include/matrix.h"
 #include "../../include/vector.h"
+#include "../../external/mmio.h"
 
 
 //Tests for dense matrices.
@@ -250,6 +252,49 @@ test_serial_sparse_power_method(){
 
 }
 
+test_serial_sparse_large_power_method(){
+    FILE *f;
+    int* row;
+    int* col;
+    double* val;
+    int rows;
+    int cols; 
+    int nnz;
+    
+    if ((f = fopen("494_bus.mtx", "r")) == NULL) {
+        perror("Cannot open matrix file");
+        exit(1);
+    }
+    
+    // contains matrix metadata
+    MM_typecode matcode;
+    mm_read_banner(f, &matcode);
+    mm_read_mtx_crd_size(f, &rows, &cols, &nnz);
+
+    row = (int *) malloc(sizeof(int) * nnz);
+    col = (int *) malloc(sizeof(int) * nnz);
+    val = (double *) malloc(sizeof(double) * nnz);
+
+    // fill row, col and val with matrix data
+    for (int i = 0; i < nnz; i++) {
+        fscanf(f, "%d %d %lg", &row[i], &col[i], &val[i]);
+        row[i]--; col[i]--;  // Convert to 0-based indexing
+    }   
+
+    fclose(f);
+    
+    sparseMatrix A = {row, col, val, rows, cols, nnz};
+
+    double lambda = serial_sparse_power_method(&A);
+    printf("Eigenvalue sparse: %f\n", lambda);
+    CU_ASSERT_DOUBLE_EQUAL(lambda, 3.0005, 0.001);
+
+    free(row);
+    free(col);
+    free(val);
+
+}
+
 //////////////////////////////////////////////////////////////
 
 // Works
@@ -300,6 +345,7 @@ int main(){
     CU_add_test(suite, "Matrix vector multiplication sparse test", test_serial_sparse_matvec_mult);
     CU_add_test(suite, "Approximate eigenvalue sparse test", test_serial_sparse_approximate_eigenvalue);
     CU_add_test(suite, "Power method sparse test", test_serial_sparse_power_method);
+    CU_add_test(suite, "Power method sparse large test", test_serial_sparse_large_power_method);
 
     // Tests for common functions.
     CU_add_test(suite, "Generate random vector test", test_serial_generate_random_vector);
@@ -307,5 +353,6 @@ int main(){
 
     CU_basic_run_tests();
     CU_cleanup_registry();
+
     return 0;
 }

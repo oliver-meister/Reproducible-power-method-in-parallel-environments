@@ -31,7 +31,7 @@ double serial_dense_power_method(denseMatrix* A){
         serial_dense_matvec_mult(A, x);
         serial_normalize_vector(x);
         lambda_new = serial_dense_approximate_eigenvalue(A, x);
-        printf(" dense lambda approximation: %f\n", lambda_new);
+        //printf(" dense lambda approximation: %f\n", lambda_new);
     } while(!serial_convergence(lambda_new, lambda_old, 0.00001));
 
     free(x->data);
@@ -151,7 +151,7 @@ double serial_sparse_power_method(sparseMatrix* A){
         serial_sparse_matvec_mult(A, x);
         serial_normalize_vector(x);
         lambda_new = serial_sparse_approximate_eigenvalue(A, x);
-        printf("sparse lambda approximation: %f\n", lambda_new);
+        //printf("sparse lambda approximation: %f\n", lambda_new);
     } while(!serial_convergence(lambda_new, lambda_old, 0.000001));
 
     free(x->data);
