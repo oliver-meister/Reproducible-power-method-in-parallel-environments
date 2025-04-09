@@ -5,12 +5,16 @@
 #include "../../include/vector.h"
 #include <stdbool.h>
 
-// Function to run the power method
-double openMP_power_method(Matrix*);
+// Function for dense power method
+double openMP_dense_power_method(denseMatrix*);
+void openMP_dense_matvec_mult(denseMatrix*, Vector*);
+double openMP_dense_approximate_eigenvalue(denseMatrix*, Vector*);
+//Function for sparse power method
+
+// Common functions
 bool openMP_convergence(double, double, double);
-void openMP_matvec_mult(Matrix*, Vector*);
 void openMP_normalize_vector(Vector*);
-double openMP_approximate_eigenvalue(Matrix*, Vector*);
 double openMP_dot_product(Vector*, Vector*);
+
 
 #endif 

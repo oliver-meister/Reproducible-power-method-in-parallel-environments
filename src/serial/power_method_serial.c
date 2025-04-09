@@ -178,11 +178,8 @@ double serial_sparse_power_method(sparseMatrix* A){
  */
 void serial_sparse_matvec_mult(sparseMatrix* A, Vector* x){
 
-    double* temp = malloc(sizeof(double) * x->size);
+    double* temp = calloc(x->size, sizeof(double));
 
-    for (int i = 0; i < x->size; ++i) {
-        temp[i] = 0;
-    }
     // iterate thrue all non zero elemets
     for (int i = 0; i < A->nnz ; i++){
         double value = A->val[i];

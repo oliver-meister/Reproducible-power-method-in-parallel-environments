@@ -10,6 +10,8 @@
 
 
 
+#define NUMTHREAD = 4
+
 /**
  * @brief Calculates the dominant eigenvalue and its coresponding eigenvector of a matrix.
  * 
@@ -17,18 +19,25 @@
  * 
  * @return The dominant eigenvalue of matrix A.
  */
-double openMP_power_method(Matrix* A){
+double openMP_dense_power_method(denseMatrix* A){
    
     // initial vector
     double lambda_old = 0;
     double lambda_new = 0;
-    Vector* x = generate_random_vector(A->rows);
+    //Vector* x = generate_random_vector(A->rows);
+    Vector* x = malloc(sizeof(Vector));
+    x->size = A->rows;
+    x->data = malloc(sizeof(double) * x->size);
+
+    for(int i = 0; i < x->size; i++){
+        x->data[i] = 1;
+    }
 
     do{
         lambda_old = lambda_new;
-        openMP_matvec_mult(A, x);
+        openMP_dense_matvec_mult(A, x);
         openMP_normalize_vector(x);
-        lambda_new = openMP_approximate_eigenvalue(A, x);
+        lambda_new = openMP_dense_approximate_eigenvalue(A, x);
     } while(openMP_convergence(lambda_new, lambda_old, 0.00001));
 
     free(x->data);
@@ -59,11 +68,13 @@ bool openMP_convergence(double lambda_new, double lambda_old, double threshold){
  * @return Nothing. The result is stored directly in the vector x.
  */
 
-void openMP_matvec_mult(Matrix* A, Vector* x){
+ // we shall have the same amount of threads as number of rows, sutch that eatch thread handles an entire row.
+void openMP_dense_matvec_mult(denseMatrix* A, Vector* x){
 
     double* temp = malloc(sizeof(double) * x->size);
     double sum;
     // parallize the outer for loop
+    omp_set_num_threads(A->rows);
     #pragma omp parallel for default(none) private(sum) shared(temp, A, x)
     for(int i = 0; i < A->rows; i++){
         sum = 0;
@@ -73,7 +84,7 @@ void openMP_matvec_mult(Matrix* A, Vector* x){
             sum += value * x->data[j];
         }
         int thread_id = omp_get_thread_num();
-        printf("Thread %d is processing row %d\n", thread_id, i);
+        //printf("Thread %d is processing row %d\n", thread_id, i);
         temp[i] = sum;
     }
     //TODO: parallize this part also
@@ -111,7 +122,7 @@ void openMP_normalize_vector(Vector* x){
  * 
  * @return The approximated dominant eigenvalue.
  */
-double openMP_approximate_eigenvalue(Matrix* A, Vector* x){
+double openMP_dense_approximate_eigenvalue(denseMatrix* A, Vector* x){
     Vector copy;
     copy.size = x->size;
     copy.data = malloc(sizeof(double) * copy.size);
@@ -119,7 +130,7 @@ double openMP_approximate_eigenvalue(Matrix* A, Vector* x){
     for(int i = 0; i < copy.size; i++){
         copy.data[i] = x->data[i];
     }
-    openMP_matvec_mult(A, &copy);
+    openMP_dense_matvec_mult(A, &copy);
     double lambda = openMP_dot_product(x, &copy);
 
     free(copy.data);
@@ -127,16 +138,127 @@ double openMP_approximate_eigenvalue(Matrix* A, Vector* x){
 }
 
 
-
 double openMP_dot_product(Vector* x, Vector* y){
     if(x->size != y->size){
         printf("Error: Vectors must have the same size (x: %d, y: %d)\n", x->size, y->size);
         return 0.0;
     }
-    double dot = 0;
-    #pragma omp parallel for reduction(+:dot) shared(x,y)
-    for(int i = 0; i < x->size; i++){
-        dot += x->data[i] * y->data[i];
+
+    int n_threads = omp_get_max_threads();
+    double *partial_sums = calloc(n_threads, sizeof(double));
+
+    #pragma omp parallel default(none) shared(x, y, partial_sums)
+    {
+        int tid = omp_get_thread_num();
+        double sum = 0.0; 
+        //printf("Thread number %d\n", tid);
+        #pragma omp for
+        for(int i = 0; i < x->size; i++){
+
+            sum += x->data[i] * y->data[i];
+        }
+        
+        partial_sums[tid] = sum;
     }
+
+    double dot = 0.0;
+
+    for (int i = 0; i < n_threads; i++){
+        dot += partial_sums[i];
+    }
+
     return dot;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+/**
+ * @brief Calculates the dominant eigenvalue and its coresponding eigenvector of a matrix.
+ * 
+ * @param A The matrix.
+ * 
+ * @return The dominant eigenvalue of matrix A.
+ */
+
+ /*
+ double openMP_sparse_power_method(sparseMatrix* A){
+    
+ // initial vector
+ double lambda_old = 0;
+ double lambda_new = 0;
+ Vector* x = generate_random_vector(A->rows);
+ 
+ do{
+    lambda_old = lambda_new;
+    openMP_sparse_matvec_mult(A, x);
+    openMP_normalize_vector(x);
+    lambda_new = openMP_sparse_approximate_eigenvalue(A, x);
+} while(openMP_convergence(lambda_new, lambda_old, 0.00001));
+
+free(x->data);
+free(x);
+return lambda_new;
+}
+*/
+
+
+/**
+ * @brief Computes the matrix-vector multiplication.
+ * 
+ * @param A The input matrix.
+ * @param x The input/output vector. It is overwritten with the result A * x.
+ * 
+ * @return Nothing. The result is stored directly in the vector x.
+ */
+
+
+/*
+void openMP_sparse_matvec_mult(sparseMatrix* A, Vector* x){
+    
+double* temp = malloc(sizeof(double) * x->size);
+
+for (int i = 0; i < x->size; ++i) {
+    temp[i] = 0;
+}
+// iterate thrue all non zero elemets
+for (int i = 0; i < A->nnz ; i++){
+    double value = A->val[i];
+    int value_row = A->row[i];
+    int value_column = A->col[i];
+    // In contrast to the dense case, we must write results directly to temp,
+    // as we don't iterate in row-major order.
+    temp[value_row] += value * x->data[value_column];
+}
+for(int i = 0; i < x->size; i++){
+    x->data[i] = temp[i];
+}
+free(temp);
+}
+
+*/
+
+/**
+ * @brief  Approximates the dominant eigenvalue.
+ * 
+ * @param A The input matrix.
+ * @param x The normalized input vector.
+ * 
+ * @return The approximated dominant eigenvalue.
+ */
+/*
+double openMP_sparse_approximate_eigenvalue(sparseMatrix* A, Vector* x){
+    Vector copy;
+    copy.size = x->size;
+    copy.data = malloc(sizeof(double) * copy.size);
+    for(int i = 0; i < copy.size; i++){
+        copy.data[i] = x->data[i];
+    }
+    serial_sparse_matvec_mult(A, &copy);
+    double lambda = dot_product(x, &copy);
+    
+    free(copy.data);
+    return lambda;
+}
+*/

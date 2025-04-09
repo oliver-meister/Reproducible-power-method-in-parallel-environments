@@ -6,9 +6,9 @@
 #include "../../include/vector.h"
 #include <omp.h>
 
-void test_openMP_matvec_mult(){
+void test_dense_openMP_matvec_mult(){
 
-    Matrix A;
+    denseMatrix A;
     A.rows = 2;
     A.cols = 2;
     A.data = malloc(sizeof(double) * 4);
@@ -27,7 +27,7 @@ void test_openMP_matvec_mult(){
 
     test_array[0] = 8;
     test_array[1] = 7;
-    openMP_matvec_mult(&A, &x);
+    openMP_dense_matvec_mult(&A, &x);
     for(int i = 0; i < x.size; i++){
         CU_ASSERT_DOUBLE_EQUAL(x.data[i], test_array[i], 1e-6);
     }
@@ -51,9 +51,9 @@ test_openMP_norm(){
 
 }
 
-test_openMP_approximate_eigenvalue(){
+test_dense_openMP_approximate_eigenvalue(){
 
-    Matrix A;
+    denseMatrix A;
     A.rows = 2;
     A.cols = 2;
     A.data = malloc(sizeof(double) * 4);
@@ -68,7 +68,7 @@ test_openMP_approximate_eigenvalue(){
     x.data[0] = 1;
     x.data[1] = 0;
 
-    double lambda = openMP_approximate_eigenvalue(&A, &x);
+    double lambda = openMP_dense_approximate_eigenvalue(&A, &x);
     CU_ASSERT_DOUBLE_EQUAL(lambda, 2.0, 0.0001);
     free(A.data);
     free(x.data);
@@ -79,15 +79,15 @@ test_openMP_generate_random_vector(){
     Vector* x = generate_random_vector(2);
     CU_ASSERT_EQUAL(2, x->size);
     for(int i = 0; i < x->size; i++){
-        printf("index %d: %f\n", i, x->data[i]);
+        //printf("index %d: %f\n", i, x->data[i]);
         CU_ASSERT(x->data[i] >= -1.0 && x->data[i] <= 1.0);
     }
     free(x->data);
     free(x);
 }
 
-test_openMP_power_method(){
-    Matrix A;
+test_dense_openMP_power_method(){
+    denseMatrix A;
     A.rows = 2;
     A.cols = 2;
     A.data = malloc(sizeof(double) * 4);
@@ -96,21 +96,41 @@ test_openMP_power_method(){
     A.data[2] = 1.0; 
     A.data[3] = 3.0; 
 
-    double lambda = openMP_power_method(&A);
-    printf("Eigenvalue %f\n", lambda);
+    double lambda = openMP_dense_power_method(&A);
+    printf("Eigenvalue %lg\n", lambda);
     CU_ASSERT_DOUBLE_EQUAL(lambda, 3.6180, 0.001);
     free(A.data);
 }
 
-int main(){
+int main(int argc, char* argv[]){
+
+    if(argc < 2){
+        printf("expected number of threads as argumet\n");
+        return 1;
+    }
+
+    int num_threads = atoi(argv[1]);
+
+    if (num_threads <= 0) {
+        printf("Error: num_threads must be greater than 0\n");
+        return 1;
+    }
+    
+    omp_set_num_threads(num_threads);
+    
     srand(time(0));
     CU_initialize_registry();
     CU_pSuite suite = CU_add_suite("Power Method openMP Tests", NULL, NULL);
-    CU_add_test(suite, "Matrix vector multiplication test", test_openMP_matvec_mult);
+    // Tests for dense matrices.
+    CU_add_test(suite, "Matrix vector multiplication test", test_dense_openMP_matvec_mult);
+    CU_add_test(suite, "Approximate eigenvalue test", test_dense_openMP_approximate_eigenvalue);
+    CU_add_test(suite, "Power method test", test_dense_openMP_power_method);
+    // Tests for sparse matrices.
+
+    // Tests for common functions.
     CU_add_test(suite, "Vector normalization test", test_openMP_norm);
-    CU_add_test(suite, "Approximate eigenvalue test", test_openMP_approximate_eigenvalue);
     CU_add_test(suite, "Generate random vector test", test_openMP_generate_random_vector);
-    CU_add_test(suite, "Power method test", test_openMP_power_method);
+
     CU_basic_run_tests();
     CU_cleanup_registry();
     return 0;
