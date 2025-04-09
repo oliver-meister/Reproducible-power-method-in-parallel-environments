@@ -41,7 +41,7 @@ double generate_random_double(double min, double max){
  * 
  * @return Pointer to a heap allocated Vector.
  */
-Vector* generate_random_vector(double size){
+Vector* generate_random_vector(int size){
     Vector* x = malloc(sizeof(Vector));
     x->size = size;
     x->data = malloc(sizeof(double) * size);

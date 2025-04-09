@@ -8,7 +8,7 @@ typedef struct {
 
 double dot_product(Vector*, Vector*);
 double generate_random_double(double, double);
-Vector* generate_random_vector(double);
+Vector* generate_random_vector(int);
 
 #endif 
 

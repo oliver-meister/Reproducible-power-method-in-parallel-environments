@@ -144,13 +144,21 @@ double serial_sparse_power_method(sparseMatrix* A){
     // initial vector
     double lambda_old = 0;
     double lambda_new = 0;
-    Vector* x = generate_random_vector(A->rows);
+    //Vector* x = generate_random_vector(A->rows);
+    Vector* x = malloc(sizeof(Vector));
+    x->size = A->rows;
+    x->data = malloc(sizeof(double) * x->size);
 
+    for(int i = 0; i < x->size; i++){
+        x->data[i] = 1.0;
+    }
+    
     do{
         lambda_old = lambda_new;
         serial_sparse_matvec_mult(A, x);
         serial_normalize_vector(x);
         lambda_new = serial_sparse_approximate_eigenvalue(A, x);
+        
         //printf("sparse lambda approximation: %f\n", lambda_new);
     } while(!serial_convergence(lambda_new, lambda_old, 0.000001));
 
