@@ -144,6 +144,21 @@ double openMP_dot_product(Vector* x, Vector* y){
         return 0.0;
     }
 
+    double dot = 0.0;
+    #pragma omp parallel for defualt(none) reduction(+:sum) shared(x,y)
+    for(int i = 0; i < x->size; i++){
+        dot = fma(x->data[i], y->data[i], dot);
+    }
+    return dot;
+}
+
+
+double openMP_dot_product2(Vector* x, Vector* y){
+    if(x->size != y->size){
+        printf("Error: Vectors must have the same size (x: %d, y: %d)\n", x->size, y->size);
+        return 0.0;
+    }
+
     int n_threads = omp_get_max_threads();
     double *partial_sums = calloc(n_threads, sizeof(double));
 
@@ -214,30 +229,29 @@ return lambda_new;
  */
 
 
-/*
+
 void openMP_sparse_matvec_mult(sparseMatrix* A, Vector* x){
     
-double* temp = malloc(sizeof(double) * x->size);
+    double* temp = calloc(x->size, sizeof(double));
+    double aux;
+    // iterate thrue all non zero elemets
+    #pragma omp parallel for 
+    for (int i = 0; i < A->rows ; i++){
+        aux = 0.0;
+        for()
+        double value = A->val[i];
+        int value_row = A->row[i];
+        int value_column = A->col[i];
+        // In contrast to the dense case, we must write results directly to temp,
+        // as we don't iterate in row-major order.
+        temp[value_row] += value * x->data[value_column];
+    }
+    for(int i = 0; i < x->size; i++){
+        x->data[i] = temp[i];
+    }
+    free(temp);
+}
 
-for (int i = 0; i < x->size; ++i) {
-    temp[i] = 0;
-}
-// iterate thrue all non zero elemets
-for (int i = 0; i < A->nnz ; i++){
-    double value = A->val[i];
-    int value_row = A->row[i];
-    int value_column = A->col[i];
-    // In contrast to the dense case, we must write results directly to temp,
-    // as we don't iterate in row-major order.
-    temp[value_row] += value * x->data[value_column];
-}
-for(int i = 0; i < x->size; i++){
-    x->data[i] = temp[i];
-}
-free(temp);
-}
-
-*/
 
 /**
  * @brief  Approximates the dominant eigenvalue.

@@ -31,7 +31,7 @@ build_serial:
 	gcc src/Serial/$(EXECUTABLE_SERIAL).c -o $(EXECUTABLE_SERIAL)
 
 test_serial:
-	gcc -o test_serial tests/tests_serial/test_power_method_serial.c src/serial/power_method_serial.c include/vector.c external/mmio.c $(CFLAGS) -lcunit
+	gcc -o test_serial tests/tests_serial/test_power_method_serial.c src/serial/power_method_serial.c include/vector.c include/matrix.c external/mmio.c $(CFLAGS) -lcunit
 
 test_openMP:
-	gcc -o test_openMP tests/tests_openMP/test_power_method_openMP.c src/openMP/power_method_openMP.c include/vector.c $(CFLAGS) -lcunit
+	gcc -o test_openMP tests/tests_openMP/test_power_method_openMP.c src/openMP/power_method_openMP.c include/vector.c include/matrix.c $(CFLAGS) -lcunit

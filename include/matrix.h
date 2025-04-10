@@ -16,6 +16,33 @@ typedef struct {
     int rows; // Total number of rows
     int cols; // Total number of columns
     int nnz; // Number of non-zero values
-} sparseMatrix;
+} sparseMatrixCOO;
+
+typedef struct {
+    int* row_ptr;  //
+    int* col;
+    double* val;
+    int rows;
+    int cols; 
+    int nnz;
+} sparseMatrixCSR;
+
+typedef enum {
+    COO,
+    CSR
+} MatrixType;
+
+typedef union {
+    sparseMatrixCOO *coo;
+    sparseMatrixCSR *csr;
+} MatrixUnion;
+
+typedef struct {
+    MatrixUnion mat;
+    MatrixType type;
+} SparseMatrixAny;
+
+sparseMatrixCOO* createSparseMatrixCOO(char*);
+sparseMatrixCSR* coo_to_csr(sparseMatrixCOO*);
 
 #endif

@@ -15,6 +15,7 @@ double openMP_dense_approximate_eigenvalue(denseMatrix*, Vector*);
 bool openMP_convergence(double, double, double);
 void openMP_normalize_vector(Vector*);
 double openMP_dot_product(Vector*, Vector*);
+double openMP_dot_product2(Vector*, Vector*);
 
 
 #endif 

@@ -173,14 +173,59 @@ test_serial_dense_power_method(){
 
 
 // Works
-void test_serial_sparse_matvec_mult(){
-    int row[] = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4};
-    int col[] = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4};
-    double val[] = {4, 1, 1, 3, 1, 1, 2, 1, 1, 3, 1, 1, 4};
-    int nnz = 13;
-
-    sparseMatrix A = {row, col, val, 5, 5, nnz};
+void test_serial_sparse_COO_matvec_mult(){
     
+    sparseMatrixCOO *coo = malloc(sizeof(sparseMatrixCOO));
+    coo->rows = 5;
+    coo->cols = 5;
+    coo->nnz = 13;
+    coo->row = malloc(sizeof(int) * coo->nnz);
+    coo->col = malloc(sizeof(int) * coo->nnz);
+    coo->val = malloc(sizeof(double) * coo->nnz);
+
+    coo->row[0] = 0;
+    coo->row[1] = 0;
+    coo->row[2] = 1;
+    coo->row[3] = 1;
+    coo->row[4] = 1;
+    coo->row[5] = 2;
+    coo->row[6] = 2;
+    coo->row[7] = 2;
+    coo->row[8] = 3;
+    coo->row[9] = 3;
+    coo->row[10] = 3;
+    coo->row[11] = 4;
+    coo->row[12] = 4;
+
+    coo->col[0] = 0;
+    coo->col[1] = 1;
+    coo->col[2] = 0;
+    coo->col[3] = 1;
+    coo->col[4] = 2;
+    coo->col[5] = 1;
+    coo->col[6] = 2;
+    coo->col[7] = 3;
+    coo->col[8] = 2;
+    coo->col[9] = 3;
+    coo->col[10] = 4;
+    coo->col[11] = 3;
+    coo->col[12] = 4;
+
+    coo->val[0] = 4;
+    coo->val[1] = 1;
+    coo->val[2] = 1;
+    coo->val[3] = 3;
+    coo->val[4] = 1;
+    coo->val[5] = 1;
+    coo->val[6] = 2;
+    coo->val[7] = 1;
+    coo->val[8] = 1;
+    coo->val[9] = 3;
+    coo->val[10] = 1;
+    coo->val[11] = 1;
+    coo->val[12] = 4;
+
+  
     Vector x;
     x.size = 5;
     x.data = malloc(sizeof(double) * 5);
@@ -198,25 +243,171 @@ void test_serial_sparse_matvec_mult(){
     test_array[3] = 3;
     test_array[4] = 5;
 
-    serial_sparse_matvec_mult(&A, &x);
+    serial_sparse_matvec_mult_COO(coo, &x);
 
     for(int i = 0; i < x.size; i++){
         CU_ASSERT_DOUBLE_EQUAL(x.data[i], test_array[i], 1e-6);
     }
+   
+    free(coo->col);
+    free(coo->row);
+    free(coo->val);
+    free(coo);
     free(x.data);
     free(test_array);
-
 }
+
+
+
+void test_serial_sparse_CSR_matvec_mult(){
+    
+    sparseMatrixCOO *coo = malloc(sizeof(sparseMatrixCOO));
+    coo->rows = 5;
+    coo->cols = 5;
+    coo->nnz = 13;
+    coo->row = malloc(sizeof(int) * coo->nnz);
+    coo->col = malloc(sizeof(int) * coo->nnz);
+    coo->val = malloc(sizeof(double) * coo->nnz);
+
+    coo->row[0] = 0;
+    coo->row[1] = 0;
+    coo->row[2] = 1;
+    coo->row[3] = 1;
+    coo->row[4] = 1;
+    coo->row[5] = 2;
+    coo->row[6] = 2;
+    coo->row[7] = 2;
+    coo->row[8] = 3;
+    coo->row[9] = 3;
+    coo->row[10] = 3;
+    coo->row[11] = 4;
+    coo->row[12] = 4;
+
+    coo->col[0] = 0;
+    coo->col[1] = 1;
+    coo->col[2] = 0;
+    coo->col[3] = 1;
+    coo->col[4] = 2;
+    coo->col[5] = 1;
+    coo->col[6] = 2;
+    coo->col[7] = 3;
+    coo->col[8] = 2;
+    coo->col[9] = 3;
+    coo->col[10] = 4;
+    coo->col[11] = 3;
+    coo->col[12] = 4;
+
+    coo->val[0] = 4;
+    coo->val[1] = 1;
+    coo->val[2] = 1;
+    coo->val[3] = 3;
+    coo->val[4] = 1;
+    coo->val[5] = 1;
+    coo->val[6] = 2;
+    coo->val[7] = 1;
+    coo->val[8] = 1;
+    coo->val[9] = 3;
+    coo->val[10] = 1;
+    coo->val[11] = 1;
+    coo->val[12] = 4;
+
+    sparseMatrixCSR* csr = coo_to_csr(coo);
+
+    Vector x;
+    x.size = 5;
+    x.data = malloc(sizeof(double) * 5);
+    x.data[0] = -1;
+    x.data[1] = 1;
+    x.data[2] = -1;
+    x.data[3] = 1;
+    x.data[4] = 1;
+
+    double* test_array = malloc(sizeof(double) * 5);
+
+    test_array[0] = -3;
+    test_array[1] = 1;
+    test_array[2] = 0;
+    test_array[3] = 3;
+    test_array[4] = 5;
+
+    serial_sparse_matvec_mult_CSR(csr, &x);
+
+    for(int i = 0; i < x.size; i++){
+        CU_ASSERT_DOUBLE_EQUAL(x.data[i], test_array[i], 1e-6);
+    }
+   
+    free(coo->col);
+    free(coo->row);
+    free(coo->val);
+    free(coo);
+    free(csr->col);
+    free(csr->row_ptr);
+    free(csr->val);
+    free(csr);
+    free(x.data);
+    free(test_array);
+}
+
+
+
+
 
 //Works
 test_serial_sparse_approximate_eigenvalue(){
 
-    int row[] = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4};
-    int col[] = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4};
-    double val[] = {4, 1, 1, 3, 1, 1, 2, 1, 1, 3, 1, 1, 4};
-    int nnz = 13;
+    sparseMatrixCOO *coo = malloc(sizeof(sparseMatrixCOO));
+    coo->rows = 5;
+    coo->cols = 5;
+    coo->nnz = 13;
+    coo->row = malloc(sizeof(int) * coo->nnz);
+    coo->col = malloc(sizeof(int) * coo->nnz);
+    coo->val = malloc(sizeof(double) * coo->nnz);
 
-    sparseMatrix A = {row, col, val, 5, 5, nnz};
+    coo->row[0] = 0;
+    coo->row[1] = 0;
+    coo->row[2] = 1;
+    coo->row[3] = 1;
+    coo->row[4] = 1;
+    coo->row[5] = 2;
+    coo->row[6] = 2;
+    coo->row[7] = 2;
+    coo->row[8] = 3;
+    coo->row[9] = 3;
+    coo->row[10] = 3;
+    coo->row[11] = 4;
+    coo->row[12] = 4;
+
+    coo->col[0] = 0;
+    coo->col[1] = 1;
+    coo->col[2] = 0;
+    coo->col[3] = 1;
+    coo->col[4] = 2;
+    coo->col[5] = 1;
+    coo->col[6] = 2;
+    coo->col[7] = 3;
+    coo->col[8] = 2;
+    coo->col[9] = 3;
+    coo->col[10] = 4;
+    coo->col[11] = 3;
+    coo->col[12] = 4;
+
+    coo->val[0] = 4;
+    coo->val[1] = 1;
+    coo->val[2] = 1;
+    coo->val[3] = 3;
+    coo->val[4] = 1;
+    coo->val[5] = 1;
+    coo->val[6] = 2;
+    coo->val[7] = 1;
+    coo->val[8] = 1;
+    coo->val[9] = 3;
+    coo->val[10] = 1;
+    coo->val[11] = 1;
+    coo->val[12] = 4;
+
+    SparseMatrixAny *A = malloc(sizeof(SparseMatrixAny));
+    A->type = COO;
+    A->mat.coo = coo;
     
     Vector x;
     x.size = 5;
@@ -228,8 +419,15 @@ test_serial_sparse_approximate_eigenvalue(){
     x.data[4] = 1;
 
 
-    double lambda = serial_sparse_approximate_eigenvalue(&A, &x);
+    double lambda = serial_sparse_approximate_eigenvalue(A, &x);
+    printf("lambda: %lg\n", lambda);
     CU_ASSERT_DOUBLE_EQUAL(lambda, 12.0, 0.0001);
+    
+    free(coo->col);
+    free(coo->row);
+    free(coo->val);
+    free(coo);
+    free(A);
     free(x.data);
 
 
@@ -238,76 +436,118 @@ test_serial_sparse_approximate_eigenvalue(){
 
 test_serial_sparse_power_method(){
 
-    int row[] = {0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4};
-    int col[] = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4};
-    double val[] = {4, 1, 1, 3, 1, 1, 2, 1, 1, 3, 1, 1, 4};
-    int nnz = 13;
+    sparseMatrixCOO *coo = malloc(sizeof(sparseMatrixCOO));
+    coo->rows = 5;
+    coo->cols = 5;
+    coo->nnz = 13;
+    coo->row = malloc(sizeof(int) * coo->nnz);
+    coo->col = malloc(sizeof(int) * coo->nnz);
+    coo->val = malloc(sizeof(double) * coo->nnz);
 
-    sparseMatrix A = {row, col, val, 5, 5, nnz};
+    coo->row[0] = 0;
+    coo->row[1] = 0;
+    coo->row[2] = 1;
+    coo->row[3] = 1;
+    coo->row[4] = 1;
+    coo->row[5] = 2;
+    coo->row[6] = 2;
+    coo->row[7] = 2;
+    coo->row[8] = 3;
+    coo->row[9] = 3;
+    coo->row[10] = 3;
+    coo->row[11] = 4;
+    coo->row[12] = 4;
 
-    double lambda = serial_sparse_power_method(&A);
+    coo->col[0] = 0;
+    coo->col[1] = 1;
+    coo->col[2] = 0;
+    coo->col[3] = 1;
+    coo->col[4] = 2;
+    coo->col[5] = 1;
+    coo->col[6] = 2;
+    coo->col[7] = 3;
+    coo->col[8] = 2;
+    coo->col[9] = 3;
+    coo->col[10] = 4;
+    coo->col[11] = 3;
+    coo->col[12] = 4;
+
+    coo->val[0] = 4;
+    coo->val[1] = 1;
+    coo->val[2] = 1;
+    coo->val[3] = 3;
+    coo->val[4] = 1;
+    coo->val[5] = 1;
+    coo->val[6] = 2;
+    coo->val[7] = 1;
+    coo->val[8] = 1;
+    coo->val[9] = 3;
+    coo->val[10] = 1;
+    coo->val[11] = 1;
+    coo->val[12] = 4;
+
+    SparseMatrixAny *A = malloc(sizeof(SparseMatrixAny));
+    A->type = COO;
+    A->mat.coo = coo;
+
+    double lambda = serial_sparse_power_method(A);
     printf("Eigenvalue sparse: %f\n", lambda);
     CU_ASSERT_DOUBLE_EQUAL(lambda, 4.8608, 0.001);
+
+    free(coo->col);
+    free(coo->row);
+    free(coo->val);
+    free(coo);
+    free(A);
+
+}
+
+test_serial_sparse_COO_large_power_method(){
+ 
+    sparseMatrixCOO * my_coo = createSparseMatrixCOO("ssget/494_bus/494_bus.mtx");
+   
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = COO;
+    A->mat.coo = my_coo;
+
+    double lambda = serial_sparse_power_method(A);
+    printf("Eigenvalue sparse: %f\n", lambda);
+    CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.14176, 0.0001);
+
+    free(my_coo->row);
+    free(my_coo->col);
+    free(my_coo->val);
+    free(my_coo);
+    free(A);
 
 
 }
 
-test_serial_sparse_large_power_method(){
-    FILE *f;
-    int *row, *col;
-    double *val;
-    int rows, cols, nnz;
+test_serial_sparse_CSR_large_power_method(){
+ 
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/494_bus/494_bus.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
 
-    if ((f = fopen("ssget/494_bus/494_bus.mtx", "r")) == NULL) {
-        perror("Cannot open matrix file");
-        exit(1);
-    }
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.coo = my_csr;
 
-    // Matrix metadata
-    MM_typecode matcode;
-    mm_read_banner(f, &matcode);
-    mm_read_mtx_crd_size(f, &rows, &cols, &nnz);
-
-    // Allocate enough memory (max case: symmetric matrix → duplicate off-diagonal entries)
-    row = (int *) malloc(sizeof(int) * nnz * 2);
-    col = (int *) malloc(sizeof(int) * nnz * 2);
-    val = (double *) malloc(sizeof(double) * nnz * 2);
-
-    int current_nnz = 0;
-
-    for (int i = 0; i < nnz; i++) {
-        int r, c;
-        double v;
-
-        fscanf(f, "%d %d %lg", &r, &c, &v);
-        r--; c--; // Convert to 0-based indexing
-
-        // Add (r, c)
-        row[current_nnz] = r;
-        col[current_nnz] = c;
-        val[current_nnz] = v;
-        current_nnz++;
-
-        // If off-diagonal, also add (c, r)
-        if (r != c) {
-            row[current_nnz] = c;
-            col[current_nnz] = r;
-            val[current_nnz] = v;
-            current_nnz++;
-        }
-    }
-
-    fclose(f);
-    
-    sparseMatrix A = {row, col, val, rows, cols, nnz};
-
-    double lambda = serial_sparse_power_method(&A);
+    double lambda = serial_sparse_power_method(A);
     printf("Eigenvalue sparse: %f\n", lambda);
     CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.14176, 0.0001);
 
-    free(row);
-    free(col);
-    free(val);
+    free(my_coo->row);
+    free(my_coo->col);
+    free(my_coo->val);
+    free(my_coo);
+    
+    free(my_csr->row_ptr);
+    free(my_csr->col);
+    free(my_csr->val);
+    free(my_csr);
+    
+    free(A);
+
 
 }
 
@@ -358,12 +598,14 @@ int main(){
     CU_add_test(suite, "Power method dense test", test_serial_dense_power_method);
 
     // Tests for sparse matrices.
-    CU_add_test(suite, "Matrix vector multiplication sparse test", test_serial_sparse_matvec_mult);
+    CU_add_test(suite, "Matrix vector multiplication sparse COO test", test_serial_sparse_COO_matvec_mult);
+    CU_add_test(suite, "Matrix vector multiplication sparse CSR test", test_serial_sparse_CSR_matvec_mult);
     CU_add_test(suite, "Approximate eigenvalue sparse test", test_serial_sparse_approximate_eigenvalue);
-    //CU_add_test(suite, "Power method sparse test", test_serial_sparse_power_method);
-    CU_add_test(suite, "Power method sparse large test", test_serial_sparse_large_power_method);
+    CU_add_test(suite, "Power method sparse test", test_serial_sparse_power_method);
+    CU_add_test(suite, "Power method sparse COO large test", test_serial_sparse_COO_large_power_method);
+    CU_add_test(suite, "Power method sparse CSR large test", test_serial_sparse_CSR_large_power_method);
 
-    // Tests for common functions.
+    //Tests for common functions.
     CU_add_test(suite, "Generate random vector test", test_serial_generate_random_vector);
     CU_add_test(suite, "Vector normalization test", test_serial_norm);
 

@@ -140,20 +140,21 @@ double serial_dense_approximate_eigenvalue(denseMatrix* A, Vector* x){
  * 
  * @return The dominant eigenvalue of matrix A.
  */
-double serial_sparse_power_method(sparseMatrix* A){
-   
-    // initial vector
+double serial_sparse_power_method(SparseMatrixAny *A){
+    
     double lambda_old = 0;
     double lambda_new = 0;
-    //Vector* x = generate_random_vector(A->rows);
-    Vector* x = malloc(sizeof(Vector));
-    x->size = A->rows;
-    x->data = malloc(sizeof(double) * x->size);
+    int size;
 
-    for(int i = 0; i < x->size; i++){
-        x->data[i] = 1.0;
+    if(A->type == CSR){
+        size = A->mat.csr->rows;
+    }else{
+        size = A->mat.coo->rows;
     }
-    
+
+    // initial vector
+    Vector* x = generate_random_vector(size);
+
     do{
         lambda_old = lambda_new;
         serial_sparse_matvec_mult(A, x);
@@ -169,6 +170,10 @@ double serial_sparse_power_method(sparseMatrix* A){
 }
 
 
+
+
+
+
 /**
  * @brief Computes the matrix-vector multiplication.
  * 
@@ -177,10 +182,36 @@ double serial_sparse_power_method(sparseMatrix* A){
  * 
  * @return Nothing. The result is stored directly in the vector x.
  */
-void serial_sparse_matvec_mult(sparseMatrix* A, Vector* x){
-
+void serial_sparse_matvec_mult_CSR(sparseMatrixCSR* A, Vector* x){
+    
     double* temp = calloc(x->size, sizeof(double));
+    double aux;
+    for(int i = 0; i < A->rows; i++){
+        aux = 0.0;
+        for(int j = A->row_ptr[i]; j < A->row_ptr[i+1]; j++){
+            aux = fma(x->data[A->col[j]], A->val[j], aux);
+        }
+        temp[i] += aux;
+    }
+    
+    for (int i = 0; i < x->size; i++){
+        x->data[i] = temp[i];
+    }
+    free(temp);
+}
 
+/**
+ * @brief Computes the matrix-vector multiplication.
+ * 
+ * @param A The input matrix.
+ * @param x The input/output vector. It is overwritten with the result A * x.
+ * 
+ * @return Nothing. The result is stored directly in the vector x.
+ */
+void serial_sparse_matvec_mult_COO(sparseMatrixCOO* A, Vector* x){
+    
+    double* temp = calloc(x->size, sizeof(double));
+    
     // iterate thrue all non zero elemets
     for (int i = 0; i < A->nnz ; i++){
         double value = A->val[i];
@@ -196,8 +227,15 @@ void serial_sparse_matvec_mult(sparseMatrix* A, Vector* x){
     free(temp);
 }
 
+void serial_sparse_matvec_mult(SparseMatrixAny* A, Vector* x) {
+    if (A->type == CSR) {
+        serial_sparse_matvec_mult_CSR(A->mat.csr, x);
+    } else {
+        serial_sparse_matvec_mult_COO(A->mat.coo, x);
+    }
+}
 
-double serial_sparse_approximate_eigenvalue(sparseMatrix* A, Vector* x){
+double serial_sparse_approximate_eigenvalue(SparseMatrixAny* A, Vector* x){
     Vector copy;
     copy.size = x->size;
     copy.data = malloc(sizeof(double) * copy.size);
@@ -206,7 +244,6 @@ double serial_sparse_approximate_eigenvalue(sparseMatrix* A, Vector* x){
     }
     serial_sparse_matvec_mult(A, &copy);
     double lambda = dot_product(x, &copy);
-
     free(copy.data);
     return lambda;
 }
