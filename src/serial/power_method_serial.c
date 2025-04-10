@@ -65,12 +65,13 @@ void serial_dense_matvec_mult(denseMatrix* A, Vector* x){
 
     double* temp = malloc(sizeof(double) * x->size);
     double sum;
+
     for(int i = 0; i < A->rows; i++){
-        sum = 0;
+        sum = 0.0;
         for (int j = 0; j < A->cols; j++){
             // each row has cols elements
             double value = A->data[i * A->cols + j];
-            sum += value * x->data[j];
+            sum = fma(value, x->data[j], sum);
         }
         temp[i] = sum;
     }
@@ -187,7 +188,7 @@ void serial_sparse_matvec_mult(sparseMatrix* A, Vector* x){
         int value_column = A->col[i];
         // In contrast to the dense case, we must write results directly to temp,
         // as we don't iterate in row-major order.
-        temp[value_row] += value * x->data[value_column];
+        temp[value_row] = fma(value, x->data[value_column], temp[value_row]);
     }
     for(int i = 0; i < x->size; i++){
         x->data[i] = temp[i];
