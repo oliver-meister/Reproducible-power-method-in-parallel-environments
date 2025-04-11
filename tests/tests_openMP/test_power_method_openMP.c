@@ -97,10 +97,41 @@ test_dense_openMP_power_method(){
     A.data[3] = 3.0; 
 
     double lambda = openMP_dense_power_method(&A);
-    printf("Eigenvalue %lg\n", lambda);
+    printf("Eigenvalue dense %lg\n", lambda);
     CU_ASSERT_DOUBLE_EQUAL(lambda, 3.6180, 0.001);
     free(A.data);
 }
+
+
+test_openMP_sparse_CSR_large_power_method(){
+ 
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/494_bus/494_bus.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+
+    double lambda = openMP_sparse_power_method(A);
+    printf("Eigenvalue sparse: %f\n", lambda);
+    CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.14176, 0.0001);
+
+    free(my_coo->row);
+    free(my_coo->col);
+    free(my_coo->val);
+    free(my_coo);
+    
+    free(my_csr->row_ptr);
+    free(my_csr->col);
+    free(my_csr->val);
+    free(my_csr);
+    
+    free(A);
+
+
+}
+
+
 
 int main(int argc, char* argv[]){
 
@@ -126,7 +157,7 @@ int main(int argc, char* argv[]){
     CU_add_test(suite, "Approximate eigenvalue test", test_dense_openMP_approximate_eigenvalue);
     CU_add_test(suite, "Power method test", test_dense_openMP_power_method);
     // Tests for sparse matrices.
-
+    CU_add_test(suite, "Power method test large CSR", test_openMP_sparse_CSR_large_power_method);
     // Tests for common functions.
     CU_add_test(suite, "Vector normalization test", test_openMP_norm);
     CU_add_test(suite, "Generate random vector test", test_openMP_generate_random_vector);

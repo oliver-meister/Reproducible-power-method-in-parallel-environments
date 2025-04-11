@@ -530,10 +530,10 @@ test_serial_sparse_CSR_large_power_method(){
 
     SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
     A->type = CSR;
-    A->mat.coo = my_csr;
+    A->mat.csr = my_csr;
 
     double lambda = serial_sparse_power_method(A);
-    printf("Eigenvalue sparse: %f\n", lambda);
+    printf("Large test: Eigenvalue sparse: %f\n", lambda);
     CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.14176, 0.0001);
 
     free(my_coo->row);

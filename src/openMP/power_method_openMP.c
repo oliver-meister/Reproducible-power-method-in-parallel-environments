@@ -138,14 +138,14 @@ double openMP_dense_approximate_eigenvalue(denseMatrix* A, Vector* x){
 }
 
 
-double openMP_dot_product(Vector* x, Vector* y){
+double openMP_dot_product2(Vector* x, Vector* y){
     if(x->size != y->size){
         printf("Error: Vectors must have the same size (x: %d, y: %d)\n", x->size, y->size);
         return 0.0;
     }
 
     double dot = 0.0;
-    #pragma omp parallel for defualt(none) reduction(+:sum) shared(x,y)
+    #pragma omp parallel for default(none) shared(x, y) reduction(+:dot) 
     for(int i = 0; i < x->size; i++){
         dot = fma(x->data[i], y->data[i], dot);
     }
@@ -153,7 +153,7 @@ double openMP_dot_product(Vector* x, Vector* y){
 }
 
 
-double openMP_dot_product2(Vector* x, Vector* y){
+double openMP_dot_product(Vector* x, Vector* y){
     if(x->size != y->size){
         printf("Error: Vectors must have the same size (x: %d, y: %d)\n", x->size, y->size);
         return 0.0;
@@ -197,26 +197,35 @@ double openMP_dot_product2(Vector* x, Vector* y){
  * @return The dominant eigenvalue of matrix A.
  */
 
- /*
- double openMP_sparse_power_method(sparseMatrix* A){
+ 
+ double openMP_sparse_power_method(SparseMatrixAny* A){
     
  // initial vector
- double lambda_old = 0;
- double lambda_new = 0;
- Vector* x = generate_random_vector(A->rows);
- 
- do{
-    lambda_old = lambda_new;
-    openMP_sparse_matvec_mult(A, x);
-    openMP_normalize_vector(x);
-    lambda_new = openMP_sparse_approximate_eigenvalue(A, x);
-} while(openMP_convergence(lambda_new, lambda_old, 0.00001));
+    double lambda_old = 0;
+    double lambda_new = 0;
+    int size;
 
-free(x->data);
-free(x);
-return lambda_new;
+    if(A->type == CSR){
+            size = A->mat.csr->rows;
+    }else{
+        printf("Runtime error: OpenMP currently only works with CSR format\n");
+        exit(EXIT_FAILURE);;
+    }   
+
+    Vector* x = generate_random_vector(size);
+
+    do{
+        lambda_old = lambda_new;
+        openMP_sparse_matvec_mult(A, x);
+        openMP_normalize_vector(x);
+        lambda_new = openMP_sparse_approximate_eigenvalue(A, x);
+    } while(openMP_convergence(lambda_new, lambda_old, 0.00001));
+
+    free(x->data);
+    free(x);
+    return lambda_new;
 }
-*/
+
 
 
 /**
@@ -229,27 +238,35 @@ return lambda_new;
  */
 
 
+ void openMP_sparse_matvec_mult_CSR(sparseMatrixCSR* A, Vector* x){
 
-void openMP_sparse_matvec_mult(sparseMatrix* A, Vector* x){
-    
     double* temp = calloc(x->size, sizeof(double));
     double aux;
-    // iterate thrue all non zero elemets
-    #pragma omp parallel for 
-    for (int i = 0; i < A->rows ; i++){
+
+    #pragma omp parallel for default(none) shared(temp, aux, A, x)
+    for(int i = 0; i < A->rows; i++){
         aux = 0.0;
-        for()
-        double value = A->val[i];
-        int value_row = A->row[i];
-        int value_column = A->col[i];
-        // In contrast to the dense case, we must write results directly to temp,
-        // as we don't iterate in row-major order.
-        temp[value_row] += value * x->data[value_column];
+        for(int j = A->row_ptr[i]; j < A->row_ptr[i+1]; j++){
+            aux = fma(x->data[A->col[j]], A->val[j], aux);
+        }
+        temp[i] += aux;
     }
-    for(int i = 0; i < x->size; i++){
+    for (int i = 0; i < x->size; i++){
         x->data[i] = temp[i];
     }
     free(temp);
+
+ }
+
+
+void openMP_sparse_matvec_mult(SparseMatrixAny* A, Vector* x){
+    
+    if (A->type == CSR) {
+        openMP_sparse_matvec_mult_CSR(A->mat.csr, x);
+    } else {
+        printf("Runtime error: OpenMP currently only works with CSR format\n");
+        exit(EXIT_FAILURE);
+    }
 }
 
 
@@ -261,18 +278,18 @@ void openMP_sparse_matvec_mult(sparseMatrix* A, Vector* x){
  * 
  * @return The approximated dominant eigenvalue.
  */
-/*
-double openMP_sparse_approximate_eigenvalue(sparseMatrix* A, Vector* x){
+
+double openMP_sparse_approximate_eigenvalue(SparseMatrixAny* A, Vector* x){
     Vector copy;
     copy.size = x->size;
     copy.data = malloc(sizeof(double) * copy.size);
     for(int i = 0; i < copy.size; i++){
         copy.data[i] = x->data[i];
     }
-    serial_sparse_matvec_mult(A, &copy);
-    double lambda = dot_product(x, &copy);
+    openMP_sparse_matvec_mult(A, &copy);
+    double lambda = openMP_dot_product(x, &copy);
     
     free(copy.data);
     return lambda;
 }
-*/
+

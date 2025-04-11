@@ -191,6 +191,7 @@ void serial_sparse_matvec_mult_CSR(sparseMatrixCSR* A, Vector* x){
         for(int j = A->row_ptr[i]; j < A->row_ptr[i+1]; j++){
             aux = fma(x->data[A->col[j]], A->val[j], aux);
         }
+        printf("row %d , aux: %lg\n",i, aux);
         temp[i] += aux;
     }
     
