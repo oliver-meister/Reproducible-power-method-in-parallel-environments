@@ -47,31 +47,6 @@ void openMP_dense_matvec_mult(const denseMatrix* A, Vector* x){
 }
 
 
-
-/**
- * @brief  Approximates the dominant eigenvalue.
- * 
- * @param A The input matrix.
- * @param x The normalized input vector.
- * 
- * @return The approximated dominant eigenvalue.
- */
-double openMP_dense_approximate_eigenvalue(const denseMatrix* A, const Vector* x){
-    Vector copy;
-    copy.size = x->size;
-    copy.data = malloc(sizeof(double) * copy.size);
-    //TODO: test parallize this for loop
-    for(int i = 0; i < copy.size; i++){
-        copy.data[i] = x->data[i];
-    }
-    openMP_dense_matvec_mult(A, &copy);
-    double lambda = openMP_dot_product(x, &copy);
-
-    free(copy.data);
-    return lambda;
-}
-
-
 double openMP_dot_product2(const Vector* x, const Vector* y){
     if(x->size != y->size){
         printf("Error: Vectors must have the same size (x: %d, y: %d)\n", x->size, y->size);
@@ -164,28 +139,3 @@ void openMP_sparse_matvec_mult(const SparseMatrixAny* A, Vector* x){
         exit(EXIT_FAILURE);
     }
 }
-
-
-/**
- * @brief  Approximates the dominant eigenvalue.
- * 
- * @param A The input matrix.
- * @param x The normalized input vector.
- * 
- * @return The approximated dominant eigenvalue.
- */
-
-double openMP_sparse_approximate_eigenvalue(const SparseMatrixAny* A, const Vector* x){
-    Vector copy;
-    copy.size = x->size;
-    copy.data = malloc(sizeof(double) * copy.size);
-    for(int i = 0; i < copy.size; i++){
-        copy.data[i] = x->data[i];
-    }
-    openMP_sparse_matvec_mult(A, &copy);
-    double lambda = openMP_dot_product(x, &copy);
-    
-    free(copy.data);
-    return lambda;
-}
-
