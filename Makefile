@@ -27,11 +27,24 @@ clean:
 run_serial: build_serial 
 	./$(EXECUTABLE_SERIAL)
 
+
 build_serial:
 	gcc src/Serial/$(EXECUTABLE_SERIAL).c -o $(EXECUTABLE_SERIAL)
 
 test_serial:
-	gcc -o test_serial tests/tests_serial/test_power_method_serial.c src/serial/power_method_serial.c include/vector.c include/matrix.c external/mmio.c $(CFLAGS)
+	gcc -o test_serial tests/tests_serial/test_power_method_serial.c src/serial/serial_fun.c src/openMP/omp_fun.c include/vector.c include/matrix.c external/mmio.c src/common.c src/dense_power_method.c src/sparse_power_method.c $(CFLAGS) -DUSE_SERIAL
 
-test_openMP:
-	gcc -o test_openMP tests/tests_openMP/test_power_method_openMP.c src/openMP/power_method_openMP.c include/vector.c include/matrix.c external/mmio.c $(CFLAGS)
+test_omp_sparse:
+	gcc -o test_omp_sparse tests/tests_openMP/sparse_test_power_method_openMP.c src/serial/serial_fun.c src/openMP/omp_fun.c include/vector.c include/matrix.c external/mmio.c src/common.c src/dense_power_method.c src/sparse_power_method.c $(CFLAGS) -DUSE_OMP
+
+test_omp_dense:
+	gcc -o test_omp_dense tests/tests_openMP/dense_test_power_method_openMP.c src/serial/serial_fun.c src/openMP/omp_fun.c include/vector.c include/matrix.c external/mmio.c src/common.c src/dense_power_method.c src/sparse_power_method.c $(CFLAGS) -DUSE_OMP
+
+test_omp_common:
+	gcc -o test_omp_common tests/tests_openMP/common_test_power_method_openMP.c src/serial/serial_fun.c src/openMP/omp_fun.c include/vector.c include/matrix.c external/mmio.c src/common.c src/dense_power_method.c src/sparse_power_method.c $(CFLAGS) -DUSE_OMP
+
+test_all: test_serial test_omp_sparse test_omp_dense test_omp_common
+	./test_serial
+	./test_omp_sparse 2
+	./test_omp_dense 2
+	./test_omp_common 2

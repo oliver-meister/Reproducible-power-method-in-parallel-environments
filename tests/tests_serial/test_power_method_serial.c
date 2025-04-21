@@ -1,8 +1,14 @@
+
 #include <CUnit/CUnit.h>
 #include <CUnit/Basic.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "../../src/serial/power_method_serial.h"
+#include <time.h>
+#include "../../src/sparse_power_method.h"
+#include "../../src/dense_power_method.h"
+#include "../../src/common.h"
+#include "../../src/serial/serial_fun.h"
+#include "../../src/openMP/omp_fun.h"
 #include "../../include/matrix.h"
 #include "../../include/vector.h"
 #include "../../external/mmio.h"
@@ -64,7 +70,6 @@ void test_serial_dense_matvec_mult(){
     test_array[3] = 3;
     test_array[4] = 5;
 
-
     serial_dense_matvec_mult(&A, &x);
     for(int i = 0; i < x.size; i++){
         CU_ASSERT_DOUBLE_EQUAL(x.data[i], test_array[i], 1e-6);
@@ -72,10 +77,11 @@ void test_serial_dense_matvec_mult(){
     free(A.data);
     free(x.data);
     free(test_array);
+    
 }
 
 // Works
-test_serial_dense_approximate_eigenvalue(){
+void test_serial_dense_approximate_eigenvalue(){
 
     denseMatrix A;
     A.rows = 5;
@@ -120,7 +126,8 @@ test_serial_dense_approximate_eigenvalue(){
     x.data[3] = 1;
     x.data[4] = 1;
 
-    double lambda = serial_dense_approximate_eigenvalue(&A, &x);
+    double lambda = dense_approximate_eigenvalue(&A, &x, true);
+
     CU_ASSERT_DOUBLE_EQUAL(lambda, 12, 0.0001);
     free(A.data);
     free(x.data);
@@ -128,7 +135,7 @@ test_serial_dense_approximate_eigenvalue(){
 }
 
 // Works
-test_serial_dense_power_method(){
+void test_serial_dense_power_method(){
     
     denseMatrix A;
     A.rows = 5;
@@ -160,8 +167,7 @@ test_serial_dense_power_method(){
     A.data[23] = 1.0; 
     A.data[24] = 4.0; 
 
-    double lambda = serial_dense_power_method(&A);
-    printf("Eigenvalue dense: %f\n", lambda);
+    double lambda = dense_power_method(&A);
     CU_ASSERT_DOUBLE_EQUAL(lambda, 4.8608, 0.001);
     free(A.data);
 }
@@ -353,7 +359,7 @@ void test_serial_sparse_CSR_matvec_mult(){
 
 
 //Works
-test_serial_sparse_approximate_eigenvalue(){
+void test_serial_sparse_approximate_eigenvalue(){
 
     sparseMatrixCOO *coo = malloc(sizeof(sparseMatrixCOO));
     coo->rows = 5;
@@ -419,8 +425,7 @@ test_serial_sparse_approximate_eigenvalue(){
     x.data[4] = 1;
 
 
-    double lambda = serial_sparse_approximate_eigenvalue(A, &x);
-    printf("lambda: %lg\n", lambda);
+    double lambda = sparse_approximate_eigenvalue(A, &x, true);
     CU_ASSERT_DOUBLE_EQUAL(lambda, 12.0, 0.0001);
     
     free(coo->col);
@@ -434,7 +439,7 @@ test_serial_sparse_approximate_eigenvalue(){
 }
 
 
-test_serial_sparse_power_method(){
+void test_serial_sparse_power_method(){
 
     sparseMatrixCOO *coo = malloc(sizeof(sparseMatrixCOO));
     coo->rows = 5;
@@ -490,8 +495,7 @@ test_serial_sparse_power_method(){
     A->type = COO;
     A->mat.coo = coo;
 
-    double lambda = serial_sparse_power_method(A);
-    printf("Eigenvalue sparse: %f\n", lambda);
+    double lambda = sparse_power_method(A);
     CU_ASSERT_DOUBLE_EQUAL(lambda, 4.8608, 0.001);
 
     free(coo->col);
@@ -502,7 +506,7 @@ test_serial_sparse_power_method(){
 
 }
 
-test_serial_sparse_COO_large_power_method(){
+void test_serial_sparse_COO_large_power_method(){
  
     sparseMatrixCOO * my_coo = createSparseMatrixCOO("ssget/494_bus/494_bus.mtx");
    
@@ -510,8 +514,7 @@ test_serial_sparse_COO_large_power_method(){
     A->type = COO;
     A->mat.coo = my_coo;
 
-    double lambda = serial_sparse_power_method(A);
-    printf("Eigenvalue sparse: %f\n", lambda);
+    double lambda = sparse_power_method(A);
     CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.14176, 0.0001);
 
     free(my_coo->row);
@@ -523,7 +526,7 @@ test_serial_sparse_COO_large_power_method(){
 
 }
 
-test_serial_sparse_CSR_large_power_method(){
+void test_serial_sparse_CSR_large_power_method(){
  
     sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/494_bus/494_bus.mtx");
     sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
@@ -532,8 +535,7 @@ test_serial_sparse_CSR_large_power_method(){
     A->type = CSR;
     A->mat.csr = my_csr;
 
-    double lambda = serial_sparse_power_method(A);
-    printf("Large test: Eigenvalue sparse: %f\n", lambda);
+    double lambda = sparse_power_method(A);
     CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.14176, 0.0001);
 
     free(my_coo->row);
@@ -554,7 +556,7 @@ test_serial_sparse_CSR_large_power_method(){
 //////////////////////////////////////////////////////////////
 
 // Works
-test_serial_norm(){
+void test_serial_norm(){
 
     Vector x;
     x.size = 5;
@@ -565,7 +567,7 @@ test_serial_norm(){
     x.data[3] = 3;
     x.data[4] = 5;
 
-    serial_normalize_vector(&x);
+    normalize_vector(&x);
 
     CU_ASSERT_DOUBLE_EQUAL(x.data[0], -0.452267, 0.0001);
     CU_ASSERT_DOUBLE_EQUAL(x.data[1], 0.150756, 0.0001);
@@ -577,7 +579,7 @@ test_serial_norm(){
 }
 
 //Works
-test_serial_generate_random_vector(){
+void test_serial_generate_random_vector(){
     Vector* x = generate_random_vector(5);
     CU_ASSERT_EQUAL(5, x->size);
     for(int i = 0; i < x->size; i++){
@@ -588,6 +590,7 @@ test_serial_generate_random_vector(){
 }
 
 int main(){
+
     srand(time(0));
     CU_initialize_registry();
     CU_pSuite suite = CU_add_suite("Power Method Serial Tests", NULL, NULL);
