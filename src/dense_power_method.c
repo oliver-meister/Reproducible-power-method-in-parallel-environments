@@ -64,14 +64,16 @@ double dense_power_method(const denseMatrix* A){
 double dense_approximate_eigenvalue(const denseMatrix* A, const Vector* x, bool test){
 
     if (test){
-        #ifdef USE_SERIAL
-        dotprod = serial_dot_product;
-        dense_matvec = serial_dense_matvec_mult;
-    #else
+        #ifdef USE_OMP
         dotprod = openMP_dot_product;
         dense_matvec = openMP_dense_matvec_mult;
-    
-    #endif
+        #elif defined(USE_OFF)
+            dotprod = off_dot_product;
+            dense_matvec = off_dense_matvec_mult;
+        #else
+            dotprod = serial_dot_product;
+            dense_matvec = serial_dense_matvec_mult;
+        #endif
     }
     Vector copy;
     copy.size = x->size;

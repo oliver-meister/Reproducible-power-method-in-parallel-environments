@@ -74,14 +74,16 @@ double sparse_power_method(const SparseMatrixAny *A){
 
  double sparse_approximate_eigenvalue(const SparseMatrixAny* A, const Vector* x, bool test){
     if (test){
-        #ifdef USE_SERIAL
-        dotprod = serial_dot_product;
-        sparse_matvec = serial_sparse_matvec_mult;
-    #else
-        dotprod = openMP_dot_product;
-        sparse_matvec = openMP_sparse_matvec_mult;
-    
-    #endif
+        #ifdef USE_OMP
+            dotprod = openMP_dot_product;
+            sparse_matvec = openMP_sparse_matvec_mult;
+        #elif defined(USE_OFF)
+            dotprod = off_dot_product;
+            sparse_matvec = off_sparse_matvec_mult;
+        #else
+            dotprod = serial_dot_product;
+            sparse_matvec = serial_sparse_matvec_mult;
+        #endif
     }
     Vector copy;
     copy.size = x->size;
