@@ -5,6 +5,7 @@
 #include "../include/vector.h"
 #include "serial/serial_fun.h"
 #include "openMP/omp_fun.h"
+#include "OMP_Offload/off_fun.h"
 #include "common.h"
 #include <math.h>
 #include <stdlib.h>
@@ -23,13 +24,15 @@ extern dense_matvec_fn dense_matvec;
  * @return The dominant eigenvalue of matrix A.
  */
 double dense_power_method(const denseMatrix* A){
-    #ifdef USE_SERIAL
-        dotprod = serial_dot_product;
-        dense_matvec = serial_dense_matvec_mult;
-    #else
+    #ifdef USE_OMP
         dotprod = openMP_dot_product;
         dense_matvec = openMP_dense_matvec_mult;
-    
+    #elif defined(USE_OFF)
+        dotprod = off_dot_product;
+        dense_matvec = off_dense_matvec_mult;
+    #else
+        dotprod = serial_dot_product;
+        dense_matvec = serial_dense_matvec_mult;
     #endif
     
     // initial vector

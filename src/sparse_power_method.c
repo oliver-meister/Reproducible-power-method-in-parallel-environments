@@ -5,6 +5,7 @@
 #include "../include/vector.h"
 #include "serial/serial_fun.h"
 #include "openMP/omp_fun.h"
+#include "OMP_Offload/off_fun.h"
 #include "common.h"
 #include <math.h>
 #include <stdlib.h>
@@ -22,12 +23,15 @@ extern sparse_matvec_fn sparse_matvec;
  */
 double sparse_power_method(const SparseMatrixAny *A){
     
-    #ifdef USE_SERIAL
-        sparse_matvec = serial_sparse_matvec_mult;
-        dotprod = serial_dot_product;
-    #else
+    #ifdef USE_OMP
         dotprod = openMP_dot_product;
         sparse_matvec = openMP_sparse_matvec_mult;
+    #elif defined(USE_OFF)
+        dotprod = off_dot_product;
+        sparse_matvec = off_sparse_matvec_mult;
+    #else
+        dotprod = serial_dot_product;
+        sparse_matvec = serial_sparse_matvec_mult;
 
     #endif
 

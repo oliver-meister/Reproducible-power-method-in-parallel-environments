@@ -1,4 +1,4 @@
-#include "omp_fun.h"
+#include "off_fun.h"
 #include <stdio.h>
 #include <stdbool.h>
 #include "../../include/matrix.h"
@@ -22,20 +22,18 @@
  */
 
  // we shall have the same amount of threads as number of rows, sutch that eatch thread handles an entire row.
-void openMP_dense_matvec_mult(const denseMatrix* A, Vector* x){
+void off_dense_matvec_mult(const denseMatrix* A, Vector* x){
     double* temp = malloc(sizeof(double) * x->size);
     double sum;
-
+    
+    #pragma omp target map(to: A->data[0: A->rows * A->cols], x->data[0: x->size]) map(from: temp[0: x->size])
     #pragma omp parallel for default(none) private(sum) shared(temp, A, x)
     for(int i = 0; i < A->rows; i++){
         sum = 0;
         for (int j = 0; j < A->cols; j++){
-            // each row has cols elements
             double value = A->data[i * A->cols + j];
             sum = fma(value, x->data[j], sum);
         }
-        //int thread_id = omp_get_thread_num();
-        //printf("Thread %d is processing row %d\n", thread_id, i);
         temp[i] = sum;
     }
     //TODO: parallize this part also
@@ -46,13 +44,14 @@ void openMP_dense_matvec_mult(const denseMatrix* A, Vector* x){
 }
 
 
-double openMP_dot_product2(const Vector* x, const Vector* y){
+double off_dot_product(const Vector* x, const Vector* y){
     if(x->size != y->size){
         printf("Error: Vectors must have the same size (x: %d, y: %d)\n", x->size, y->size);
         return 0.0;
     }
 
     double dot = 0.0;
+    #pragma omp target map(to: x->data[0: x->size], y->data[0: y->size]) map(from: dot)
     #pragma omp parallel for default(none) shared(x, y) reduction(+:dot) 
     for(int i = 0; i < x->size; i++){
         //dot = fma(x->data[i], y->data[i], dot);
@@ -62,41 +61,7 @@ double openMP_dot_product2(const Vector* x, const Vector* y){
 }
 
 
-double openMP_dot_product(const Vector* x, const Vector* y){
-    if(x->size != y->size){
-        printf("Error: Vectors must have the same size (x: %d, y: %d)\n", x->size, y->size);
-        return 0.0;
-    }
-
-    int n_threads = omp_get_max_threads();
-    double *partial_sums = calloc(n_threads, sizeof(double));
-
-    #pragma omp parallel default(none) shared(x, y, partial_sums)
-    {
-        int tid = omp_get_thread_num();
-        double sum = 0.0; 
-        //printf("Thread number %d\n", tid);
-        #pragma omp for
-        for(int i = 0; i < x->size; i++){
-
-            sum += x->data[i] * y->data[i];
-        }
-        
-        partial_sums[tid] = sum;
-    }
-
-    double dot = 0.0;
-
-    for (int i = 0; i < n_threads; i++){
-        dot += partial_sums[i];
-    }
-
-    return dot;
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 
 /**
@@ -109,11 +74,12 @@ double openMP_dot_product(const Vector* x, const Vector* y){
  */
 
 
- void openMP_sparse_matvec_mult_CSR(const sparseMatrixCSR* A, Vector* x){
+ void off_sparse_matvec_mult_CSR(const sparseMatrixCSR* A, Vector* x){
 
     double* temp = calloc(x->size, sizeof(double));
     double aux;
 
+    #pragma omp target map(to: A->row_ptr[0: A->rows + 1], A->val[0: A->nnz], A->col[0: A->nnz], x->data[0: x->size]) map(from: temp[0: x->size])
     #pragma omp parallel for default(none) private(aux) shared(temp, A, x)
     for(int i = 0; i < A->rows; i++){
         aux = 0.0;
@@ -130,7 +96,7 @@ double openMP_dot_product(const Vector* x, const Vector* y){
  }
 
 
-void openMP_sparse_matvec_mult(const SparseMatrixAny* A, Vector* x){
+void off_sparse_matvec_mult(const SparseMatrixAny* A, Vector* x){
     
     if (A->type == CSR) {
         openMP_sparse_matvec_mult_CSR(A->mat.csr, x);

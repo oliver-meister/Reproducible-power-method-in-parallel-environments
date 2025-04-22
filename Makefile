@@ -5,6 +5,11 @@ EXECUTABLE_SERIAL = power_method_serial
 
 CFLAGS = -Wall -Wextra -lm -fopenmp -lcunit
 
+
+# USE_OFF for omp offloading
+# USE_omp for regular omp
+OMPFLAG = USE_OFF
+
 # Default target
 all: build
 
@@ -32,16 +37,16 @@ build_serial:
 	gcc src/Serial/$(EXECUTABLE_SERIAL).c -o $(EXECUTABLE_SERIAL)
 
 test_serial:
-	gcc -o test_serial tests/tests_serial/test_power_method_serial.c src/serial/serial_fun.c src/openMP/omp_fun.c include/vector.c include/matrix.c external/mmio.c src/common.c src/dense_power_method.c src/sparse_power_method.c $(CFLAGS) -DUSE_SERIAL
+	gcc -o test_serial tests/tests_serial/test_power_method_serial.c src/serial/serial_fun.c src/openMP/omp_fun.c src/OMP_Offload/off_fun.c include/vector.c include/matrix.c external/mmio.c src/common.c src/dense_power_method.c src/sparse_power_method.c $(CFLAGS) -DUSE_SERIAL
 
 test_omp_sparse:
-	gcc -o test_omp_sparse tests/tests_openMP/sparse_test_power_method_openMP.c src/serial/serial_fun.c src/openMP/omp_fun.c include/vector.c include/matrix.c external/mmio.c src/common.c src/dense_power_method.c src/sparse_power_method.c $(CFLAGS) -DUSE_OMP
+	gcc -o test_omp_sparse tests/tests_openMP/sparse_test_power_method_openMP.c src/serial/serial_fun.c src/openMP/omp_fun.c src/OMP_Offload/off_fun.c include/vector.c include/matrix.c external/mmio.c src/common.c src/dense_power_method.c src/sparse_power_method.c $(CFLAGS) -D$(OMPFLAG)
 
 test_omp_dense:
-	gcc -o test_omp_dense tests/tests_openMP/dense_test_power_method_openMP.c src/serial/serial_fun.c src/openMP/omp_fun.c include/vector.c include/matrix.c external/mmio.c src/common.c src/dense_power_method.c src/sparse_power_method.c $(CFLAGS) -DUSE_OMP
+	gcc -o test_omp_dense tests/tests_openMP/dense_test_power_method_openMP.c src/serial/serial_fun.c src/openMP/omp_fun.c src/OMP_Offload/off_fun.c include/vector.c include/matrix.c external/mmio.c src/common.c src/dense_power_method.c src/sparse_power_method.c $(CFLAGS) -D$(OMPFLAG)
 
 test_omp_common:
-	gcc -o test_omp_common tests/tests_openMP/common_test_power_method_openMP.c src/serial/serial_fun.c src/openMP/omp_fun.c include/vector.c include/matrix.c external/mmio.c src/common.c src/dense_power_method.c src/sparse_power_method.c $(CFLAGS) -DUSE_OMP
+	gcc -o test_omp_common tests/tests_openMP/common_test_power_method_openMP.c src/serial/serial_fun.c src/openMP/omp_fun.c src/OMP_Offload/off_fun.c include/vector.c include/matrix.c external/mmio.c src/common.c src/dense_power_method.c src/sparse_power_method.c $(CFLAGS) -D$(OMPFLAG)
 
 test_all: test_serial test_omp_sparse test_omp_dense test_omp_common
 	./test_serial
