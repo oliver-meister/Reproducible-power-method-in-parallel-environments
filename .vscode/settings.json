@@ -14,6 +14,8 @@
         "stdlib.h": "c",
         "serial_fun.h": "c",
         "omp_fun.h": "c",
-        "sparse_power_method.h": "c"
+        "sparse_power_method.h": "c",
+        "dense_power_method.h": "c",
+        "off_fun.h": "c"
     }
 }

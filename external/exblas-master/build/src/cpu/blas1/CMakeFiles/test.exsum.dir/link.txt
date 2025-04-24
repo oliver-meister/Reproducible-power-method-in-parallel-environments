@@ -1,0 +1,1 @@
+/usr/bin/c++  -std=c++11 -march=native -fabi-version=0 -O3 -Wall -fopenmp -masm=intel -DEXBLAS_MPI -DMPI_NO_CPPBIND -rdynamic CMakeFiles/test.exsum.dir/__/__/__/tests/test.exsum.cpu.cpp.o -o test.exsum  -Wl,-rpath,/usr/lib/x86_64-linux-gnu/mpich/lib: ../libexblas.a /usr/lib/x86_64-linux-gnu/mpich/lib/libmpichcxx.so /usr/lib/x86_64-linux-gnu/mpich/lib/libmpich.so -ltbb 
