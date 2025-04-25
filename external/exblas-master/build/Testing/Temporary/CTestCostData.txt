@@ -1,9 +1,0 @@
-TestSumNaiveNumbers 0 0
-TestSumStdDynRange 0 0
-TestSumLargeDynRange 0 0
-TestSumIllConditioned 0 0
----
-TestSumNaiveNumbers
-TestSumStdDynRange
-TestSumLargeDynRange
-TestSumIllConditioned
