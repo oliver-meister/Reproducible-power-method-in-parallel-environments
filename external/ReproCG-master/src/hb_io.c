@@ -664,7 +664,7 @@ void hb_file_read ( FILE *input, char **title, char **key, int *totcrd,
 /*
   Read the matrix values.
 */
-  if ( 0 < valcrd )
+  if ( valcrd && 0 < *valcrd )
   {
     if ( *values )
     {
