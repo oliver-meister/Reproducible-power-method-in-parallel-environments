@@ -1,5 +1,4 @@
 
-#include <math.h>
 // Courtesy of the OzBLAS by Daichi Mukunoki and Takeshi Ogita
 //
 // =========================================

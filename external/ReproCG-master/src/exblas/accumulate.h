@@ -19,7 +19,6 @@
 #include "config.h"
 #include "mylibm.hpp"
 #include "nearsum.hpp"
-#include <stdio.h>
 //this file has a direct correspondance to gpu code accumulate.cuh
 
 namespace exblas {
