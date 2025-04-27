@@ -15,7 +15,7 @@
 #include "../../external/ReproCG-master/src/matrix.h"
 #include "../../external/ReproCG-master/src/common.h"
 #include "../../external/ReproCG-master/src/exblas/exdot.h"
-
+//ExBLAS
 
 double exBlasCpu_dot_product(const Vector* x, const Vector* y){
 
