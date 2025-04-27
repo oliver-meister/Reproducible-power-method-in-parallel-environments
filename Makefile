@@ -53,3 +53,6 @@ test_all: test_serial test_omp_sparse test_omp_dense test_omp_common
 	./test_omp_sparse 2
 	./test_omp_dense 2
 	./test_omp_common 2
+
+mkl:
+	source /opt/intel/oneapi/setvars.sh

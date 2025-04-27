@@ -16,6 +16,9 @@
         "omp_fun.h": "c",
         "sparse_power_method.h": "c",
         "dense_power_method.h": "c",
-        "off_fun.h": "c"
-    }
+        "off_fun.h": "c",
+        "random": "cpp",
+        "algorithm": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }
