@@ -81,20 +81,31 @@ double cuda_dot_product(const Vector* x, const Vector* y){
 }
 
 
-__global__ void DOT(const double* d_x, const double* d_y, const int incx, const int incy, const int offsetx, const int offsety, const int NbElements, double* sums){
+__global__ void DOT(const double* d_x, const double* d_y, const int incx, const int incy, const int offsetx, const int offsety, const int NbElements, double* result){
     
     extern __shared__ double sdata[];
 
-    int local_id = threadIdx.x;
-    int global_id = blockIdx.x * blockDim.x + local_id;
+    int tid = threadIdx.x;
+    int i = blockIdx.x * blockDim.x + local_id;
     int total_threads = blockDim.x * gridDim.x;
-
-    sdata[local_id] = 0.0;
-    for(int pos = global_id; pos < NbElements; pos += total_threads){
-        sdata[local_id] += d_x[pos] * d_y[pos];
-    }
-    __syncthreads();
     
+    double local_sum = 0.0;
+
+    for(int pos = i; pos < NbElements; pos += total_threads){
+        local_sum += d_x[pos] * d_y[pos];
+    }
+
+    sdata[tid] = local_sum;
+    __syncthreads();
+
+    
+    for (unsigned int s = blockDim.x / 2; s > 0; s >>= 1) {
+        if (tid < s)
+        sdata[tid] += sdata[tid + s];
+        __syncthreads();
+    }
+    if (tid == 0)
+    result[blockIdx.x] = sdata[0]
 }
 
 __global__ void DOTComplete(){
