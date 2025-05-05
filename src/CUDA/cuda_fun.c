@@ -55,6 +55,35 @@ double cuda_dot_product(Vector* x, Vector* y) {
 }
 
 
+void cuda_sparse_matvec_mult_CSR(const sparseMatrixCSR *A, Vector *x){
+
+    int *row_ptr, *col;
+    double *val, *ivector, *ovector;
+    cudaMalloc((void**)&row_ptr, sizeof(int) * A->rows + 1);
+    cudaMalloc((void**)&col, sizeof(int) * A->nnz);
+    cudaMalloc((void**)&val, sizeof(double) * A->nnz);
+    cudaMalloc((void**)&ivector, sizeof(double) * x->size);
+    cudaMalloc((void**)&ovector, sizeof(double) * x->size);
+
+    cudaMemcpy(&row_ptr, A->row_ptr, sizeof(int) * A->rows + 1, cudaMemcpyHostToDevice);
+    cudaMemcpy(&col, A->col, sizeof(int) * A->nnz, cudaMemcpyHostToDevice);
+    cudaMemcpy(&val, A->val, sizeof(double) * A->nnz, cudaMemcpyHostToDevice);
+    cudaMemcpy(&ivector, x->data, sizeof(double) * x->size, cudaMemcpyHostToDevice);
+
+    launch_matvec_CSR_kernel()
+
+}
+
+void cuda_sparse_matvec_mult(const SparseMatrixAny *A, Vector *x){
+    if (A->type == CSR) {
+        cuda_sparse_matvec_mult_CSR(A->mat.csr, x);
+    } else {
+        printf("Runtime error: OpenMP currently only works with CSR format\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+
 
 /*
 __global__ void DOT(const double* d_x, const double* d_y, const int incx, const int incy, const int offsetx, const int offsety, const int NbElements, double* result){

@@ -9,6 +9,9 @@
 extern "C" {
 #endif
 
+
+void cuda_dense
+
 // Function implemented in a C file
 double cuda_dot_product(Vector* x, Vector* y);
 

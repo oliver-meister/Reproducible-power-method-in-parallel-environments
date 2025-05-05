@@ -52,3 +52,40 @@ __global__ void reduce1(double *x_idata, double *y_idata, double* result, unsign
     extern "C" void launch_reduce2_kernel(double* input, double* output, int currentSize, int nextSize, int blockSize) {
         reduce2<BLOCK_SIZE><<<nextSize, blockSize, blockSize * sizeof(double)>>>(input, output, currentSize);
     }
+
+
+// one thread per row
+__global__ void matvec_CSR_kernel(const int num_rows, 
+                                    const int *row_ptr, 
+                                    const int *col, 
+                                    const double *val, 
+                                    const double *input_vector, 
+                                    double* output_vector)
+{
+    int row = blockDim.x * blockIdx.x + threadIdx.x;
+    if(row < num_rows){
+        double dot = 0.0;
+        for(int i = row_ptr[row]; i < row_ptr[row + 1]; i++){
+            dot += val[i] * input_vector[col[i]];
+        }
+        output_vector[row] = dot;
+    }
+}
+
+extern "C" void launch_matvec_CSR_kernel(const int num_rows, 
+                                            const int *row_ptr, 
+                                            const int *col, 
+                                            const double *val, 
+                                            const double *input_vector, 
+                                            double* output_vector)
+{
+    int gridSize = (num_rows + BLOCK_SIZE - 1) / BLOCK_SIZE;
+    matvec_CSR_kernel<<<gridSize, BLOCK_SIZE>>>(num_rows, 
+                                                row_ptr, 
+                                                col, 
+                                                val,
+                                                input_vector, 
+                                                output_vector);
+
+
+}
