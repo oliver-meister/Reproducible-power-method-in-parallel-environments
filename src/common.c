@@ -4,6 +4,8 @@
 #include "common.h"
 #include "serial/serial_fun.h"
 #include "openMP/omp_fun.h"
+#include "OMP_Offload/off_fun.h"
+#include "CUDA/cuda_fun.h"
 #include "../include/matrix.h"
 #include "../include/vector.h"
 
@@ -38,10 +40,14 @@ bool convergence(double lambda_new, double lambda_old, double threshold){
  */
 void normalize_vector(Vector* x){
 
-    #ifdef USE_SERIAL
-        dotprod = serial_dot_product;
-    #else
+    #ifdef USE_OMP
         dotprod = openMP_dot_product;
+    #elif defined(USE_OFF)
+        dotprod = off_dot_product;
+    #elif defined(USE_CUDA)
+        dotprod = cuda_dot_product;
+    #else
+        dotprod = serial_dot_product;
     #endif
 
     double norm = sqrt(dotprod(x,x));
