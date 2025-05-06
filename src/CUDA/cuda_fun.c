@@ -94,8 +94,7 @@ void cuda_sparse_matvec_mult(const SparseMatrixAny *A, Vector *x){
 
 void cuda_dense_matvec_mult(const denseMatrix *A, Vector *x){
 
-    
-    double *val, ivector, ovector;
+    double *val, *ivector, *ovector;
 
     cudaMalloc((void **)&val, sizeof(double) * A->cols * A->rows);
     cudaMalloc((void **)&ivector, sizeof(double) * x->size);

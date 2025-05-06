@@ -1,5 +1,5 @@
-#ifndef CUDA_H
-#define CUDA_H
+#ifndef CUDA_FUN_H
+#define CUDA_FUN_H
 
 #include "../../include/matrix.h"
 #include "../../include/vector.h"
@@ -28,7 +28,7 @@ void launch_matvec_CSR_kernel(const int num_rows,
                                 double *output_vector);
                                 
 void launch_matvec_dense_kernel(const int num_rows, const int num_cols, 
-                                    const double *val, const double *input_vector, double *output_vector)
+                                    const double *val, const double *input_vector, double *output_vector);
 #ifdef __cplusplus
 }
 #endif

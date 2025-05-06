@@ -4,12 +4,61 @@
 #include <time.h>
 #include "../../src/sparse_power_method.h"
 #include "../../src/dense_power_method.h"
+#include "../../src/common.h"
 #include "../../src/serial/serial_fun.h"
 #include "../../src/openMP/omp_fun.h"
 #include "../../include/matrix.h"
 #include "../../include/vector.h"
 #include <omp.h>
 
+
+void test_openMP_norm(){
+
+    Vector x;
+    x.size = 2;
+    x.data = malloc(sizeof(double) * 2);
+    x.data[0] = 3.0;
+    x.data[1] = 4.0;
+
+    normalize_vector(&x);
+    CU_ASSERT_DOUBLE_EQUAL(x.data[0], 0.6, 0.0001);
+    CU_ASSERT_DOUBLE_EQUAL(x.data[1], 0.8, 0.0001);
+    free(x.data);
+
+}
+
+void test_openMP_generate_random_vector(){
+    Vector* x = generate_random_vector(2);
+    CU_ASSERT_EQUAL(2, x->size);
+    for(int i = 0; i < x->size; i++){
+        CU_ASSERT(x->data[i] >= -1.0 && x->data[i] <= 1.0);
+    }
+    free(x->data);
+    free(x);
+}
+
+void test_openMP_dotproduct(){
+    Vector* x = malloc(sizeof(Vector));
+    x->size = 10;
+    x->data = malloc(sizeof(double) * x->size);
+
+    x->data[0] = 1;
+    x->data[1] = 2;
+    x->data[2] = 3;
+    x->data[3] = 4;
+    x->data[4] = 5;
+    x->data[5] = 6;
+    x->data[6] = 7;
+    x->data[7] = 8;
+    x->data[8] = 9;
+    x->data[9] = 10;
+
+    double dot = openMP_dot_product(x, x);
+    CU_ASSERT_DOUBLE_EQUAL(dot, 385, 0);
+
+    free(x->data);
+    free(x);
+}
 
 void test_openMP_sparse_CSR_large_power_method(){
  
@@ -134,6 +183,77 @@ void test_sparse_openMP_approximate_eigenvalue(){
 }
 */
 
+void test_dense_openMP_matvec_mult(){
+
+    denseMatrix A;
+    A.rows = 2;
+    A.cols = 2;
+    A.data = malloc(sizeof(double) * 4);
+    A.data[0] = 2;
+    A.data[1] = 4;
+    A.data[2] = 2;
+    A.data[3] = 3;
+
+    Vector x;
+    x.size = 2;
+    x.data = malloc(sizeof(double) * 2);
+    x.data[0] = 2;
+    x.data[1] = 1;
+
+    double* test_array = malloc(sizeof(double) * 2);
+
+    test_array[0] = 8;
+    test_array[1] = 7;
+    openMP_dense_matvec_mult(&A, &x);
+    for(int i = 0; i < x.size; i++){
+        CU_ASSERT_DOUBLE_EQUAL(x.data[i], test_array[i], 1e-6);
+    }
+    free(A.data);
+    free(x.data);
+    free(test_array);
+}
+
+void test_dense_openMP_approximate_eigenvalue(){
+
+    denseMatrix A;
+    A.rows = 2;
+    A.cols = 2;
+    A.data = malloc(sizeof(double) * 4);
+    A.data[0] = 2;
+    A.data[1] = 0; 
+    A.data[2] = 0; 
+    A.data[3] = 3;
+
+    Vector x;
+    x.size = 2;
+    x.data = malloc(sizeof(double) * 2);
+    x.data[0] = 1;
+    x.data[1] = 0;
+
+    double lambda = dense_approximate_eigenvalue(&A, &x, true);
+    CU_ASSERT_DOUBLE_EQUAL(lambda, 2.0, 0.0001);
+    free(A.data);
+    free(x.data);
+
+}
+
+
+void test_dense_openMP_power_method(){
+    denseMatrix A;
+    A.rows = 2;
+    A.cols = 2;
+    A.data = malloc(sizeof(double) * 4);
+    A.data[0] = 2.0; 
+    A.data[1] = 1.0; 
+    A.data[2] = 1.0; 
+    A.data[3] = 3.0; 
+
+    double lambda = dense_power_method(&A);
+    CU_ASSERT_DOUBLE_EQUAL(lambda, 3.6180, 0.001);
+    free(A.data);
+}
+
+
 int main(int argc, char* argv[]){
 
     if(argc < 2){
@@ -152,11 +272,19 @@ int main(int argc, char* argv[]){
     
     srand(time(0));
     CU_initialize_registry();
-    CU_pSuite suite = CU_add_suite("Power Method openMP Tests for sparse matrices", NULL, NULL);
+    CU_pSuite suite = CU_add_suite("Power Method openMP Tests", NULL, NULL);
 
-    // Tests for sparse matrices.
+    // Tests for common functions.
+    CU_add_test(suite, "Vector normalization test", test_openMP_norm);
+    CU_add_test(suite, "Generate random vector test", test_openMP_generate_random_vector);
+    CU_add_test(suite, "dotproduct test", test_openMP_dotproduct);
+
     CU_add_test(suite, "Power method test large CSR", test_openMP_sparse_CSR_large_power_method);
     CU_add_test(suite, "sparse matrix-vector multi test", test_sparse_openMP_matvec_mult);
+
+    CU_add_test(suite, "Matrix vector multiplication test", test_dense_openMP_matvec_mult);
+    CU_add_test(suite, "Approximate eigenvalue test", test_dense_openMP_approximate_eigenvalue);
+    CU_add_test(suite, "Power method test", test_dense_openMP_power_method);
 
     CU_basic_run_tests();
     CU_cleanup_registry();
