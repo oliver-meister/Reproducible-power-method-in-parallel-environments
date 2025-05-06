@@ -34,6 +34,32 @@ void test_dot(){
 }
 
 
+void test_CUDA_sparse_CSR_large_power_method(){
+ 
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/494_bus/494_bus.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+
+    double lambda = sparse_power_method(A);
+    CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.14176, 0.0001);
+
+    free(my_coo->row);
+    free(my_coo->col);
+    free(my_coo->val);
+    free(my_coo);
+    
+    free(my_csr->row_ptr);
+    free(my_csr->col);
+    free(my_csr->val);
+    free(my_csr);
+    
+    free(A);
+
+}
+
 
 int main(){
 
@@ -42,6 +68,7 @@ int main(){
     CU_pSuite suite = CU_add_suite("Power Method Serial CUDA", NULL, NULL);
 
     CU_add_test(suite, "Test dot product CUDA", test_dot);
+    CU_add_test(suite, "Test CSR powermethod", test_CUDA_sparse_CSR_large_power_method);
 
 
     CU_basic_run_tests();

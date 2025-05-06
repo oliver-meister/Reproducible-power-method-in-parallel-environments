@@ -49,16 +49,14 @@ test_omp_common:
 
 # CUDA test
 test_cuda:
-	$(NVCC) -o test_cuda tests/tests_CUDA/test_power_method_cuda.c \
-	src/CUDA/cuda_fun.c src/CUDA/cuda_kernels.cu \
-	include/vector.c include/matrix.c \
-	external/mmio.c \
-	$(CUDA_FLAGS) -lcunit 
-
-
 	
-
-
+	$(NVCC) -o test_cuda tests/tests_CUDA/test_power_method_cuda.c \
+	src/serial/serial_fun.c src/openMP/omp_fun.c src/OMP_Offload/off_fun.c \
+	src/CUDA/cuda_fun.c src/CUDA/cuda_kernels.cu \
+	include/vector.c include/matrix.c external/mmio.c src/common.c \
+	src/dense_power_method.c src/sparse_power_method.c $(CUDA_FLAGS) $(CFLAGS) -DUSE_CUDA
+	
+	
 # Run all tests
 
 .PHONY: test_all
