@@ -53,7 +53,7 @@ test_cuda:
 	src/CUDA/cuda_fun.c src/CUDA/cuda_kernels.cu \
 	include/vector.c include/matrix.c \
 	external/mmio.c \
-	$(CUDA_FLAGS) -lcunit
+	$(CUDA_FLAGS) -lcunit 
 
 
 	

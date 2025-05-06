@@ -70,7 +70,15 @@ void cuda_sparse_matvec_mult_CSR(const sparseMatrixCSR *A, Vector *x){
     cudaMemcpy(&val, A->val, sizeof(double) * A->nnz, cudaMemcpyHostToDevice);
     cudaMemcpy(&ivector, x->data, sizeof(double) * x->size, cudaMemcpyHostToDevice);
 
-    launch_matvec_CSR_kernel()
+    launch_matvec_CSR_kernel(A->rows, row_ptr, col, val, ivector, ovector);
+
+    cudaMemcpy(x->data, ovector, sizeof(double) * x->size, cudaMemcpyDeviceToHost);
+
+    cudaFree(row_ptr);
+    cudaFree(col);
+    cudaFree(val);
+    cudaFree(ivector);
+    cudaFree(ovector);
 
 }
 
@@ -81,6 +89,28 @@ void cuda_sparse_matvec_mult(const SparseMatrixAny *A, Vector *x){
         printf("Runtime error: OpenMP currently only works with CSR format\n");
         exit(EXIT_FAILURE);
     }
+}
+
+
+void cuda_dense_matvec_mult(const denseMatrix *A, Vector *x){
+
+    
+    double *val, ivector, ovector;
+
+    cudaMalloc((void **)&val, sizeof(double) * A->cols * A->rows);
+    cudaMalloc((void **)&ivector, sizeof(double) * x->size);
+    cudaMalloc((void **)&ovector, sizeof(double) * x->size);
+
+    cudaMemcpy(&val, A->data, sizeof(double) * A->cols * A->rows, cudaMemcpyHostToDevice);
+    cudaMemcpy(&ivector, x->data, sizeof(double) * x->size, cudaMemcpyHostToDevice);
+
+    launch_matvec_dense_kernel(A->rows, A->cols, val, ivector, ovector);
+
+    cudaMemcpy(x->data, ovector, sizeof(double) * x->size, cudaMemcpyDeviceToHost);
+
+    cudaFree(val);
+    cudaFree(ivector);
+    cudaFree(ovector);
 }
 
 

@@ -6,6 +6,7 @@
 #include "serial/serial_fun.h"
 #include "openMP/omp_fun.h"
 #include "OMP_Offload/off_fun.h"
+#include "CUDA/cuda_fun.h"
 #include "common.h"
 #include <math.h>
 #include <stdlib.h>
@@ -29,6 +30,9 @@ double sparse_power_method(const SparseMatrixAny *A){
     #elif defined(USE_OFF)
         dotprod = off_dot_product;
         sparse_matvec = off_sparse_matvec_mult;
+    #elif defined(USE_CUDA)
+        dotprod = cuda_dot_product;
+        sparse_matvec = cuda_sparse_matvec_mult;
     #else
         dotprod = serial_dot_product;
         sparse_matvec = serial_sparse_matvec_mult;
@@ -80,6 +84,9 @@ double sparse_power_method(const SparseMatrixAny *A){
         #elif defined(USE_OFF)
             dotprod = off_dot_product;
             sparse_matvec = off_sparse_matvec_mult;
+        #elif defined(USE_CUDA)
+            dotprod = cuda_dot_product;
+            sparse_matvec = cuda_sparse_matvec_mult;
         #else
             dotprod = serial_dot_product;
             sparse_matvec = serial_sparse_matvec_mult;

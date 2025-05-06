@@ -89,3 +89,28 @@ extern "C" void launch_matvec_CSR_kernel(const int num_rows,
 
 
 }
+
+__global__ void matvec_dense_kernel(const int num_rows, const int num_cols, 
+                                    const double *val, const double *input_vector, double *output_vector)
+{
+
+    int row = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (row < num_rows) {
+        double dot = 0.0;
+        for (int col = 0; col < num_cols; col++) {
+            dot += val[row * num_cols + col] * input_vector[col];
+        }
+        output_vector[row] = dot;
+    }
+}
+
+extern "C" void launch_matvec_dense_kernel(const int num_rows, const int num_cols, 
+                                            const double *val, const double *input_vector, double *output_vector)
+{
+
+    int gridSize = (num_rows + BLOCK_SIZE - 1) / BLOCK_SIZE;
+    matvec_dense_kernel<<<gridSize, BLOCK_SIZE>>>(num_rows, num_cols,
+                                                    val, input_vector, output_vector);
+
+}

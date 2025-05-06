@@ -6,6 +6,7 @@
 #include "serial/serial_fun.h"
 #include "openMP/omp_fun.h"
 #include "OMP_Offload/off_fun.h"
+#include "CUDA/cuda_fun.h"
 #include "common.h"
 #include <math.h>
 #include <stdlib.h>
@@ -30,6 +31,9 @@ double dense_power_method(const denseMatrix* A){
     #elif defined(USE_OFF)
         dotprod = off_dot_product;
         dense_matvec = off_dense_matvec_mult;
+    #elif defined(USE_CUDA)
+        dotprod = cuda_dot_product;
+        dense_matvec = cuda_dense_matvec_mult;
     #else
         dotprod = serial_dot_product;
         dense_matvec = serial_dense_matvec_mult;
@@ -70,6 +74,9 @@ double dense_approximate_eigenvalue(const denseMatrix* A, const Vector* x, bool 
         #elif defined(USE_OFF)
             dotprod = off_dot_product;
             dense_matvec = off_dense_matvec_mult;
+        #elif defined(USE_CUDA)
+            dotprod = cuda_dot_product;
+            dense_matvec = cuda_dense_matvec_mult;
         #else
             dotprod = serial_dot_product;
             dense_matvec = serial_dense_matvec_mult;
