@@ -17,8 +17,9 @@ double runExDOT(const double *h_x, const double *h_y, int N){
     
     // Initializing CUDA ExDOT
     
-    unsigned long long int* d_PartialSuperaccs;
-    size_t size = PARTIAL_SUPERACCS_COUNT * BIN_COUNT * sizeof(unsigned long long int);
+    // What shall I do about the problem that attomic add does not accept long long int?
+    long long int* d_PartialSuperaccs;
+    size_t size = PARTIAL_SUPERACCS_COUNT * BIN_COUNT * sizeof(long long int);
     
     
     cudaMalloc((void**)&d_PartialSuperaccs, size);
