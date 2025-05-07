@@ -12,6 +12,7 @@ SERIAL_OBJS = src/serial/serial_fun.o
 OMP_OBJS = src/openMP/omp_fun.o
 OFFLOAD_OBJS = src/OMP_Offload/off_fun.o
 CUDA_OBJS = src/CUDA/cuda_fun.o src/CUDA/cuda_kernels.o
+CUDA_EXBLAS = src/CUDA_ExBLAS/cuda_exblas_fun.o src/CUDA_ExBLAS/ExDOT.FPE.EX.4.o
 SPARSE_OBJS = src/sparse_power_method.o
 DENSE_OBJS = src/dense_power_method.o
 
@@ -50,6 +51,14 @@ src/CUDA/cuda_fun.o: src/CUDA/cuda_fun.c src/CUDA/cuda_fun.h
 src/CUDA/cuda_kernels.o: src/CUDA/cuda_kernels.cu
 	$(NVCC) -c $< -o $@ $(CUDA_FLAGS)
 
+
+src/CUDA_ExBLAS/cuda_exblas_fun.o: src/CUDA_ExBLAS/cuda_exblas_fun.c src/CUDA_ExBLAS/cuda_exblas_fun.h
+	$(NVCC) -c $< -o $@ $(CUDA_FLAGS)
+
+src/CUDA_ExBLAS/ExDOT.FPE.EX.4.o: src/CUDA_ExBLAS/ExDOT.FPE.EX.4.cu
+	$(NVCC) -c $< -o $@ $(CUDA_FLAGS)
+
+
 src/sparse_power_method.o: src/sparse_power_method.c src/sparse_power_method.h
 	$(CC) -c $< -o $@ $(CFLAGS)
 
@@ -69,5 +78,8 @@ test_offload: $(COMMON_OBJS) $(OFFLOAD_OBJS) $(OMP_OBJS) $(SPARSE_OBJS) $(DENSE_
 test_cuda: $(COMMON_OBJS) $(CUDA_OBJS) $(SPARSE_OBJS) $(DENSE_OBJS) $(SERIAL_OBJS)
 	$(NVCC) -o test_cuda $(TEST_CUDA) $^ $(CUDA_FLAGS) $(CUNIT) -DUSE_CUDA
 
+test_cuda_exblas: $(COMMON_OBJS) $(CUDA_OBJS) $(CUDA_EXBLAS) $(SPARSE_OBJS) $(DENSE_OBJS) $(SERIAL_OBJS)
+	$(NVCC) -o test_cuda_exblas $(TEST_CUDA) $^ $(CUDA_FLAGS) $(CUNIT) -DUSE_EXBLAS
+
 clean:
-	rm -f *.o */*.o */*/*.o test_serial test_openmp test_offload test_cuda
+	rm -f *.o */*.o */*/*.o test_serial test_openmp test_offload test_cuda test_cuda_exblas

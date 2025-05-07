@@ -37,7 +37,7 @@ long xadd(volatile long *sa, long x, unsigned char* of) {
     // OF and SF  -> carry=1
     // OF and !SF -> carry=-1
     // !OF        -> carry=0
-    long y = atom_add(sa, x);
+    long y = atomicAdd(sa, x);
     long z = y + x; // since the value sa->superacc[i] can be changed by another work item
 
     // TODO: cover also underflow
@@ -142,7 +142,7 @@ void AccumulateWord(volatile long *sa, int i, long x) {
     // accumulation and carry propagation can happen in any order,
     // as long as addition is atomic
     // only constraint is: never forget an overflow bit
-    uchar overflow;
+    unsigned char overflow;
     long carry = x;
     long carrybit;
     long oldword = xadd(&sa[i * WARP_COUNT], x, &overflow);

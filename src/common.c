@@ -6,6 +6,7 @@
 #include "openMP/omp_fun.h"
 #include "OMP_Offload/off_fun.h"
 #include "CUDA/cuda_fun.h"
+#include "CUDA_ExBLAS/cuda_exblas_fun.h"
 #include "../include/matrix.h"
 #include "../include/vector.h"
 
@@ -46,6 +47,8 @@ void normalize_vector(Vector* x){
         dotprod = off_dot_product;
     #elif defined(USE_CUDA)
         dotprod = cuda_dot_product;
+    #elif defined(USE_EXBLAS)
+        dotprod = cuda_ExBLAS_dot_product;
     #else
         dotprod = serial_dot_product;
     #endif
