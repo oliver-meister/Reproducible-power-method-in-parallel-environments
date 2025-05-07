@@ -19,6 +19,8 @@ TEST_SERIAL = tests/tests_serial/test_power_method_serial.c
 TEST_OMP = tests/tests_openMP/test_power_method_openMP.c
 TEST_CUDA = tests/tests_CUDA/test_power_method_cuda.c
 
+COMPILE_OPTIONS_EXBLAS = -DWARP_COUNT=16 -DWARP_SIZE=16 -DMERGE_WORKGROUP_SIZE=64 -DMERGE_SUPERACCS_SIZE=128 -DUSE_KNUTH
+
 all: test_serial test_openmp test_offload test_cuda
 
 include/vector.o: include/vector.c include/vector.h
