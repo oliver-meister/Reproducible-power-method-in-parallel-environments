@@ -11,6 +11,6 @@ typedef double (*dense_eigen_fn)(const denseMatrix*, const Vector*);
 typedef double (*sparse_eigen_fn)(const SparseMatrixAny*, const Vector*);
 
 bool convergence(double prev, double curr, double tolerance);
-void normalize_vector(Vector*);
+void normalize_vector(Vector* x);
 
 #endif

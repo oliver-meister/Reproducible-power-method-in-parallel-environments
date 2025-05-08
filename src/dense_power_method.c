@@ -16,6 +16,8 @@
 extern dot_fn dotprod;
 extern dense_matvec_fn dense_matvec;
 
+
+
 // Dense power method
 
 /**
@@ -27,18 +29,23 @@ extern dense_matvec_fn dense_matvec;
  */
 double dense_power_method(const denseMatrix* A){
     #ifdef USE_OMP
+        printf("in OMP def\n");
         dotprod = openMP_dot_product;
         dense_matvec = openMP_dense_matvec_mult;
     #elif defined(USE_OFF)
+        printf("in OFF def\n");
         dotprod = off_dot_product;
         dense_matvec = off_dense_matvec_mult;
     #elif defined(USE_CUDA)
+        printf("in CUDA def\n");
         dotprod = cuda_dot_product;
         dense_matvec = cuda_dense_matvec_mult;
     #elif defined(USE_EXBLAS)
+        printf("in EXBLAS def\n");
         dotprod = cuda_ExBLAS_dot_product;
         dense_matvec = cuda_dense_matvec_mult;
     #else
+        printf("in SERIAL def\n");
         dotprod = serial_dot_product;
         dense_matvec = serial_dense_matvec_mult;
     #endif
@@ -73,18 +80,23 @@ double dense_approximate_eigenvalue(const denseMatrix* A, const Vector* x, bool 
 
     if (test){
         #ifdef USE_OMP
+        printf("in OMP def\n");
         dotprod = openMP_dot_product;
         dense_matvec = openMP_dense_matvec_mult;
         #elif defined(USE_OFF)
+            printf("in OFF def\n");
             dotprod = off_dot_product;
             dense_matvec = off_dense_matvec_mult;
         #elif defined(USE_CUDA)
+            printf("in CUDA def\n");
             dotprod = cuda_dot_product;
             dense_matvec = cuda_dense_matvec_mult;
         #elif defined(USE_EXBLAS)
+            printf("in EXBLAS def\n");
             dotprod = cuda_ExBLAS_dot_product;
             dense_matvec = cuda_dense_matvec_mult;
         #else
+            printf("in SERIAL def\n");
             dotprod = serial_dot_product;
             dense_matvec = serial_dense_matvec_mult;
         #endif
@@ -100,3 +112,5 @@ double dense_approximate_eigenvalue(const denseMatrix* A, const Vector* x, bool 
     free(copy.data);
     return lambda;
 }
+
+

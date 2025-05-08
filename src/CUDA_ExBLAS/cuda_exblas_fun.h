@@ -14,15 +14,15 @@ extern "C" {
 double cuda_ExBLAS_dot_product(const Vector *x, const Vector *y, const int fpe, const bool early_exit);
 // Launch wrappers implemented in .cu (compiled with nvcc)
 void launch_ExDOT(
-    long *d_PartialSuperaccs,
+    long long int *d_PartialSuperaccs,
     double *d_a,
     double *d_b,
     const unsigned int NbElements
 );
 
 void launch_ExDOTComplete(
-    double *d_Res,
-    long *d_PartialSuperaccs,
+    long long int *d_Res,
+    long long int *d_PartialSuperaccs,
     unsigned int PartialSuperaccusCount
 );
 

@@ -19,28 +19,58 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Auxiliary functions
 ////////////////////////////////////////////////////////////////////////////////
-double TwoProductFMA(double a, double b, double *d) {
+__device__ double TwoProductFMA(double a, double b, double *d) {
     double p = a * b;
     *d = fma(a, b, -p);
     return p;
 }
 
-double KnuthTwoSum(double a, double b, double *s) {
+__device__ double KnuthTwoSum(double a, double b, double *s) {
     double r = a + b;
     double z = r - a;
     *s = (a - (r - z)) + (b - z);
     return r;
 }
 
+
+/*
+
 // signedcarry in {-1, 0, 1}
-long xadd(volatile long *sa, long x, unsigned char* of) {
+long long int xadd(volatile long long int *sa, long long int x, unsigned char* of) {
     // OF and SF  -> carry=1
     // OF and !SF -> carry=-1
     // !OF        -> carry=0
-    long y = atomicAdd(sa, x);
-    long z = y + x; // since the value sa->superacc[i] can be changed by another work item
-
+    long long int y = atomicAdd(sa, x);
+    long long int z = y + x; // since the value sa->superacc[i] can be changed by another work item
+    
     // TODO: cover also underflow
+    *of = 0;
+    if(x > 0 && y > 0 && z < 0)
+    *of = 1;
+    if(x < 0 && y < 0 && z > 0)
+    *of = 1;
+    
+    return y;
+}
+*/
+
+__device__ long int xadd(volatile long long int *sa, long long int x, unsigned char* of) {
+
+    volatile unsigned long long int* cast_sa = (volatile unsigned long long int*)sa;
+
+    unsigned long long int old, assumed;
+    long long int y, z;
+
+    old = *cast_sa;
+
+    do{
+        assumed = old;
+        y = (long long int)assumed;
+        z = y + x;
+        // Because the bits does not change when we cast signed to unsigned.
+        old = atomicCAS((unsigned long long int*)cast_sa, assumed, (unsigned long long int)z);
+    }   while (old != assumed);
+
     *of = 0;
     if(x > 0 && y > 0 && z < 0)
         *of = 1;
@@ -54,10 +84,10 @@ long xadd(volatile long *sa, long x, unsigned char* of) {
 ////////////////////////////////////////////////////////////////////////////////
 // Rounding functions
 ////////////////////////////////////////////////////////////////////////////////
-double OddRoundSumNonnegative(double th, double tl) {
+__device__ double OddRoundSumNonnegative(double th, double tl) {
     union {
         double d;
-        long l;
+        long long int l;
     } thdb;
 
     thdb.d = th + tl;
@@ -68,14 +98,14 @@ double OddRoundSumNonnegative(double th, double tl) {
     return thdb.d;
 }
 
-int Normalize(long *accumulator, int *imin, int *imax) {
-    long carry_in = accumulator[*imin] >> digits;
+__device__ int Normalize(long long int *accumulator, int *imin, int *imax) {
+    long long int carry_in = accumulator[*imin] >> digits;
     accumulator[*imin] -= carry_in << digits;
     int i;
     // Sign-extend all the way
     for (i = *imin + 1; i < BIN_COUNT; ++i) {
         accumulator[i] += carry_in;
-        long carry_out = accumulator[i] >> digits;    // Arithmetic shift
+        long long int carry_out = accumulator[i] >> digits;    // Arithmetic shift
         accumulator[i] -= (carry_out << digits);
         carry_in = carry_out;
     }
@@ -87,7 +117,7 @@ int Normalize(long *accumulator, int *imin, int *imax) {
     return carry_in < 0;
 }
 
-double Round(long *accumulator) {
+__device__ double Round(long long int *accumulator) {
     int imin = 0;
     int imax = 38;
     int negative = Normalize(accumulator, &imin, &imax);
@@ -106,20 +136,20 @@ double Round(long *accumulator) {
         //TODO: should we preserve sign of zero?
         return 0.0;
 
-    long hiword = negative ? ((1l << digits) - 1) - accumulator[i] : accumulator[i];
+    long long int hiword = negative ? ((1l << digits) - 1) - accumulator[i] : accumulator[i];
     double rounded = (double) hiword;
     double hi = ldexp(rounded, (i - f_words) * digits);
     if (i == 0)
         return negative ? -hi : hi;  // Correct rounding achieved
-    hiword -= (long) rint(rounded);
+    hiword -= (long long int) rint(rounded);
     double mid = ldexp((double) hiword, (i - f_words) * digits);
 
     //Compute sticky
-    long sticky = 0;
+    long long int sticky = 0;
     for (int j = imin; j != i - 1; ++j)
         sticky |= negative ? (1l << digits) - accumulator[j] : accumulator[j];
 
-    long loword = negative ? (1l << digits) - accumulator[i - 1] : accumulator[i - 1];
+    long long int loword = negative ? (1l << digits) - accumulator[i - 1] : accumulator[i - 1];
     loword |= !!sticky;
     double lo = ldexp((double) loword, (i - 1 - f_words) * digits);
 
@@ -137,15 +167,15 @@ double Round(long *accumulator) {
 ////////////////////////////////////////////////////////////////////////////////
 // Main computation pass: compute partial superaccs
 ////////////////////////////////////////////////////////////////////////////////
-void AccumulateWord(volatile long *sa, int i, long x) {
+__device__ void AccumulateWord(volatile long long int *sa, int i, long long int x) {
     // With atomic superacc updates
     // accumulation and carry propagation can happen in any order,
     // as long as addition is atomic
     // only constraint is: never forget an overflow bit
     unsigned char overflow;
-    long carry = x;
-    long carrybit;
-    long oldword = xadd(&sa[i * WARP_COUNT], x, &overflow);
+    long long int carry = x;
+    long long int carrybit;
+    long long int oldword = xadd(&sa[i * WARP_COUNT], x, &overflow);
 
     // To propagate over- or underflow
     while (overflow) {
@@ -160,7 +190,7 @@ void AccumulateWord(volatile long *sa, int i, long x) {
         carrybit = (s ? 1l << K : -1l << K);
 
         // Cancel carry-save bits
-        xadd(&sa[i * WARP_COUNT], (long) -(carry << digits), &overflow);
+        xadd(&sa[i * WARP_COUNT], (long long int) -(carry << digits), &overflow);
         if (TSAFE && (s ^ overflow))
             carrybit *= 2;
         carry += carrybit;
@@ -172,7 +202,7 @@ void AccumulateWord(volatile long *sa, int i, long x) {
     }
 }
 
-void Accumulate(volatile long *sa, double x) {
+__device__ void Accumulate(volatile long long int *sa, double x) {
     if (x == 0)
         return;
 
@@ -186,7 +216,7 @@ void Accumulate(volatile long *sa, double x) {
     int i;
     for (i = iup; xscaled != 0; --i) {
         double xrounded = rint(xscaled);
-        long xint = (long) xrounded;
+        long long int xint = (long long int) xrounded;
 
         AccumulateWord(sa, i, xint);
 
@@ -197,14 +227,14 @@ void Accumulate(volatile long *sa, double x) {
 
 
 __global__ void ExDOT(
-    long *d_PartialSuperaccs,
+    long long int *d_PartialSuperaccs,
     double *d_a,
     double *d_b,
     const unsigned int NbElements
 ) {
     
-    __shared__ long l_sa[WARP_COUNT * BIN_COUNT];
-    long *l_workingBase = &l_sa[threadIdx.x & (WARP_COUNT - 1)];
+    __shared__ long long int l_sa[WARP_COUNT * BIN_COUNT];
+    long long int *l_workingBase = &l_sa[threadIdx.x & (WARP_COUNT - 1)];
 
     //Initialize superaccs
     for (uint i = 0; i < BIN_COUNT; i++)
@@ -286,7 +316,7 @@ __global__ void ExDOT(
     //Merge sub-superaccs into work-group partial-accumulator
     unsigned int pos = threadIdx.x;
     if (pos < BIN_COUNT) {
-        long sum = 0;
+        long long int sum = 0;
 
         for(unsigned int i = 0; i < WARP_COUNT; i++)
             sum += l_sa[pos * WARP_COUNT + i];
@@ -308,14 +338,14 @@ __global__ void ExDOT(
 
 __global__ void ExDOTComplete(
     double *d_Res,
-    long *d_PartialSuperaccs,
+    long long int *d_PartialSuperaccs,
     unsigned int PartialSuperaccusCount
 ) {
     unsigned int lid = threadIdx.x;
     unsigned int gid = blockIdx.x;
 
     if (lid < BIN_COUNT) {
-        long sum = 0;
+        long long int sum = 0;
 
         for(unsigned int i = 0; i < MERGE_SUPERACCS_SIZE; i++)
             sum += d_PartialSuperaccs[(gid * MERGE_SUPERACCS_SIZE + i) * BIN_COUNT + lid];
@@ -332,7 +362,7 @@ __global__ void ExDOTComplete(
 
     __syncthreads();
     if ((lid < BIN_COUNT) && (gid == 0)) {
-        long sum = 0;
+        long long int sum = 0;
 
         for(unsigned int i = 0; i < gridDim.x * blockDim.x / blockDim.x; i++)
             sum += d_PartialSuperaccs[i * BIN_COUNT + lid];
@@ -346,7 +376,7 @@ __global__ void ExDOTComplete(
 }
 
 extern "C" void launch_ExDOT(
-    long *d_PartialSuperaccs,
+    long long int *d_PartialSuperaccs,
     double *d_a,
     double *d_b,
     const unsigned int NbElements
@@ -357,7 +387,7 @@ extern "C" void launch_ExDOT(
 
 extern "C" void launch_ExDOTComplete(
     double *d_Res,
-    long *d_PartialSuperaccs,
+    long long int *d_PartialSuperaccs,
     unsigned int PartialSuperaccusCount
 ){
     int GridSize =  PARTIAL_SUPERACCS_COUNT/MERGE_SUPERACCS_SIZE;

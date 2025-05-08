@@ -16,6 +16,8 @@
 extern dot_fn dotprod;
 extern sparse_matvec_fn sparse_matvec;
 
+
+
 /**
  * @brief Calculates the dominant eigenvalue and its coresponding eigenvector of a matrix.
  * 
@@ -26,18 +28,23 @@ extern sparse_matvec_fn sparse_matvec;
 double sparse_power_method(const SparseMatrixAny *A){
     
     #ifdef USE_OMP
+        printf("in OMP def\n");
         dotprod = openMP_dot_product;
         sparse_matvec = openMP_sparse_matvec_mult;
     #elif defined(USE_OFF)
+        printf("in OFF def\n");
         dotprod = off_dot_product;
         sparse_matvec = off_sparse_matvec_mult;
     #elif defined(USE_CUDA)
+        printf("in CUDA def\n");
         dotprod = cuda_dot_product;
         sparse_matvec = cuda_sparse_matvec_mult;
     #elif defined(USE_EXBLAS)
+        printf("in EXBLAS def\n");
         dotprod = cuda_ExBLAS_dot_product;
         sparse_matvec = cuda_sparse_matvec_mult;
     #else
+        printf("in SERIAL def\n");
         dotprod = serial_dot_product;
         sparse_matvec = serial_sparse_matvec_mult;
 
@@ -83,18 +90,23 @@ double sparse_power_method(const SparseMatrixAny *A){
  double sparse_approximate_eigenvalue(const SparseMatrixAny* A, const Vector* x, bool test){
     if (test){
         #ifdef USE_OMP
+            printf("in OMP def\n");
             dotprod = openMP_dot_product;
             sparse_matvec = openMP_sparse_matvec_mult;
         #elif defined(USE_OFF)
+            printf("in OFF def\n");
             dotprod = off_dot_product;
             sparse_matvec = off_sparse_matvec_mult;
         #elif defined(USE_CUDA)
+            printf("in CUDA def\n");
             dotprod = cuda_dot_product;
             sparse_matvec = cuda_sparse_matvec_mult;
         #elif defined(USE_EXBLAS)
+            printf("in EXBLAS def\n");
             dotprod = cuda_ExBLAS_dot_product;
             sparse_matvec = cuda_sparse_matvec_mult;
         #else
+            printf("in SERIAL def\n");
             dotprod = serial_dot_product;
             sparse_matvec = serial_sparse_matvec_mult;
         #endif
@@ -111,3 +123,5 @@ double sparse_power_method(const SparseMatrixAny *A){
     free(copy.data);
     return lambda;
 }
+
+

@@ -42,14 +42,19 @@ bool convergence(double lambda_new, double lambda_old, double threshold){
 void normalize_vector(Vector* x){
 
     #ifdef USE_OMP
+        printf("in OMP def\n");
         dotprod = openMP_dot_product;
     #elif defined(USE_OFF)
+        printf("in OFF def\n");
         dotprod = off_dot_product;
     #elif defined(USE_CUDA)
+        printf("in CUDA def\n");
         dotprod = cuda_dot_product;
     #elif defined(USE_EXBLAS)
+        printf("in EXBLAS def\n");
         dotprod = cuda_ExBLAS_dot_product;
     #else
+        printf("in SERIAL def\n");
         dotprod = serial_dot_product;
     #endif
 

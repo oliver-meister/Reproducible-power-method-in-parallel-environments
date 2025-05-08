@@ -99,7 +99,7 @@ double off_dot_product(const Vector* x, const Vector* y){
 void off_sparse_matvec_mult(const SparseMatrixAny* A, Vector* x){
     
     if (A->type == CSR) {
-        openMP_sparse_matvec_mult_CSR(A->mat.csr, x);
+        off_sparse_matvec_mult_CSR(A->mat.csr, x);
     } else {
         printf("Runtime error: OpenMP currently only works with CSR format\n");
         exit(EXIT_FAILURE);

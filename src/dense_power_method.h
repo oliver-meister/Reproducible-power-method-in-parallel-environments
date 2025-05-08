@@ -6,5 +6,4 @@
 
 double dense_power_method(const denseMatrix* );
 double dense_approximate_eigenvalue(const denseMatrix*, const Vector*, bool);
-
 #endif 

@@ -1,6 +1,6 @@
 #include <cuda_runtime.h>
 #include <stdbool.h>
-#include <math.h>early_exit
+#include <math.h>
 #include <stdlib.h>
 #include "cuda_exblas_fun.h"
 #include <stdio.h>
@@ -10,22 +10,22 @@
 
 double runExDOT(const double *h_x, const double *h_y, int N){
     
-    const double *d_x;
-    const double *d_y;
-    long *d_result;
+    double *d_x;
+    double *d_y;
+    long long int*d_result;
     // Allocate CUDA memory
     
     // Initializing CUDA ExDOT
     
-    // What shall I do about the problem that attomic add does not accept long long int?
+    
     long long int* d_PartialSuperaccs;
-    size_t size = PARTIAL_SUPERACCS_COUNT * BIN_COUNT * sizeof(long long int);
+    size_t size = PARTIAL_SUPERACCS_COUNT * BIN_COUNT * sizeof(long long int);  
     
     
     cudaMalloc((void**)&d_PartialSuperaccs, size);
     cudaMalloc((void**)&d_x, sizeof(double) * N);
     cudaMalloc((void**)&d_y, sizeof(double) * N);
-    cudaMalloc((void**)&d_result, sizeof(long));
+    cudaMalloc((void**)&d_result, sizeof(long long int));
     
     cudaMemcpy(d_x, h_x, sizeof(double) * N, cudaMemcpyHostToDevice);
     cudaMemcpy(d_y, h_y, sizeof(double) * N, cudaMemcpyHostToDevice);
@@ -35,14 +35,15 @@ double runExDOT(const double *h_x, const double *h_y, int N){
     launch_ExDOT(d_PartialSuperaccs, d_x, d_y, N);
     launch_ExDOTComplete(d_result, d_PartialSuperaccs, PARTIAL_SUPERACCS_COUNT);
     
-    long h_result;  
-    cudaMemcpy(&h_result, d_result, sizeof(long), cudaMemcpyDeviceToHost);
+    long long int h_result;  
+    cudaMemcpy(&h_result, d_result, sizeof(long long int), cudaMemcpyDeviceToHost);
 
     cudaFree(d_PartialSuperaccs);
     cudaFree(d_x);
     cudaFree(d_y);
     cudaFree(d_result);
     
+    printf("exblas dot: %f\n", (double) h_result);
     
     return (double) h_result;
 }

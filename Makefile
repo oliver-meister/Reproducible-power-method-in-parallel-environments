@@ -1,28 +1,45 @@
 CC = gcc
 NVCC = nvcc
 
-INCLUDES = -Iinclude -Isrc -Iexternal
 CUDA_LIBS = -L/usr/local/cuda/lib64 -lcudart
 CFLAGS = -Wall -Wextra -O2 -fopenmp -lm
-CUDA_FLAGS = $(INCLUDES) $(CUDA_LIBS) -Xcompiler="-Wall -Wextra -fopenmp"
+CUDA_FLAGS = $(CUDA_LIBS) -Xcompiler="-Wall -Wextra -fopenmp"
 CUNIT = -lcunit
 
-COMMON_OBJS = include/vector.o include/matrix.o external/mmio.o src/common.o
+GENERAL_OBJ = include/vector.o include/matrix.o external/mmio.o
+
+COMMON_OBJ_SERIAL = src/common_serial.o
+COMMON_OBJS_OPENMP = src/common_openmp.o
+COMMON_OBJS_OFFLOAD = src/common_offload.o
+COMMON_OBJS_CUDA = src/common_cuda.o
+COMMON_OBJS_EXBLAS = src/common_exblas.o
+
 SERIAL_OBJS = src/serial/serial_fun.o
 OMP_OBJS = src/openMP/omp_fun.o
 OFFLOAD_OBJS = src/OMP_Offload/off_fun.o
 CUDA_OBJS = src/CUDA/cuda_fun.o src/CUDA/cuda_kernels.o
 CUDA_EXBLAS = src/CUDA_ExBLAS/cuda_exblas_fun.o src/CUDA_ExBLAS/ExDOT.FPE.EX.4.o
-SPARSE_OBJS = src/sparse_power_method.o
-DENSE_OBJS = src/dense_power_method.o
+
+
+SPARSE_OBJS_SERIAL = src/sparse_power_method_serial.o
+SPARSE_OBJS_OPENMP = src/sparse_power_method_openmp.o
+SPARSE_OBJS_OFFLOAD = src/sparse_power_method_offload.o
+SPARSE_OBJS_CUDA = src/sparse_power_method_cuda.o
+SPARSE_OBJS_EXBLAS = src/sparse_power_method_exdot.o
+
+DENSE_OBJS_SERIAL = src/dense_power_method_serial.o
+DENSE_OBJS_OPENMP = src/dense_power_method_openmp.o
+DENSE_OBJS_OFFLOAD = src/dense_power_method_offload.o
+DENSE_OBJS_CUDA = src/dense_power_method_cuda.o
+DENSE_OBJS_EXBLAS = src/dense_power_method_exblas.o
 
 TEST_SERIAL = tests/tests_serial/test_power_method_serial.c
 TEST_OMP = tests/tests_openMP/test_power_method_openMP.c
+TEST_OFF = tests/tests_offload/test_power_method_offload.c
 TEST_CUDA = tests/tests_CUDA/test_power_method_cuda.c
 
-COMPILE_OPTIONS_EXBLAS = -DWARP_COUNT=16 -DWARP_SIZE=16 -DMERGE_WORKGROUP_SIZE=64 -DMERGE_SUPERACCS_SIZE=128 -DUSE_KNUTH
 
-all: test_serial test_openmp test_offload test_cuda
+
 
 include/vector.o: include/vector.c include/vector.h
 	$(CC) -c $< -o $@ $(CFLAGS)
@@ -33,8 +50,20 @@ include/matrix.o: include/matrix.c include/matrix.h
 external/mmio.o: external/mmio.c external/mmio.h
 	$(CC) -c $< -o $@ $(CFLAGS)
 
-src/common.o: src/common.c src/common.h
-	$(CC) -c $< -o $@ $(CFLAGS)
+
+
+src/common_serial.o: src/common.c src/common.h 
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_SERIAL
+src/common_openmp.o: src/common.c src/common.h
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_OMP
+src/common_offload.o: src/common.c src/common.h
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_OFF
+src/common_cuda.o: src/common.c src/common.h
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_CUDA
+src/common_exblas.o: src/common.c src/common.h
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_EXBLAS
+
+
 
 src/serial/serial_fun.o: src/serial/serial_fun.c src/serial/serial_fun.h
 	$(CC) -c $< -o $@ $(CFLAGS)
@@ -59,27 +88,47 @@ src/CUDA_ExBLAS/ExDOT.FPE.EX.4.o: src/CUDA_ExBLAS/ExDOT.FPE.EX.4.cu
 	$(NVCC) -c $< -o $@ $(CUDA_FLAGS)
 
 
-src/sparse_power_method.o: src/sparse_power_method.c src/sparse_power_method.h
-	$(CC) -c $< -o $@ $(CFLAGS)
 
-src/dense_power_method.o: src/dense_power_method.c src/dense_power_method.h
-	$(CC) -c $< -o $@ $(CFLAGS)
+src/sparse_power_method_serial.o: src/sparse_power_method.c src/sparse_power_method.h 
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_SERIAL
+src/sparse_power_method_openmp.o: src/sparse_power_method.c src/sparse_power_method.h 
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_OMP
+src/sparse_power_method_offload.o: src/sparse_power_method.c src/sparse_power_method.h 
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_OFF
+src/sparse_power_method_cuda.o: src/sparse_power_method.c src/sparse_power_method.h 
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_CUDA
+src/sparse_power_method_exdot.o: src/sparse_power_method.c src/sparse_power_method.h 
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_EXBLAS
 
 
-test_serial: $(COMMON_OBJS) $(SERIAL_OBJS) $(SPARSE_OBJS) $(DENSE_OBJS)
-	$(CC) -o test_serial $(TEST_SERIAL) $^ $(CFLAGS) $(CUNIT) -DUSE_SERIAL
+src/dense_power_method_serial.o: src/dense_power_method.c src/dense_power_method.h 
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_SERIAL
+src/dense_power_method_openmp.o: src/dense_power_method.c src/dense_power_method.h 
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_OMP
+src/dense_power_method_offload.o: src/dense_power_method.c src/dense_power_method.h 
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_OFF
+src/dense_power_method_cuda.o: src/dense_power_method.c src/dense_power_method.h 
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_CUDA
+src/dense_power_method_exblas.o: src/dense_power_method.c src/dense_power_method.h 
 
-test_openmp: $(COMMON_OBJS) $(OMP_OBJS) $(SPARSE_OBJS) $(DENSE_OBJS) $(SERIAL_OBJS)
-	$(CC) -o test_openmp $(TEST_OMP) $^ $(CFLAGS) $(CUNIT) -DUSE_OMP
 
-test_offload: $(COMMON_OBJS) $(OFFLOAD_OBJS) $(OMP_OBJS) $(SPARSE_OBJS) $(DENSE_OBJS) $(SERIAL_OBJS)
-	$(CC) -o test_offload $(TEST_OMP) $^ $(CFLAGS) $(CUNIT) -DUSE_OFF
 
-test_cuda: $(COMMON_OBJS) $(CUDA_OBJS) $(SPARSE_OBJS) $(DENSE_OBJS) $(SERIAL_OBJS)
-	$(NVCC) -o test_cuda $(TEST_CUDA) $^ $(CUDA_FLAGS) $(CUNIT) -DUSE_CUDA
 
-test_cuda_exblas: $(COMMON_OBJS) $(CUDA_OBJS) $(CUDA_EXBLAS) $(SPARSE_OBJS) $(DENSE_OBJS) $(SERIAL_OBJS)
-	$(NVCC) -o test_cuda_exblas $(TEST_CUDA) $^ $(CUDA_FLAGS) $(CUNIT) -DUSE_EXBLAS
+test_serial:  $(DENSE_OBJS_SERIAL) $(SPARSE_OBJS_SERIAL) $(COMMON_OBJ_SERIAL) $(GENERAL_OBJ) $(SERIAL_OBJS)
+	$(CC) -o test_serial $(TEST_SERIAL) $^ $(CFLAGS) $(CUNIT) 
+
+test_openmp: $(DENSE_OBJS_OPENMP) $(SPARSE_OBJS_OPENMP) $(COMMON_OBJS_OPENMP) $(GENERAL_OBJ) $(OMP_OBJS)
+	$(CC) -o test_openmp $(TEST_OMP) $^ $(CFLAGS) $(CUNIT) 
+
+test_offload: $(DENSE_OBJS_OFFLOAD) $(SPARSE_OBJS_OFFLOAD) $(COMMON_OBJS_OFFLOAD) $(GENERAL_OBJ) $(OFFLOAD_OBJS)
+	$(CC) -o test_offload $(TEST_OFF) $^ $(CFLAGS) $(CUNIT) 
+
+test_cuda: $(DENSE_OBJS_CUDA) $(SPARSE_OBJS_CUDA) $(COMMON_OBJS_CUDA) $(GENERAL_OBJ) $(CUDA_OBJS)
+	$(NVCC) -o test_cuda $(TEST_CUDA) $^ $(CUDA_FLAGS) $(CUNIT) 
+
+test_cuda_exblas: $(DENSE_OBJS_EXBLAS) $(SPARSE_OBJS_EXBLAS) $(COMMON_OBJS_EXBLAS) $(GENERAL_OBJ) $(CUDA_EXBLAS)
+	$(NVCC) -o test_cuda_exblas $(TEST_CUDA) $^ $(CUDA_FLAGS) $(CUNIT) 
 
 clean:
-	rm -f *.o */*.o */*/*.o test_serial test_openmp test_offload test_cuda test_cuda_exblas
+	find . -name '*.o' -delete
+	rm -f test_serial test_openmp test_offload test_cuda test_cuda_exblas
