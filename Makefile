@@ -37,6 +37,7 @@ TEST_SERIAL = tests/tests_serial/test_power_method_serial.c
 TEST_OMP = tests/tests_openMP/test_power_method_openMP.c
 TEST_OFF = tests/tests_offload/test_power_method_offload.c
 TEST_CUDA = tests/tests_CUDA/test_power_method_cuda.c
+TEST_EXBLAS = tests/tests_CUDA_EXBLAS/test_power_method_cuda_exblas.c
 
 
 
@@ -110,7 +111,7 @@ src/dense_power_method_offload.o: src/dense_power_method.c src/dense_power_metho
 src/dense_power_method_cuda.o: src/dense_power_method.c src/dense_power_method.h 
 	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_CUDA
 src/dense_power_method_exblas.o: src/dense_power_method.c src/dense_power_method.h 
-
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_EXBLAS
 
 
 
@@ -126,8 +127,8 @@ test_offload: $(DENSE_OBJS_OFFLOAD) $(SPARSE_OBJS_OFFLOAD) $(COMMON_OBJS_OFFLOAD
 test_cuda: $(DENSE_OBJS_CUDA) $(SPARSE_OBJS_CUDA) $(COMMON_OBJS_CUDA) $(GENERAL_OBJ) $(CUDA_OBJS)
 	$(NVCC) -o test_cuda $(TEST_CUDA) $^ $(CUDA_FLAGS) $(CUNIT) 
 
-test_cuda_exblas: $(DENSE_OBJS_EXBLAS) $(SPARSE_OBJS_EXBLAS) $(COMMON_OBJS_EXBLAS) $(GENERAL_OBJ) $(CUDA_EXBLAS)
-	$(NVCC) -o test_cuda_exblas $(TEST_CUDA) $^ $(CUDA_FLAGS) $(CUNIT) 
+test_cuda_exblas: $(DENSE_OBJS_EXBLAS) $(SPARSE_OBJS_EXBLAS) $(COMMON_OBJS_EXBLAS) $(GENERAL_OBJ) $(CUDA_EXBLAS) $(CUDA_OBJS)
+	$(NVCC) -o test_cuda_exblas $(TEST_EXBLAS) $^ $(CUDA_FLAGS) $(CUNIT) 
 
 clean:
 	find . -name '*.o' -delete

@@ -59,21 +59,21 @@ void cuda_sparse_matvec_mult_CSR(const sparseMatrixCSR *A, Vector *x){
 
     int *row_ptr, *col;
     double *val, *ivector, *ovector;
-    cudaMalloc((void**)&row_ptr, sizeof(int) * A->rows + 1);
+    cudaMalloc((void**)&row_ptr, sizeof(int) * (A->rows + 1));
     cudaMalloc((void**)&col, sizeof(int) * A->nnz);
     cudaMalloc((void**)&val, sizeof(double) * A->nnz);
     cudaMalloc((void**)&ivector, sizeof(double) * x->size);
     cudaMalloc((void**)&ovector, sizeof(double) * x->size);
 
-    cudaMemcpy(&row_ptr, A->row_ptr, sizeof(int) * A->rows + 1, cudaMemcpyHostToDevice);
-    cudaMemcpy(&col, A->col, sizeof(int) * A->nnz, cudaMemcpyHostToDevice);
-    cudaMemcpy(&val, A->val, sizeof(double) * A->nnz, cudaMemcpyHostToDevice);
-    cudaMemcpy(&ivector, x->data, sizeof(double) * x->size, cudaMemcpyHostToDevice);
+    cudaMemcpy(row_ptr, A->row_ptr, sizeof(int) * (A->rows + 1), cudaMemcpyHostToDevice);
+    cudaMemcpy(col, A->col, sizeof(int) * A->nnz, cudaMemcpyHostToDevice);
+    cudaMemcpy(val, A->val, sizeof(double) * A->nnz, cudaMemcpyHostToDevice);
+    cudaMemcpy(ivector, x->data, sizeof(double) * x->size, cudaMemcpyHostToDevice);
 
     launch_matvec_CSR_kernel(A->rows, row_ptr, col, val, ivector, ovector);
 
     cudaMemcpy(x->data, ovector, sizeof(double) * x->size, cudaMemcpyDeviceToHost);
-
+  
     cudaFree(row_ptr);
     cudaFree(col);
     cudaFree(val);
@@ -100,8 +100,8 @@ void cuda_dense_matvec_mult(const denseMatrix *A, Vector *x){
     cudaMalloc((void **)&ivector, sizeof(double) * x->size);
     cudaMalloc((void **)&ovector, sizeof(double) * x->size);
 
-    cudaMemcpy(&val, A->data, sizeof(double) * A->cols * A->rows, cudaMemcpyHostToDevice);
-    cudaMemcpy(&ivector, x->data, sizeof(double) * x->size, cudaMemcpyHostToDevice);
+    cudaMemcpy(val, A->data, sizeof(double) * A->cols * A->rows, cudaMemcpyHostToDevice);
+    cudaMemcpy(ivector, x->data, sizeof(double) * x->size, cudaMemcpyHostToDevice);
 
     launch_matvec_dense_kernel(A->rows, A->cols, val, ivector, ovector);
 

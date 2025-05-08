@@ -1,5 +1,6 @@
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
+#include <stdio.h>
 
 #define BLOCK_SIZE 256
 
@@ -86,8 +87,6 @@ extern "C" void launch_matvec_CSR_kernel(const int num_rows,
                                                 val,
                                                 input_vector, 
                                                 output_vector);
-
-
 }
 
 __global__ void matvec_dense_kernel(const int num_rows, const int num_cols, 

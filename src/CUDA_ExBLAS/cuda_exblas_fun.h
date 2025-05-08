@@ -11,7 +11,7 @@ extern "C" {
 
 
 // Function implemented in a C file
-double cuda_ExBLAS_dot_product(const Vector *x, const Vector *y, const int fpe, const bool early_exit);
+double cuda_ExBLAS_dot_product(const Vector *x, const Vector *y);
 // Launch wrappers implemented in .cu (compiled with nvcc)
 void launch_ExDOT(
     long long int *d_PartialSuperaccs,
@@ -21,7 +21,7 @@ void launch_ExDOT(
 );
 
 void launch_ExDOTComplete(
-    long long int *d_Res,
+    double *d_Res,
     long long int *d_PartialSuperaccs,
     unsigned int PartialSuperaccusCount
 );

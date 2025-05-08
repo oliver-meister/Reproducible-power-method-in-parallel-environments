@@ -33,6 +33,133 @@ void test_dot(){
     free(y.data);
 }
 
+void test_CUDA_norm(){
+
+    Vector x;
+    x.size = 2;
+    x.data = malloc(sizeof(double) * 2);
+    x.data[0] = 3.0;
+    x.data[1] = 4.0;
+
+    normalize_vector(&x);
+    CU_ASSERT_DOUBLE_EQUAL(x.data[0], 0.6, 0.0001);
+    CU_ASSERT_DOUBLE_EQUAL(x.data[1], 0.8, 0.0001);
+    free(x.data);
+
+}
+
+void test_sparse_CUDA_matvec_mult(){
+    
+    sparseMatrixCSR* my_csr = malloc(sizeof(sparseMatrixCSR));
+    my_csr->rows = 4;
+    my_csr->cols = 4;
+    my_csr->nnz = 5;
+    my_csr->row_ptr = malloc(sizeof(double) * my_csr->rows + 1);
+    my_csr->val = malloc(sizeof(double) * my_csr->nnz);
+    my_csr->col = malloc(sizeof(double) * my_csr->nnz);
+    
+    my_csr->row_ptr[0] = 0;
+    my_csr->row_ptr[1] = 1;
+    my_csr->row_ptr[2] = 2;
+    my_csr->row_ptr[3] = 4;
+    my_csr->row_ptr[4] = 5;
+    
+    my_csr->val[0] = 10;
+    my_csr->val[1] = 20;
+    my_csr->val[2] = 30;
+    my_csr->val[3] = 40;
+    my_csr->val[4] = 50;
+    
+    my_csr->col[0] = 0;
+    my_csr->col[1] = 1;
+    my_csr->col[2] = 0;
+    my_csr->col[3] = 2;
+    my_csr->col[4] = 3;
+    
+    Vector* x = malloc(sizeof(Vector));
+    x->size = my_csr->rows;
+    x->data = malloc(sizeof(double) * x->size);
+    x->data[0] = 1;
+    x->data[1] = 2;
+    x->data[2] = 3;
+    x->data[3] = 4;
+    
+    double* test_vector = malloc(sizeof(double) * x->size);
+    test_vector[0] = 10;
+    test_vector[1] = 40;
+    test_vector[2] = 150;
+    test_vector[3] = 200;
+    
+    cuda_sparse_matvec_mult_CSR(my_csr,x);
+    
+    for(int i = 0; i < x->size; i++){
+        CU_ASSERT_DOUBLE_EQUAL(x->data[i], test_vector[i], 1e-6);
+    }
+    
+    free(test_vector);
+    free(x->data);
+    free(x);
+    free(my_csr->col);
+    free(my_csr->val);
+    free(my_csr->row_ptr);
+    free(my_csr);
+    
+}
+
+
+void test_dense_CUDA_matvec_mult(){
+    
+    denseMatrix A;
+    A.rows = 2;
+    A.cols = 2;
+    A.data = malloc(sizeof(double) * 4);
+    A.data[0] = 2;
+    A.data[1] = 4;
+    A.data[2] = 2;
+    A.data[3] = 3;
+    
+    Vector x;
+    x.size = 2;
+    x.data = malloc(sizeof(double) * 2);
+    x.data[0] = 2;
+    x.data[1] = 1;
+    
+    double* test_array = malloc(sizeof(double) * 2);
+    
+    test_array[0] = 8;
+    test_array[1] = 7;
+    cuda_dense_matvec_mult(&A, &x);
+    for(int i = 0; i < x.size; i++){
+        CU_ASSERT_DOUBLE_EQUAL(x.data[i], test_array[i], 1e-6);
+    }
+    free(A.data);
+    free(x.data);
+    free(test_array);
+}
+
+void test_dense_CUDA_approximate_eigenvalue(){
+    
+    denseMatrix A;
+    A.rows = 2;
+    A.cols = 2;
+    A.data = malloc(sizeof(double) * 4);
+    A.data[0] = 2;
+    A.data[1] = 0; 
+    A.data[2] = 0; 
+    A.data[3] = 3;
+    
+    Vector x;
+    x.size = 2;
+    x.data = malloc(sizeof(double) * 2);
+    x.data[0] = 1;
+    x.data[1] = 0;
+    
+    double lambda = dense_approximate_eigenvalue(&A, &x, true);
+    CU_ASSERT_DOUBLE_EQUAL(lambda, 2.0, 0.0001);
+    free(A.data);
+    free(x.data);
+    
+}
 
 void test_CUDA_sparse_CSR_large_power_method(){
  
@@ -44,7 +171,8 @@ void test_CUDA_sparse_CSR_large_power_method(){
     A->mat.csr = my_csr;
 
     double lambda = sparse_power_method(A);
-    CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.14176, 0.0001);
+    printf("cuda dot: %f", lambda);
+    CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.14176, 1.0E-4);
 
     free(my_coo->row);
     free(my_coo->col);
@@ -61,16 +189,38 @@ void test_CUDA_sparse_CSR_large_power_method(){
 }
 
 
-int main(){
 
+void test_dense_CUDA_power_method(){
+    denseMatrix A;
+    A.rows = 2;
+    A.cols = 2;
+    A.data = malloc(sizeof(double) * 4);
+    A.data[0] = 2.0; 
+    A.data[1] = 1.0; 
+    A.data[2] = 1.0; 
+    A.data[3] = 3.0; 
+
+    double lambda = dense_power_method(&A);
+    CU_ASSERT_DOUBLE_EQUAL(lambda, 3.6180, 0.001);
+    free(A.data);
+}
+
+
+
+
+
+int main(){
+    
     srand(time(0));
     CU_initialize_registry();
     CU_pSuite suite = CU_add_suite("Power Method Serial CUDA", NULL, NULL);
 
+    CU_add_test(suite, "Vector normalization test", test_CUDA_norm);
     CU_add_test(suite, "Test dot product CUDA", test_dot);
     CU_add_test(suite, "Test CSR powermethod", test_CUDA_sparse_CSR_large_power_method);
-
-
+    CU_add_test(suite, "sparse matrix-vector multi test", test_sparse_CUDA_matvec_mult);
+    CU_add_test(suite, "Matrix vector multiplication test", test_dense_CUDA_matvec_mult);
+    CU_add_test(suite, "Approximate eigenvalue test", test_dense_CUDA_approximate_eigenvalue);    
     CU_basic_run_tests();
     CU_cleanup_registry();
 

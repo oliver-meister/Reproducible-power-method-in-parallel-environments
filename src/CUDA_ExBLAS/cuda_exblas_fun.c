@@ -12,7 +12,7 @@ double runExDOT(const double *h_x, const double *h_y, int N){
     
     double *d_x;
     double *d_y;
-    long long int*d_result;
+    double *d_result;
     // Allocate CUDA memory
     
     // Initializing CUDA ExDOT
@@ -25,7 +25,7 @@ double runExDOT(const double *h_x, const double *h_y, int N){
     cudaMalloc((void**)&d_PartialSuperaccs, size);
     cudaMalloc((void**)&d_x, sizeof(double) * N);
     cudaMalloc((void**)&d_y, sizeof(double) * N);
-    cudaMalloc((void**)&d_result, sizeof(long long int));
+    cudaMalloc((void**)&d_result, sizeof(double));
     
     cudaMemcpy(d_x, h_x, sizeof(double) * N, cudaMemcpyHostToDevice);
     cudaMemcpy(d_y, h_y, sizeof(double) * N, cudaMemcpyHostToDevice);
@@ -35,8 +35,8 @@ double runExDOT(const double *h_x, const double *h_y, int N){
     launch_ExDOT(d_PartialSuperaccs, d_x, d_y, N);
     launch_ExDOTComplete(d_result, d_PartialSuperaccs, PARTIAL_SUPERACCS_COUNT);
     
-    long long int h_result;  
-    cudaMemcpy(&h_result, d_result, sizeof(long long int), cudaMemcpyDeviceToHost);
+    double h_result;  
+    cudaMemcpy(&h_result, d_result, sizeof(double), cudaMemcpyDeviceToHost);
 
     cudaFree(d_PartialSuperaccs);
     cudaFree(d_x);
@@ -45,10 +45,15 @@ double runExDOT(const double *h_x, const double *h_y, int N){
     
     printf("exblas dot: %f\n", (double) h_result);
     
-    return (double) h_result;
+    return h_result;
 }
 
-double cuda_ExBLAS_dot_product(const Vector *x, const Vector *y, const int fpe, const bool early_exit){
+double cuda_ExBLAS_dot_product(const Vector *x, const Vector *y){
+
+    if(x->size != y->size){
+        printf("Error: Vectors must have the same size (x: %d, y: %d)\n", x->size, y->size);
+        return 0.0;
+    }
 
     /*
     if(early_exit){
