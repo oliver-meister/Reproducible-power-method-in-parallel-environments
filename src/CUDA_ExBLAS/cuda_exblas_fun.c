@@ -44,6 +44,7 @@ double runExDOT(const double *h_x, const double *h_y, int N){
     cudaFree(d_result);
     
     printf("exblas dot: %f\n", (double) h_result);
+    printf("exblas dot / 2: %f\n", (double) h_result / 2.0);
     
     return h_result;
 }

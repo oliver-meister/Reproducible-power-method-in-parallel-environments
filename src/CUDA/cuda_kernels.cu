@@ -2,7 +2,9 @@
 #include <device_launch_parameters.h>
 #include <stdio.h>
 
-#define BLOCK_SIZE 256
+#define WARP_COUNT 8
+#define WARP_SIZE 32
+#define BLOCK_SIZE (WARP_COUNT * WARP_SIZE)
 
 
 template <unsigned int blockSize>
