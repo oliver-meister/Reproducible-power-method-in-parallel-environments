@@ -6,7 +6,8 @@
 #define WARP_SIZE 32
 #define BLOCK_SIZE (WARP_COUNT * WARP_SIZE)
 #define MERGE_SUPERACCS_SIZE 128
-
+#define PARTIAL_SUPERACCS_COUNT 512
+#define MERGE_WORKGROUP_SIZE 64
 
 #define BIN_COUNT      39
 #define K              12                   // High-radix carry-save bits
@@ -15,6 +16,19 @@
 #define f_words        20
 #define TSAFE           0
 
+
+__device__ double TwoProductFMA(double a, double b, double *d) {
+    double p = a * b;
+    *d = fma(a, b, -p);
+    return p;
+}
+
+__device__ double KnuthTwoSum(double a, double b, double *s) {
+    double r = a + b;
+    double z = r - a;
+    *s = (a - (r - z)) + (b - z);
+    return r;
+}
 
 __device__ long int xadd(volatile long long int *sa, long long int x, unsigned char* of) {
 
@@ -41,6 +55,7 @@ __device__ long int xadd(volatile long long int *sa, long long int x, unsigned c
 
     return y;
 }
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -187,9 +202,27 @@ __device__ void Accumulate(volatile long long int *sa, double x) {
     }
 }
 
+__global__ void FinalReduceAndRound(double *d_Res, long long int *d_PartialSuperaccs, int block_count) {
+    int tid = threadIdx.x;
+
+    if (tid < BIN_COUNT) {
+        long long int sum = 0;
+        for (int i = 0; i < block_count; ++i) {
+            sum += d_PartialSuperaccs[i * BIN_COUNT + tid];
+        }
+        d_PartialSuperaccs[tid] = sum;
+    }
+
+    __syncthreads();
+
+    if (tid == 0) {
+        d_Res[0] = Round(d_PartialSuperaccs);
+    }
+}
 
 
-__global__ void ExDOTComplete(double *d_Res, long long int *d_PartialSuperaccs) {
+
+__global__ void ExDOTComplete(long long int *d_PartialSuperaccs) {
 
     unsigned int tid = threadIdx.x;
    
@@ -208,36 +241,23 @@ __global__ void ExDOTComplete(double *d_Res, long long int *d_PartialSuperaccs) 
     if (tid == 0){
         int imin = 0;
         int imax = 38;
-        Normalize(&d_PartialSuperaccs[gid * BIN_COUNT], &imin, &imax);
+        Normalize(&d_PartialSuperaccs[blockIdx.x * BIN_COUNT], &imin, &imax);
     }
 
-    __syncthreads();
-
-    if ((tid < BIN_COUNT) && (blockIdx.x == 0)){
-
-        long long sum = 0.0;
-
-        for(unsigned int = 0; i < gridDim.x; i++){
-            sum += d_PartialSuperaccs[i * BIN_COUNT + tid]
-        }
-        d_PartialSuperaccs[tid] = sum;
-        __syncthreads();
-
-        if(tid == 0)
-        d_Res[0] = Round(d_PartialSuperaccs);
-    }
 }
 
 
 __global__ void ExDOT(long long int *d_PartialSuperaccs, double *d_a, double *d_b, unsigned int NbElements) {
     
     unsigned int tid = threadIdx.x;
+    int gid = blockIdx.x * blockDim.x + threadIdx.x;
+
     __shared__ long long int l_sa[WARP_COUNT * BIN_COUNT];
     // pointer to the part of the shared (local) superaccumulator that its own warp owns.
     long long int *l_workingBase = l_sa + (tid & (WARP_COUNT - 1));
 
     //Initialize superaccs
-    for(unsigned int = 0; i < BIN_COUNT; i++){
+    for(unsigned int i = 0; i < BIN_COUNT; i++){
         l_workingBase[i * WARP_COUNT] = 0;
     }
     __syncthreads();
@@ -248,21 +268,15 @@ __global__ void ExDOT(long long int *d_PartialSuperaccs, double *d_a, double *d_
     // FPE of size 4
     double a[4] = {0.0};
 
-    //extern __shared__ double sdata[];
-    unsigned int i = blockIdx.x*(BLOCK_SIZE*2) + tid;
-    unsigned int gridSize = BLOCK_SIZE*2*gridDim.x;
-
-    //sdata[tid] = 0;
-
     double r, x, s;
 
-    while (i < NbElements){
+    for (unsigned int pos = gid; pos < NbElements; pos += gridDim.x * blockDim.x) {
 
         r = 0.0;
-        x = TwoProductFMA(d_a[i], d_b[i], &r);
+        x = TwoProductFMA(d_a[pos], d_b[pos], &r);
 
         a[0] = KnuthTwoSum(a[0], x, &s);
-        x  = s;
+        x  = s; 
         if (x != 0.0){
             a[1] = KnuthTwoSum(a[1], x, &s);
             x = s;
@@ -315,70 +329,9 @@ __global__ void ExDOT(long long int *d_PartialSuperaccs, double *d_a, double *d_
 			a[3] = 0.0;
 
         }
-
-
         
-        r = 0.0;
-        x = TwoProductFMA(d_a[i+BLOCK_SIZE], d_b[i+BLOCK_SIZE], &r);
        
-        a[0] = KnuthTwoSum(a[0], x, &s);
-        x  = s;
-        if (x != 0.0){
-            a[1] = KnuthTwoSum(a[1], x, &s);
-            x = s;
-            if (x != 0.0){
-                a[2] = KnuthTwoSum(a[2], x, &s);
-                x = s;
-                if(x != 0.0){
-                    a[3] = KnuthTwoSum(a[3], x, &s);
-                    x = s;
-                }
-            }
-        }
-        if (x != 0.0){
-            Accumulate(l_workingBase, x);
-            //Flush FPEs to superaccs
-            Accumulate(l_workingBase, a[0]);
-            Accumulate(l_workingBase, a[1]);
-            Accumulate(l_workingBase, a[2]);
-            Accumulate(l_workingBase, a[3]);
-            a[0] = 0.0;
-			a[1] = 0.0;
-			a[2] = 0.0;
-			a[3] = 0.0;
-        }
-
-        if (r != 0.0){
-            a[1] = KnuthTwoSum(a[1], r, &s);
-            r = s;
-            if (r != 0.0){
-                a[2] = KnuthTwoSum(a[2], r, &s);
-                r = s;
-                if (r != 0.0){
-                    a[3] = KnuthTwoSum(a[3], r, &s);
-                    r = s;
-                }
-            }
-
-        }
-
-        if (r != 0.0){
-            Accumulate(l_workingBase, r);
-            //Flush FPEs to superaccs
-            Accumulate(l_workingBase, a[0]);
-			Accumulate(l_workingBase, a[1]);
-			Accumulate(l_workingBase, a[2]);
-			Accumulate(l_workingBase, a[3]);
-            a[0] = 0.0;
-			a[1] = 0.0;
-			a[2] = 0.0;
-			a[3] = 0.0;
-
-        }
-
-        i += gridSize;
     }
-
     //Flush FPEs to superaccs
     Accumulate(l_workingBase, a[0]);
     Accumulate(l_workingBase, a[1]);
@@ -412,10 +365,16 @@ __global__ void ExDOT(long long int *d_PartialSuperaccs, double *d_a, double *d_
 extern "C" void launch_ExDOT(
    long long int *d_PartialSuperaccs, double *d_a, double *d_b, unsigned int NbElements){
 
-    ExDOT<<<>>>(d_PartialSuperaccs, d_a, d_b, NbElements);
+    ExDOT<<<PARTIAL_SUPERACCS_COUNT, BLOCK_SIZE>>>(d_PartialSuperaccs, d_a, d_b, NbElements);
 }
 
-extern "C" void launch_ExDOTComplete(double *d_Res, long long int *d_PartialSuperaccs){
+extern "C" void launch_ExDOTComplete(long long int *d_PartialSuperaccs){
     
-    ExDOTComplete<<<>>>(d_Res, d_PartialSuperaccs);
+    ExDOTComplete<<<PARTIAL_SUPERACCS_COUNT / MERGE_SUPERACCS_SIZE, MERGE_WORKGROUP_SIZE >>>(d_PartialSuperaccs);
+}
+
+
+extern "C" void launch_FinalReduceAndRound(double *d_Res, long long int *d_PartialSuperaccs){
+    int block_count = PARTIAL_SUPERACCS_COUNT / MERGE_SUPERACCS_SIZE;
+    FinalReduceAndRound<<<1, BIN_COUNT>>>(d_Res, d_PartialSuperaccs, block_count);
 }

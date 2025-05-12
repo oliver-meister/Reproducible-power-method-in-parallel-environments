@@ -18,7 +18,7 @@ SERIAL_OBJS = src/serial/serial_fun.o
 OMP_OBJS = src/openMP/omp_fun.o
 OFFLOAD_OBJS = src/OMP_Offload/off_fun.o
 CUDA_OBJS = src/CUDA/cuda_fun.o src/CUDA/cuda_kernels.o
-CUDA_EXBLAS = src/CUDA_ExBLAS/cuda_exblas_fun.o src/CUDA_ExBLAS/ExDOT.FPE.EX.4.o
+CUDA_EXBLAS = src/CUDA_ExBLAS/cuda_exblas_fun.o src/CUDA_ExBLAS/cuda_exblas_kernels.o
 
 
 SPARSE_OBJS_SERIAL = src/sparse_power_method_serial.o
@@ -85,7 +85,7 @@ src/CUDA/cuda_kernels.o: src/CUDA/cuda_kernels.cu
 src/CUDA_ExBLAS/cuda_exblas_fun.o: src/CUDA_ExBLAS/cuda_exblas_fun.c src/CUDA_ExBLAS/cuda_exblas_fun.h
 	$(NVCC) -c $< -o $@ $(CUDA_FLAGS)
 
-src/CUDA_ExBLAS/ExDOT.FPE.EX.4.o: src/CUDA_ExBLAS/ExDOT.FPE.EX.4.cu
+src/CUDA_ExBLAS/cuda_exblas_kernels.o: src/CUDA_ExBLAS/cuda_exblas_kernels.cu
 	$(NVCC) -c $< -o $@ $(CUDA_FLAGS)
 
 

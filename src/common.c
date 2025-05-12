@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include "common.h"
+#include <stdio.h>
 #include "serial/serial_fun.h"
 #include "openMP/omp_fun.h"
 #include "OMP_Offload/off_fun.h"

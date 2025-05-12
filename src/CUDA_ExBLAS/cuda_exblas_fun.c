@@ -33,7 +33,8 @@ double runExDOT(const double *h_x, const double *h_y, int N){
     // Running CUDA ExDOT
     
     launch_ExDOT(d_PartialSuperaccs, d_x, d_y, N);
-    launch_ExDOTComplete(d_result, d_PartialSuperaccs, PARTIAL_SUPERACCS_COUNT);
+    launch_ExDOTComplete(d_PartialSuperaccs);
+    launch_FinalReduceAndRound(d_result, d_PartialSuperaccs);
     
     double h_result;  
     cudaMemcpy(&h_result, d_result, sizeof(double), cudaMemcpyDeviceToHost);

@@ -21,10 +21,10 @@ void launch_ExDOT(
 );
 
 void launch_ExDOTComplete(
-    double *d_Res,
-    long long int *d_PartialSuperaccs,
-    unsigned int PartialSuperaccusCount
+    long long int *d_PartialSuperaccs
 );
+
+void launch_FinalReduceAndRound(double *d_Res, long long int *d_PartialSuperaccs);
 
                                 
 #ifdef __cplusplus

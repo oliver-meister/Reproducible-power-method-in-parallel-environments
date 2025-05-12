@@ -124,10 +124,10 @@ int main(){
     CU_initialize_registry();
     CU_pSuite suite = CU_add_suite("Power Method Serial CUDA", NULL, NULL);
 
-    //CU_add_test(suite, "Vector normalization test", test_EXBLAS_norm);
+    CU_add_test(suite, "Vector normalization test", test_EXBLAS_norm);
     CU_add_test(suite, "Test dot product CUDA", test_dot);
-    //CU_add_test(suite, "Test CSR powermethod", test_EXBLAS_sparse_CSR_large_power_method);
-    //CU_add_test(suite, "Approximate eigenvalue test", test_dense_EXBLAS_approximate_eigenvalue);    
+    CU_add_test(suite, "Test CSR powermethod", test_EXBLAS_sparse_CSR_large_power_method);
+    CU_add_test(suite, "Approximate eigenvalue test", test_dense_EXBLAS_approximate_eigenvalue);    
     CU_basic_run_tests();
     CU_cleanup_registry();
 
