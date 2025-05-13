@@ -18,9 +18,9 @@
  * 
  * @return Nothing. The result is stored directly in the vector x.
  */
-void serial_dense_matvec_mult(const denseMatrix* A, Vector* x){
+void serial_dense_matvec_mult(const denseMatrix* A, Vector* x, Vector* y){
 
-    double* temp = malloc(sizeof(double) * x->size);
+    
     double sum;
     for(int i = 0; i < A->rows; i++){
         sum = 0.0;
@@ -29,12 +29,9 @@ void serial_dense_matvec_mult(const denseMatrix* A, Vector* x){
             double value = A->data[i * A->cols + j];
             sum = fma(value, x->data[j], sum);
         }
-        temp[i] = sum;
+        y->data[i] = sum;
     }
-    for(int i = 0; i < x->size; i++){
-        x->data[i] = temp[i];
-    }
-    free(temp);
+ 
 }
 
 
@@ -76,22 +73,16 @@ double serial_dot_product(const Vector* x, const Vector* y){
  * 
  * @return Nothing. The result is stored directly in the vector x.
  */
-void serial_sparse_matvec_mult_CSR(const sparseMatrixCSR* A, Vector* x){
+void serial_sparse_matvec_mult_CSR(const sparseMatrixCSR* A, Vector* x, Vector* y){
     
-    double* temp = calloc(x->size, sizeof(double));
     double aux;
     for(int i = 0; i < A->rows; i++){
         aux = 0.0;
         for(int j = A->row_ptr[i]; j < A->row_ptr[i+1]; j++){
             aux = fma(x->data[A->col[j]], A->val[j], aux);
         }
-        temp[i] += aux;
+        y->data[i] = aux;
     }
-    
-    for (int i = 0; i < x->size; i++){
-        x->data[i] = temp[i];
-    }
-    free(temp);
 }
 
 /**
@@ -102,10 +93,11 @@ void serial_sparse_matvec_mult_CSR(const sparseMatrixCSR* A, Vector* x){
  * 
  * @return Nothing. The result is stored directly in the vector x.
  */
-void serial_sparse_matvec_mult_COO(const sparseMatrixCOO* A, Vector* x){
+void serial_sparse_matvec_mult_COO(const sparseMatrixCOO* A, Vector* x, Vector* y){
     
-    double* temp = calloc(x->size, sizeof(double));
-    
+    for (int i = 0; i < y->length; i++) {
+        y->data[i] = 0.0;
+    }
     // iterate thrue all non zero elemets
     for (int i = 0; i < A->nnz ; i++){
         double value = A->val[i];
@@ -113,18 +105,14 @@ void serial_sparse_matvec_mult_COO(const sparseMatrixCOO* A, Vector* x){
         int value_column = A->col[i];
         // In contrast to the dense case, we must write results directly to temp,
         // as we don't iterate in row-major order.
-        temp[value_row] = fma(value, x->data[value_column], temp[value_row]);
+        y->data[value_row] = fma(value, x->data[value_column], y->data[value_row]);
     }
-    for(int i = 0; i < x->size; i++){
-        x->data[i] = temp[i];
-    }
-    free(temp);
 }
 
-void serial_sparse_matvec_mult(const SparseMatrixAny* A, Vector* x) {
+void serial_sparse_matvec_mult(const SparseMatrixAny* A, Vector* x, Vector* y) {
     if (A->type == CSR) {
-        serial_sparse_matvec_mult_CSR(A->mat.csr, x);
+        serial_sparse_matvec_mult_CSR(A->mat.csr, x, y);
     } else {
-        serial_sparse_matvec_mult_COO(A->mat.coo, x);
+        serial_sparse_matvec_mult_COO(A->mat.coo, x, y);
     }
 }
