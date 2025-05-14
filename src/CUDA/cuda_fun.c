@@ -55,7 +55,7 @@ double cuda_dot_product(Vector* x, Vector* y) {
 }
 
 
-void cuda_sparse_matvec_mult_CSR(const sparseMatrixCSR *A, Vector *x){
+void cuda_sparse_matvec_mult_CSR(const sparseMatrixCSR *A, Vector *x, Vector *y){
 
     int *row_ptr, *col;
     double *val, *ivector, *ovector;
@@ -72,7 +72,7 @@ void cuda_sparse_matvec_mult_CSR(const sparseMatrixCSR *A, Vector *x){
 
     launch_matvec_CSR_kernel(A->rows, row_ptr, col, val, ivector, ovector);
 
-    cudaMemcpy(x->data, ovector, sizeof(double) * x->size, cudaMemcpyDeviceToHost);
+    cudaMemcpy(y->data, ovector, sizeof(double) * x->size, cudaMemcpyDeviceToHost);
   
     cudaFree(row_ptr);
     cudaFree(col);
@@ -82,9 +82,9 @@ void cuda_sparse_matvec_mult_CSR(const sparseMatrixCSR *A, Vector *x){
 
 }
 
-void cuda_sparse_matvec_mult(const SparseMatrixAny *A, Vector *x){
+void cuda_sparse_matvec_mult(const SparseMatrixAny *A, Vector *x, Vector *y){
     if (A->type == CSR) {
-        cuda_sparse_matvec_mult_CSR(A->mat.csr, x);
+        cuda_sparse_matvec_mult_CSR(A->mat.csr, x, y);
     } else {
         printf("Runtime error: OpenMP currently only works with CSR format\n");
         exit(EXIT_FAILURE);
@@ -92,7 +92,7 @@ void cuda_sparse_matvec_mult(const SparseMatrixAny *A, Vector *x){
 }
 
 
-void cuda_dense_matvec_mult(const denseMatrix *A, Vector *x){
+void cuda_dense_matvec_mult(const denseMatrix *A, Vector *x, Vector *y){
 
     double *val, *ivector, *ovector;
 
@@ -105,7 +105,7 @@ void cuda_dense_matvec_mult(const denseMatrix *A, Vector *x){
 
     launch_matvec_dense_kernel(A->rows, A->cols, val, ivector, ovector);
 
-    cudaMemcpy(x->data, ovector, sizeof(double) * x->size, cudaMemcpyDeviceToHost);
+    cudaMemcpy(y->data, ovector, sizeof(double) * x->size, cudaMemcpyDeviceToHost);
 
     cudaFree(val);
     cudaFree(ivector);
@@ -114,61 +114,3 @@ void cuda_dense_matvec_mult(const denseMatrix *A, Vector *x){
 
 
 
-/*
-__global__ void DOT(const double* d_x, const double* d_y, const int incx, const int incy, const int offsetx, const int offsety, const int NbElements, double* result){
-    
-extern __shared__ double sdata[];
-
-int tid = threadIdx.x;
-int i = blockIdx.x * blockDim.x + local_id;
-int total_threads = blockDim.x * gridDim.x;
-
-double local_sum = 0.0;
-
-for(int pos = i; pos < NbElements; pos += total_threads){
-    local_sum += d_x[pos] * d_y[pos];
-}
-
-sdata[tid] = local_sum;
-__syncthreads();
-
-
-for (unsigned int s = blockDim.x / 2; s > 0; s >>= 1) {
-    if (tid < s)
-    sdata[tid] += sdata[tid + s];
-    __syncthreads();
-}
-
-if (tid == 0){
-    result[blockIdx.x] = sdata[0];
-}
-}
-
-__global__ void DOTComplete(double *d_res ){
-    
-for (unsigned int s = blockDim.x / 2; s > 0; s >>= 1) {
-    if (tid < s)
-    sd[tid] += sdata[tid + s];
-    __syncthreads();
-}
-}
-
-
-double cuda_dot(const Vector* x, const Vector* y, const int incx, const int incy, const int offsetx, const int offsety){
-    int size_x = x->size;
-    int size_y = y->size;
-    const double* d_x, d_y;
-    
-    if(size_x != size_y){
-        printf("Error: Vectors must have the same size (x: %d, y: %d)\n", size_x, size_y);
-        return 0.0;
-    }
-    //Allocate CUDA memory
-    cudaMalloc(&d_x, sizeof(double) * size_x);
-    cudaMalloc(&d_y, sizeof(double) * size_y);
-    cudaMemcpy(d_x, x->data, sizeof(double) * size_x, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_y, y->data, sizeof(double) * size_y, cudaMemcpyHostToDevice);
-    
-    DOT<<<>>>
-}
-*/

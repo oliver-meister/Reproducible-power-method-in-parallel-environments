@@ -22,25 +22,19 @@
  */
 
  // we shall have the same amount of threads as number of rows, sutch that eatch thread handles an entire row.
-void off_dense_matvec_mult(const denseMatrix* A, Vector* x){
-    double* temp = malloc(sizeof(double) * x->size);
+void off_dense_matvec_mult(const denseMatrix* A, Vector* x, Vector* y){
+
     double sum;
-    
-    #pragma omp target map(to: A->data[0: A->rows * A->cols], x->data[0: x->size]) map(from: temp[0: x->size])
-    #pragma omp parallel for default(none) private(sum) shared(temp, A, x)
+    #pragma omp target map(to: A->data[0: A->rows * A->cols], x->data[0: x->size]) map(from: y->data[0: y->size])
+    #pragma omp parallel for default(none) private(sum) shared(y, A, x)
     for(int i = 0; i < A->rows; i++){
         sum = 0;
         for (int j = 0; j < A->cols; j++){
             double value = A->data[i * A->cols + j];
             sum = fma(value, x->data[j], sum);
         }
-        temp[i] = sum;
+        y->data[i] = sum;
     }
-    //TODO: parallize this part also
-    for(int i = 0; i < x->size; i++){
-        x->data[i] = temp[i];
-    }
-    free(temp);
 }
 
 
@@ -74,32 +68,26 @@ double off_dot_product(const Vector* x, const Vector* y){
  */
 
 
- void off_sparse_matvec_mult_CSR(const sparseMatrixCSR* A, Vector* x){
+ void off_sparse_matvec_mult_CSR(const sparseMatrixCSR* A, Vector* x, Vector *y){
 
-    double* temp = calloc(x->size, sizeof(double));
     double aux;
 
-    #pragma omp target map(to: A->row_ptr[0: A->rows + 1], A->val[0: A->nnz], A->col[0: A->nnz], x->data[0: x->size]) map(from: temp[0: x->size])
-    #pragma omp parallel for default(none) private(aux) shared(temp, A, x)
+    #pragma omp target map(to: A->row_ptr[0: A->rows + 1], A->val[0: A->nnz], A->col[0: A->nnz], x->data[0: x->size]) map(from: y->data[0: x->size])
+    #pragma omp parallel for default(none) private(aux) shared(y, A, x)
     for(int i = 0; i < A->rows; i++){
         aux = 0.0;
         for(int j = A->row_ptr[i]; j < A->row_ptr[i+1]; j++){
             aux = fma(x->data[A->col[j]], A->val[j], aux);
         }
-        temp[i] += aux;
+        y->data[i] += aux;
     }
-    for (int i = 0; i < x->size; i++){
-        x->data[i] = temp[i];
-    }
-    free(temp);
-
  }
 
 
-void off_sparse_matvec_mult(const SparseMatrixAny* A, Vector* x){
+void off_sparse_matvec_mult(const SparseMatrixAny* A, Vector* x, Vector *y){
     
     if (A->type == CSR) {
-        off_sparse_matvec_mult_CSR(A->mat.csr, x);
+        off_sparse_matvec_mult_CSR(A->mat.csr, x, y);
     } else {
         printf("Runtime error: OpenMP currently only works with CSR format\n");
         exit(EXIT_FAILURE);

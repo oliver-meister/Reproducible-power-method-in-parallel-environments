@@ -63,17 +63,26 @@ double sparse_power_method(const SparseMatrixAny *A){
     // initial vector
     Vector* x = generate_random_vector(size);
 
+    // output vector y
+    Vector *y = malloc(sizeof(Vector));
+    y->size = x->size;
+    double *y_data = malloc(sizeof(double) * y->size);
+    y->data = y_data;
+
     do{
         lambda_old = lambda_new;
-        sparse_matvec(A,x);
+        sparse_matvec(A,x,y);
+        x->data = y->data
         normalize_vector(x);
-        lambda_new = sparse_approximate_eigenvalue(A, x, false);
+        lambda_new = sparse_approximate_eigenvalue(A, x, y, false);
         
         //printf("sparse lambda approximation: %f\n", lambda_new);
     } while(!convergence(lambda_new, lambda_old, 0.000001));
 
     free(x->data);
     free(x);
+    free(y->data);
+    free(y);
     return lambda_new;
 }
 
@@ -87,7 +96,7 @@ double sparse_power_method(const SparseMatrixAny *A){
  * @return The approximated dominant eigenvalue.
  */
 
- double sparse_approximate_eigenvalue(const SparseMatrixAny* A, const Vector* x, bool test){
+ double sparse_approximate_eigenvalue(const SparseMatrixAny* A, const Vector* x, Vector* y, bool test){
     if (test){
         #ifdef USE_OMP
             printf("in OMP def\n");
@@ -111,16 +120,10 @@ double sparse_power_method(const SparseMatrixAny *A){
             sparse_matvec = serial_sparse_matvec_mult;
         #endif
     }
-    Vector copy;
-    copy.size = x->size;
-    copy.data = malloc(sizeof(double) * copy.size);
-    for(int i = 0; i < copy.size; i++){
-        copy.data[i] = x->data[i];
-    }
-    sparse_matvec(A, &copy);
-    double lambda = dotprod(x, &copy);
     
-    free(copy.data);
+    sparse_matvec(A, x, y);
+    double lambda = dotprod(x, y);
+    
     return lambda;
 }
 

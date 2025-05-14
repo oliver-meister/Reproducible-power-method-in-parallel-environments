@@ -22,10 +22,9 @@
  */
 
  // we shall have the same amount of threads as number of rows, sutch that eatch thread handles an entire row.
-void openMP_dense_matvec_mult(const denseMatrix* A, Vector* x){
-    double* temp = malloc(sizeof(double) * x->size);
-    double sum;
+void openMP_dense_matvec_mult(const denseMatrix* A, Vector* x, Vector* y){
 
+    double sum;
     #pragma omp parallel for default(none) private(sum) shared(temp, A, x)
     for(int i = 0; i < A->rows; i++){
         sum = 0;
@@ -36,13 +35,8 @@ void openMP_dense_matvec_mult(const denseMatrix* A, Vector* x){
         }
         //int thread_id = omp_get_thread_num();
         //printf("Thread %d is processing row %d\n", thread_id, i);
-        temp[i] = sum;
+        y->data[i] = sum;
     }
-    //TODO: parallize this part also
-    for(int i = 0; i < x->size; i++){
-        x->data[i] = temp[i];
-    }
-    free(temp);
 }
 
 
@@ -109,31 +103,27 @@ double openMP_dot_product(const Vector* x, const Vector* y){
  */
 
 
- void openMP_sparse_matvec_mult_CSR(const sparseMatrixCSR* A, Vector* x){
+ void openMP_sparse_matvec_mult_CSR(const sparseMatrixCSR* A, Vector* x, Vector *y){
 
-    double* temp = calloc(x->size, sizeof(double));
     double aux;
 
-    #pragma omp parallel for default(none) private(aux) shared(temp, A, x)
+    #pragma omp parallel for default(none) private(aux) shared(y, A, x)
     for(int i = 0; i < A->rows; i++){
         aux = 0.0;
         for(int j = A->row_ptr[i]; j < A->row_ptr[i+1]; j++){
             aux = fma(x->data[A->col[j]], A->val[j], aux);
         }
-        temp[i] += aux;
+        y->data[i] = aux;
     }
-    for (int i = 0; i < x->size; i++){
-        x->data[i] = temp[i];
-    }
-    free(temp);
+
 
  }
 
 
-void openMP_sparse_matvec_mult(const SparseMatrixAny* A, Vector* x){
+void openMP_sparse_matvec_mult(const SparseMatrixAny* A, Vector* x, Vector *y){
     
     if (A->type == CSR) {
-        openMP_sparse_matvec_mult_CSR(A->mat.csr, x);
+        openMP_sparse_matvec_mult_CSR(A->mat.csr, x, y);
     } else {
         printf("Runtime error: OpenMP currently only works with CSR format\n");
         exit(EXIT_FAILURE);
