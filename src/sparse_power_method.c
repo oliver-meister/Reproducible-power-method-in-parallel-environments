@@ -77,7 +77,7 @@ double sparse_power_method(const SparseMatrixAny *A){
         lambda_new = sparse_approximate_eigenvalue(A, x, y, false);
         
         //printf("sparse lambda approximation: %f\n", lambda_new);
-    } while(!convergence(lambda_new, lambda_old, 0.000001));
+    } while(!convergence(lambda_new, lambda_old, 1.0E-6));
 
     free(x->data);
     free(x);
