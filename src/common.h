@@ -11,5 +11,6 @@ typedef void (*vector_norm_div_fun)(const Vector*, Vector*, double);
 
 bool convergence(double prev, double curr, double tolerance);
 void normalize_vector(Vector* x, Vector* y);
+void init_backend();
 
 #endif

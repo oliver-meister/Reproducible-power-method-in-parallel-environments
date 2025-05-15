@@ -230,7 +230,7 @@ int main(int argc, char* argv[]){
     }
     
     omp_set_num_threads(num_threads);
-    
+    init_backend();
     srand(time(0));
     CU_initialize_registry();
     CU_pSuite suite = CU_add_suite("Power Method openMP offload Tests", NULL, NULL);

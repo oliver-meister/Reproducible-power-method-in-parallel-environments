@@ -1,6 +1,7 @@
 #include "vector.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "matrix.h"
 
 /**
  * @brief Calculates the dot product of two Vectors.
@@ -64,4 +65,8 @@ Vector* generate_vector(int size){
 void delete_vector(Vector *x){
     free(x->data);
     free(x);
+}
+
+Vector* generate_sum_vector_CSR(sparseMatrixCSR *A){
+
 }

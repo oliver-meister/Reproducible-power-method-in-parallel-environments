@@ -18,6 +18,42 @@ sparse_matvec_fn sparse_matvec;
 
 vector_norm_div_fun vector_norm_div;
 
+
+void init_backend() {
+    #ifdef USE_OMP
+        printf("Backend: OpenMP\n");
+        dotprod = openMP_dot_product;
+        vector_norm_div = openMP_vector_norm_div;
+        dense_matvec = openMP_dense_matvec_mult;
+        sparse_matvec = openMP_sparse_matvec_mult;
+    #elif defined(USE_OFF)
+        printf("Backend: OpenMP Offload\n");
+        dotprod = off_dot_product;
+        vector_norm_div = off_vector_norm_div;
+        dense_matvec = off_dense_matvec_mult;
+        sparse_matvec = off_sparse_matvec_mult;
+    #elif defined(USE_CUDA)
+        printf("Backend: CUDA\n");
+        dotprod = cuda_dot_product;
+        vector_norm_div = cuda_vector_norm_div;
+        dense_matvec = cuda_dense_matvec_mult;
+        sparse_matvec = cuda_sparse_matvec_mult;
+    #elif defined(USE_EXBLAS)
+        printf("Backend: CUDA + ExBLAS\n");
+        dotprod = cuda_ExBLAS_dot_product;
+        vector_norm_div = cuda_vector_norm_div;
+        dense_matvec = cuda_dense_matvec_mult;
+        sparse_matvec = cuda_sparse_matvec_mult;
+    #else
+        printf("Backend: Serial\n");
+        dotprod = serial_dot_product;
+        vector_norm_div = serial_vector_norm_div;
+        dense_matvec = serial_dense_matvec_mult;
+        sparse_matvec = serial_sparse_matvec_mult;
+    #endif
+}
+
+
 /**
  * @brief Compares two eigenvalues and determines whether they have converged
  *          (i.e., if the difference between them is less than a given threshold).
@@ -41,28 +77,6 @@ bool convergence(double lambda_new, double lambda_old, double threshold){
  * @return Nothing. The result is stored directly in the vector x.
  */
 void normalize_vector(Vector* x, Vector *y){
-
-    #ifdef USE_OMP
-        printf("in OMP def\n");
-        dotprod = openMP_dot_product;
-        vector_norm_div = openMP_vector_norm_div;
-    #elif defined(USE_OFF)
-        printf("in OFF 5 def\n");
-        dotprod = off_dot_product;
-        vector_norm_div = off_vector_norm_div;
-    #elif defined(USE_CUDA)
-        printf("in CUDA def\n");
-        dotprod = cuda_dot_product;
-        vector_norm_div = cuda_vector_norm_div;
-    #elif defined(USE_EXBLAS)
-        printf("in EXBLAS def\n");
-        dotprod = cuda_ExBLAS_dot_product;
-        vector_norm_div = cuda_vector_norm_div;
-    #else
-        printf("in SERIAL def\n");
-        dotprod = serial_dot_product;
-        vector_norm_div = serial_vector_norm_div;
-    #endif
 
     double norm = sqrt(dotprod(x,x));
     if (norm < 1.0E-10){

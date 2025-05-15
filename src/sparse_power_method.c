@@ -16,6 +16,7 @@
 extern dot_fn dotprod;
 extern sparse_matvec_fn sparse_matvec;
 
+#define MAX_ITERATIONS 1000
 
 
 /**
@@ -27,29 +28,6 @@ extern sparse_matvec_fn sparse_matvec;
  */
 double sparse_power_method(const SparseMatrixAny *A){
     
-    #ifdef USE_OMP
-        printf("in OMP def\n");
-        dotprod = openMP_dot_product;
-        sparse_matvec = openMP_sparse_matvec_mult;
-    #elif defined(USE_OFF)
-        printf("in OFF 3 def\n");
-        dotprod = off_dot_product;
-        sparse_matvec = off_sparse_matvec_mult;
-    #elif defined(USE_CUDA)
-        printf("in CUDA def\n");
-        dotprod = cuda_dot_product;
-        sparse_matvec = cuda_sparse_matvec_mult;
-    #elif defined(USE_EXBLAS)
-        printf("in EXBLAS def\n");
-        dotprod = cuda_ExBLAS_dot_product;
-        sparse_matvec = cuda_sparse_matvec_mult;
-    #else
-        printf("in SERIAL def\n");
-        dotprod = serial_dot_product;
-        sparse_matvec = serial_sparse_matvec_mult;
-
-    #endif
-
     double lambda_old = 0;
     double lambda_new = 0;
     int size;
@@ -63,18 +41,27 @@ double sparse_power_method(const SparseMatrixAny *A){
     // initial vector
     Vector* x = generate_random_vector(size);
     Vector* y = generate_vector(size);
+    int iterations = 0;
 
+    clock_t start = clock();
     do{
-
+        iterations += 1;
         lambda_old = lambda_new;
         sparse_matvec(A,x,y);
-
         normalize_vector(y,x);
-        lambda_new = sparse_approximate_eigenvalue(A, x, y, false);
+        lambda_new = sparse_approximate_eigenvalue(A, x, y);
         
-        printf("lambda approximation: %f\n", lambda_new);
-    } while(!convergence(lambda_new, lambda_old, 1.0E-6));
+    } while(!convergence(lambda_new, lambda_old, 1.0E-6) && iterations < MAX_ITERATIONS);
 
+    clock_t end = clock();
+    double time = (double) (end - start) / CLOCKS_PER_SEC;
+
+    if (iterations >= MAX_ITERATIONS) {
+        printf("Warning: Power method did not converge within max iterations.\n");
+    } else{
+        printf("Number of iterations: %d\n", iterations);
+        printf("Execution time: %f\n", time);
+    }
     delete_vector(x);
     delete_vector(y);
     return lambda_new;
@@ -90,32 +77,7 @@ double sparse_power_method(const SparseMatrixAny *A){
  * @return The approximated dominant eigenvalue.
  */
 
- double sparse_approximate_eigenvalue(const SparseMatrixAny* A, Vector* x, Vector *y, bool test){
-    if (test){
-        #ifdef USE_OMP
-            printf("in OMP def\n");
-            dotprod = openMP_dot_product;
-            sparse_matvec = openMP_sparse_matvec_mult;
-        #elif defined(USE_OFF)
-            printf("in OFF 4 def\n");
-            dotprod = off_dot_product;
-            sparse_matvec = off_sparse_matvec_mult;
-        #elif defined(USE_CUDA)
-            printf("in CUDA def\n");
-            dotprod = cuda_dot_product;
-            sparse_matvec = cuda_sparse_matvec_mult;
-        #elif defined(USE_EXBLAS)
-            printf("in EXBLAS def\n");
-            dotprod = cuda_ExBLAS_dot_product;
-            sparse_matvec = cuda_sparse_matvec_mult;
-        #else
-            printf("in SERIAL def\n");
-            dotprod = serial_dot_product;
-            sparse_matvec = serial_sparse_matvec_mult;
-        #endif
-    }
-
-   
+ double sparse_approximate_eigenvalue(const SparseMatrixAny* A, Vector* x, Vector *y){
     
     sparse_matvec(A, x, y);
     double lambda = dotprod(x, y);

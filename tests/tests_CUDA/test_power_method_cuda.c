@@ -219,10 +219,10 @@ void test_dense_CUDA_power_method(){
 
 
 int main(){
-    
+    init_backend();
     srand(time(0));
     CU_initialize_registry();
-    CU_pSuite suite = CU_add_suite("Power Method Serial CUDA", NULL, NULL);
+    CU_pSuite suite = CU_add_suite("Power Method CUDA ExBLAS", NULL, NULL);
 
     CU_add_test(suite, "Vector normalization test", test_CUDA_norm);
     CU_add_test(suite, "Test dot product CUDA", test_dot);

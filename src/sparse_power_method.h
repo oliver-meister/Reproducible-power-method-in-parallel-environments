@@ -5,5 +5,5 @@
 #include <stdbool.h>
 
 double sparse_power_method(const SparseMatrixAny* );
-double sparse_approximate_eigenvalue(const SparseMatrixAny*, Vector*, Vector*, bool);
+double sparse_approximate_eigenvalue(const SparseMatrixAny*, Vector*, Vector*);
 #endif 

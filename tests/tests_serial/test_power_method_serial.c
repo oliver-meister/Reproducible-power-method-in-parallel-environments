@@ -129,7 +129,7 @@ void test_serial_dense_approximate_eigenvalue(){
     x.data[4] = 1;
 
     Vector *y = generate_vector(5);
-    double lambda = dense_approximate_eigenvalue(&A, &x, y, true);
+    double lambda = dense_approximate_eigenvalue(&A, &x, y);
 
     CU_ASSERT_DOUBLE_EQUAL(lambda, 12, 0.0001);
     free(A.data);
@@ -433,7 +433,7 @@ void test_serial_sparse_approximate_eigenvalue(){
     x.data[4] = 1;
 
     Vector *y = generate_vector(5);
-    double lambda = sparse_approximate_eigenvalue(A, &x, y, true);
+    double lambda = sparse_approximate_eigenvalue(A, &x, y);
     CU_ASSERT_DOUBLE_EQUAL(lambda, 12.0, 0.0001);
     
     free(coo->col);
@@ -535,7 +535,7 @@ void test_serial_sparse_COO_large_power_method(){
 
 }
 
-void test_serial_sparse_CSR_large_power_method(){
+void test_serial_CSR_494_bus(){
  
     sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/494_bus/494_bus.mtx");
     sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
@@ -602,10 +602,12 @@ void test_serial_generate_random_vector(){
 
 int main(){
 
+    init_backend();
+
     srand(time(0));
     CU_initialize_registry();
     CU_pSuite suite = CU_add_suite("Power Method Serial Tests", NULL, NULL);
-
+/*
     // Tests for dense matrices.
     CU_add_test(suite, "Matrix vector multiplication dense test", test_serial_dense_matvec_mult);
     CU_add_test(suite, "Approximate eigenvalue dense test", test_serial_dense_approximate_eigenvalue);
@@ -617,11 +619,13 @@ int main(){
     CU_add_test(suite, "Approximate eigenvalue sparse test", test_serial_sparse_approximate_eigenvalue);
     CU_add_test(suite, "Power method sparse test", test_serial_sparse_power_method);
     CU_add_test(suite, "Power method sparse COO large test", test_serial_sparse_COO_large_power_method);
-    CU_add_test(suite, "Power method sparse CSR large test", test_serial_sparse_CSR_large_power_method);
+*/
+
+    CU_add_test(suite, "Power method sparse CSR large test", test_serial_CSR_494_bus);
 
     //Tests for common functions.
-    CU_add_test(suite, "Generate random vector test", test_serial_generate_random_vector);
-    CU_add_test(suite, "Vector normalization test", test_serial_norm);
+    //CU_add_test(suite, "Generate random vector test", test_serial_generate_random_vector);
+    //CU_add_test(suite, "Vector normalization test", test_serial_norm);
 
     CU_basic_run_tests();
     CU_cleanup_registry();

@@ -21,17 +21,9 @@ CUDA_OBJS = src/CUDA/cuda_fun.o src/CUDA/cuda_kernels.o
 CUDA_EXBLAS = src/CUDA_ExBLAS/cuda_exblas_fun.o src/CUDA_ExBLAS/cuda_exblas_kernels.o
 
 
-SPARSE_OBJS_SERIAL = src/sparse_power_method_serial.o
-SPARSE_OBJS_OPENMP = src/sparse_power_method_openmp.o
-SPARSE_OBJS_OFFLOAD = src/sparse_power_method_offload.o
-SPARSE_OBJS_CUDA = src/sparse_power_method_cuda.o
-SPARSE_OBJS_EXBLAS = src/sparse_power_method_exdot.o
+SPARSE_OBJS = src/sparse_power_method.o
 
-DENSE_OBJS_SERIAL = src/dense_power_method_serial.o
-DENSE_OBJS_OPENMP = src/dense_power_method_openmp.o
-DENSE_OBJS_OFFLOAD = src/dense_power_method_offload.o
-DENSE_OBJS_CUDA = src/dense_power_method_cuda.o
-DENSE_OBJS_EXBLAS = src/dense_power_method_exblas.o
+DENSE_OBJS = src/dense_power_method.o
 
 TEST_SERIAL = tests/tests_serial/test_power_method_serial.c
 TEST_OMP = tests/tests_openMP/test_power_method_openMP.c
@@ -90,44 +82,25 @@ src/CUDA_ExBLAS/cuda_exblas_kernels.o: src/CUDA_ExBLAS/cuda_exblas_kernels.cu
 
 
 
-src/sparse_power_method_serial.o: src/sparse_power_method.c src/sparse_power_method.h 
-	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_SERIAL
-src/sparse_power_method_openmp.o: src/sparse_power_method.c src/sparse_power_method.h 
-	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_OMP
-src/sparse_power_method_offload.o: src/sparse_power_method.c src/sparse_power_method.h 
-	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_OFF
-src/sparse_power_method_cuda.o: src/sparse_power_method.c src/sparse_power_method.h 
-	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_CUDA
-src/sparse_power_method_exdot.o: src/sparse_power_method.c src/sparse_power_method.h 
-	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_EXBLAS
+src/sparse_power_method.o: src/sparse_power_method.c src/sparse_power_method.h 
+	$(CC) -c $< -o $@ $(CFLAGS) 
+src/dense_power_method.o: src/dense_power_method.c src/dense_power_method.h 
+	$(CC) -c $< -o $@ $(CFLAGS)
 
-
-src/dense_power_method_serial.o: src/dense_power_method.c src/dense_power_method.h 
-	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_SERIAL
-src/dense_power_method_openmp.o: src/dense_power_method.c src/dense_power_method.h 
-	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_OMP
-src/dense_power_method_offload.o: src/dense_power_method.c src/dense_power_method.h 
-	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_OFF
-src/dense_power_method_cuda.o: src/dense_power_method.c src/dense_power_method.h 
-	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_CUDA
-src/dense_power_method_exblas.o: src/dense_power_method.c src/dense_power_method.h 
-	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_EXBLAS
-
-
-
-test_serial:  $(DENSE_OBJS_SERIAL) $(SPARSE_OBJS_SERIAL) $(COMMON_OBJ_SERIAL) $(GENERAL_OBJ) $(SERIAL_OBJS)
+	
+test_serial:  $(DENSE_OBJS) $(SPARSE_OBJS) $(COMMON_OBJ_SERIAL) $(GENERAL_OBJ) $(SERIAL_OBJS)
 	$(CC) -o test_serial $(TEST_SERIAL) $^ $(CFLAGS) $(CUNIT) 
 
-test_openmp: $(DENSE_OBJS_OPENMP) $(SPARSE_OBJS_OPENMP) $(COMMON_OBJS_OPENMP) $(GENERAL_OBJ) $(OMP_OBJS)
+test_openmp: $(DENSE_OBJS) $(SPARSE_OBJS) $(COMMON_OBJS_OPENMP) $(GENERAL_OBJ) $(OMP_OBJS)
 	$(CC) -o test_openmp $(TEST_OMP) $^ $(CFLAGS) $(CUNIT) 
 
-test_offload: $(DENSE_OBJS_OFFLOAD) $(SPARSE_OBJS_OFFLOAD) $(COMMON_OBJS_OFFLOAD) $(GENERAL_OBJ) $(OFFLOAD_OBJS)
+test_offload: $(DENSE_OBJS) $(SPARSE_OBJS) $(COMMON_OBJS_OFFLOAD) $(GENERAL_OBJ) $(OFFLOAD_OBJS)
 	$(CC) -o test_offload $(TEST_OFF) $^ $(CFLAGS) $(CUNIT) 
 
-test_cuda: $(DENSE_OBJS_CUDA) $(SPARSE_OBJS_CUDA) $(COMMON_OBJS_CUDA) $(GENERAL_OBJ) $(CUDA_OBJS)
+test_cuda: $(DENSE_OBJS) $(SPARSE_OBJS) $(COMMON_OBJS_CUDA) $(GENERAL_OBJ) $(CUDA_OBJS)
 	$(NVCC) -o test_cuda $(TEST_CUDA) $^ $(CUDA_FLAGS) $(CUNIT) 
 
-test_cuda_exblas: $(DENSE_OBJS_EXBLAS) $(SPARSE_OBJS_EXBLAS) $(COMMON_OBJS_EXBLAS) $(GENERAL_OBJ) $(CUDA_EXBLAS) $(CUDA_OBJS)
+test_cuda_exblas: $(DENSE_OBJS) $(SPARSE_OBJS) $(COMMON_OBJS_EXBLAS) $(GENERAL_OBJ) $(CUDA_EXBLAS) $(CUDA_OBJS)
 	$(NVCC) -o test_cuda_exblas $(TEST_EXBLAS) $^ $(CUDA_FLAGS) $(CUNIT) 
 
 clean:
