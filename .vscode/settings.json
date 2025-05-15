@@ -40,7 +40,10 @@
         "typeinfo": "cpp",
         "utility": "cpp",
         "stdbool.h": "c",
-        "cuda_fun.h": "c"
+        "cuda_fun.h": "c",
+        "bitset": "c",
+        "__locale": "c",
+        "locale": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

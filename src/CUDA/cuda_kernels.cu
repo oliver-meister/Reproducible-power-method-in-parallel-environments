@@ -115,3 +115,18 @@ extern "C" void launch_matvec_dense_kernel(const int num_rows, const int num_col
                                                     val, input_vector, output_vector);
 
 }
+
+__global__ void vector_norm_div_kernel(const double* input_vector, double* output_vector, double norm, int numElem){
+
+    unsigned int tid = threadIdx.x;
+    unsigned int gid = blockIdx.x * blockDim.x + tid;
+
+    for(unsigned int pos = gid; pos < numElem; pos += gridDim.x * blockDim.x){
+        output_vector[pos] = input_vector[pos] / norm;
+    }
+}
+
+extern "C" void launch_vector_norm_div(const double* input_vector, double* output_vector, double norm, int numElem){
+    int gridSize = (numElem + BLOCK_SIZE - 1) / BLOCK_SIZE;
+    vector_norm_div_kernel<<<gridSize, BLOCK_SIZE>>>(input_vector, output_vector, norm, numElem);
+}

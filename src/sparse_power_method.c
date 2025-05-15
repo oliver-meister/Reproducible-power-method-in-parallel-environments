@@ -32,7 +32,7 @@ double sparse_power_method(const SparseMatrixAny *A){
         dotprod = openMP_dot_product;
         sparse_matvec = openMP_sparse_matvec_mult;
     #elif defined(USE_OFF)
-        printf("in OFF def\n");
+        printf("in OFF 3 def\n");
         dotprod = off_dot_product;
         sparse_matvec = off_sparse_matvec_mult;
     #elif defined(USE_CUDA)
@@ -62,27 +62,21 @@ double sparse_power_method(const SparseMatrixAny *A){
 
     // initial vector
     Vector* x = generate_random_vector(size);
-
-    // output vector y
-    Vector *y = malloc(sizeof(Vector));
-    y->size = x->size;
-    double *y_data = malloc(sizeof(double) * y->size);
-    y->data = y_data;
+    Vector* y = generate_vector(size);
 
     do{
+
         lambda_old = lambda_new;
         sparse_matvec(A,x,y);
-        x->data = y->data
-        normalize_vector(x);
+
+        normalize_vector(y,x);
         lambda_new = sparse_approximate_eigenvalue(A, x, y, false);
         
-        //printf("sparse lambda approximation: %f\n", lambda_new);
+        printf("lambda approximation: %f\n", lambda_new);
     } while(!convergence(lambda_new, lambda_old, 1.0E-6));
 
-    free(x->data);
-    free(x);
-    free(y->data);
-    free(y);
+    delete_vector(x);
+    delete_vector(y);
     return lambda_new;
 }
 
@@ -96,14 +90,14 @@ double sparse_power_method(const SparseMatrixAny *A){
  * @return The approximated dominant eigenvalue.
  */
 
- double sparse_approximate_eigenvalue(const SparseMatrixAny* A, const Vector* x, Vector* y, bool test){
+ double sparse_approximate_eigenvalue(const SparseMatrixAny* A, Vector* x, Vector *y, bool test){
     if (test){
         #ifdef USE_OMP
             printf("in OMP def\n");
             dotprod = openMP_dot_product;
             sparse_matvec = openMP_sparse_matvec_mult;
         #elif defined(USE_OFF)
-            printf("in OFF def\n");
+            printf("in OFF 4 def\n");
             dotprod = off_dot_product;
             sparse_matvec = off_sparse_matvec_mult;
         #elif defined(USE_CUDA)
@@ -120,6 +114,8 @@ double sparse_power_method(const SparseMatrixAny *A){
             sparse_matvec = serial_sparse_matvec_mult;
         #endif
     }
+
+   
     
     sparse_matvec(A, x, y);
     double lambda = dotprod(x, y);

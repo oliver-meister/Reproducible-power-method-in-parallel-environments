@@ -41,10 +41,12 @@ void test_EXBLAS_norm(){
     x.data[0] = 3.0;
     x.data[1] = 4.0;
 
-    normalize_vector(&x);
-    CU_ASSERT_DOUBLE_EQUAL(x.data[0], 0.6, 0.0001);
-    CU_ASSERT_DOUBLE_EQUAL(x.data[1], 0.8, 0.0001);
+    Vector *y = generate_vector(2);
+    normalize_vector(&x, y);
+    CU_ASSERT_DOUBLE_EQUAL(y->data[0], 0.6, 0.0001);
+    CU_ASSERT_DOUBLE_EQUAL(y->data[1], 0.8, 0.0001);
     free(x.data);
+    delete_vector(y);
 
 }
 
@@ -66,10 +68,12 @@ void test_dense_EXBLAS_approximate_eigenvalue(){
     x.data[0] = 1;
     x.data[1] = 0;
     
-    double lambda = dense_approximate_eigenvalue(&A, &x, true);
+    Vector *y = generate_vector(2);
+    double lambda = dense_approximate_eigenvalue(&A, &x, y, true);
     CU_ASSERT_DOUBLE_EQUAL(lambda, 2.0, 0.0001);
     free(A.data);
     free(x.data);
+    delete_vector(y);
     
 }
 

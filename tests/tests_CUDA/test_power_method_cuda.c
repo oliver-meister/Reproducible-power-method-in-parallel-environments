@@ -40,11 +40,12 @@ void test_CUDA_norm(){
     x.data = malloc(sizeof(double) * 2);
     x.data[0] = 3.0;
     x.data[1] = 4.0;
-
-    normalize_vector(&x);
-    CU_ASSERT_DOUBLE_EQUAL(x.data[0], 0.6, 0.0001);
-    CU_ASSERT_DOUBLE_EQUAL(x.data[1], 0.8, 0.0001);
+    Vector *y = generate_vector(2);
+    normalize_vector(&x,y);
+    CU_ASSERT_DOUBLE_EQUAL(y->data[0], 0.6, 0.0001);
+    CU_ASSERT_DOUBLE_EQUAL(y->data[1], 0.8, 0.0001);
     free(x.data);
+    delete_vector(y);
 
 }
 
@@ -90,10 +91,11 @@ void test_sparse_CUDA_matvec_mult(){
     test_vector[2] = 150;
     test_vector[3] = 200;
     
-    cuda_sparse_matvec_mult_CSR(my_csr,x);
+    Vector *y  = generate_vector(4);
+    cuda_sparse_matvec_mult_CSR(my_csr,x, y);
     
-    for(int i = 0; i < x->size; i++){
-        CU_ASSERT_DOUBLE_EQUAL(x->data[i], test_vector[i], 1e-6);
+    for(int i = 0; i < y->size; i++){
+        CU_ASSERT_DOUBLE_EQUAL(y->data[i], test_vector[i], 1e-6);
     }
     
     free(test_vector);
@@ -103,6 +105,7 @@ void test_sparse_CUDA_matvec_mult(){
     free(my_csr->val);
     free(my_csr->row_ptr);
     free(my_csr);
+    delete_vector(y);
     
 }
 
@@ -128,13 +131,17 @@ void test_dense_CUDA_matvec_mult(){
     
     test_array[0] = 8;
     test_array[1] = 7;
-    cuda_dense_matvec_mult(&A, &x);
-    for(int i = 0; i < x.size; i++){
-        CU_ASSERT_DOUBLE_EQUAL(x.data[i], test_array[i], 1e-6);
+
+    Vector *y = generate_vector(2);
+
+    cuda_dense_matvec_mult(&A, &x, y);
+    for(int i = 0; i < y->size; i++){
+        CU_ASSERT_DOUBLE_EQUAL(y->data[i], test_array[i], 1e-6);
     }
     free(A.data);
     free(x.data);
     free(test_array);
+    delete_vector(y);
 }
 
 void test_dense_CUDA_approximate_eigenvalue(){
@@ -154,10 +161,12 @@ void test_dense_CUDA_approximate_eigenvalue(){
     x.data[0] = 1;
     x.data[1] = 0;
     
-    double lambda = dense_approximate_eigenvalue(&A, &x, true);
+    Vector *y = generate_vector(2);
+    double lambda = dense_approximate_eigenvalue(&A, &x, y, true);
     CU_ASSERT_DOUBLE_EQUAL(lambda, 2.0, 0.0001);
     free(A.data);
     free(x.data);
+    delete_vector(y);
     
 }
 

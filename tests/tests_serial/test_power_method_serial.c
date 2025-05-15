@@ -70,13 +70,15 @@ void test_serial_dense_matvec_mult(){
     test_array[3] = 3;
     test_array[4] = 5;
 
-    serial_dense_matvec_mult(&A, &x);
-    for(int i = 0; i < x.size; i++){
-        CU_ASSERT_DOUBLE_EQUAL(x.data[i], test_array[i], 1e-6);
+    Vector *y = generate_vector(5);
+    serial_dense_matvec_mult(&A, &x, y);
+    for(int i = 0; i < y->size; i++){
+        CU_ASSERT_DOUBLE_EQUAL(y->data[i], test_array[i], 1e-6);
     }
     free(A.data);
     free(x.data);
     free(test_array);
+    delete_vector(y);
     
 }
 
@@ -126,11 +128,13 @@ void test_serial_dense_approximate_eigenvalue(){
     x.data[3] = 1;
     x.data[4] = 1;
 
-    double lambda = dense_approximate_eigenvalue(&A, &x, true);
+    Vector *y = generate_vector(5);
+    double lambda = dense_approximate_eigenvalue(&A, &x, y, true);
 
     CU_ASSERT_DOUBLE_EQUAL(lambda, 12, 0.0001);
     free(A.data);
     free(x.data);
+    delete_vector(y);
 
 }
 
@@ -249,10 +253,11 @@ void test_serial_sparse_COO_matvec_mult(){
     test_array[3] = 3;
     test_array[4] = 5;
 
-    serial_sparse_matvec_mult_COO(coo, &x);
+    Vector *y = generate_vector(5);
+    serial_sparse_matvec_mult_COO(coo, &x, y);
 
-    for(int i = 0; i < x.size; i++){
-        CU_ASSERT_DOUBLE_EQUAL(x.data[i], test_array[i], 1e-6);
+    for(int i = 0; i < y->size; i++){
+        CU_ASSERT_DOUBLE_EQUAL(y->data[i], test_array[i], 1e-6);
     }
    
     free(coo->col);
@@ -261,6 +266,7 @@ void test_serial_sparse_COO_matvec_mult(){
     free(coo);
     free(x.data);
     free(test_array);
+    delete_vector(y);
 }
 
 
@@ -336,10 +342,11 @@ void test_serial_sparse_CSR_matvec_mult(){
     test_array[3] = 3;
     test_array[4] = 5;
 
-    serial_sparse_matvec_mult_CSR(csr, &x);
+    Vector *y = generate_vector(5);
+    serial_sparse_matvec_mult_CSR(csr, &x, y);
 
-    for(int i = 0; i < x.size; i++){
-        CU_ASSERT_DOUBLE_EQUAL(x.data[i], test_array[i], 1e-6);
+    for(int i = 0; i < y->size; i++){
+        CU_ASSERT_DOUBLE_EQUAL(y->data[i], test_array[i], 1e-6);
     }
    
     free(coo->col);
@@ -352,6 +359,7 @@ void test_serial_sparse_CSR_matvec_mult(){
     free(csr);
     free(x.data);
     free(test_array);
+    delete_vector(y);
 }
 
 
@@ -424,8 +432,8 @@ void test_serial_sparse_approximate_eigenvalue(){
     x.data[3] = 1;
     x.data[4] = 1;
 
-
-    double lambda = sparse_approximate_eigenvalue(A, &x, true);
+    Vector *y = generate_vector(5);
+    double lambda = sparse_approximate_eigenvalue(A, &x, y, true);
     CU_ASSERT_DOUBLE_EQUAL(lambda, 12.0, 0.0001);
     
     free(coo->col);
@@ -434,6 +442,7 @@ void test_serial_sparse_approximate_eigenvalue(){
     free(coo);
     free(A);
     free(x.data);
+    delete_vector(y);
 
 
 }
@@ -567,14 +576,16 @@ void test_serial_norm(){
     x.data[3] = 3;
     x.data[4] = 5;
 
-    normalize_vector(&x);
+    Vector *y = generate_vector(5);
+    normalize_vector(&x, y);
 
-    CU_ASSERT_DOUBLE_EQUAL(x.data[0], -0.452267, 0.0001);
-    CU_ASSERT_DOUBLE_EQUAL(x.data[1], 0.150756, 0.0001);
-    CU_ASSERT_DOUBLE_EQUAL(x.data[2], 0.000000, 0.0001);
-    CU_ASSERT_DOUBLE_EQUAL(x.data[3], 0.452267, 0.0001);
-    CU_ASSERT_DOUBLE_EQUAL(x.data[4], 0.753778, 0.0001);
+    CU_ASSERT_DOUBLE_EQUAL(y->data[0], -0.452267, 0.0001);
+    CU_ASSERT_DOUBLE_EQUAL(y->data[1], 0.150756, 0.0001);
+    CU_ASSERT_DOUBLE_EQUAL(y->data[2], 0.000000, 0.0001);
+    CU_ASSERT_DOUBLE_EQUAL(y->data[3], 0.452267, 0.0001);
+    CU_ASSERT_DOUBLE_EQUAL(y->data[4], 0.753778, 0.0001);
     free(x.data);
+    delete_vector(y);
 
 }
 

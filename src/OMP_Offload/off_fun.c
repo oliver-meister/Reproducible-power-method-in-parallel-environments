@@ -72,14 +72,14 @@ double off_dot_product(const Vector* x, const Vector* y){
 
     double aux;
 
-    #pragma omp target map(to: A->row_ptr[0: A->rows + 1], A->val[0: A->nnz], A->col[0: A->nnz], x->data[0: x->size]) map(from: y->data[0: x->size])
+    #pragma omp target map(to: A->row_ptr[0: A->rows + 1], A->val[0: A->nnz], A->col[0: A->nnz], x->data[0: x->size]) map(from: y->data[0: y->size])
     #pragma omp parallel for default(none) private(aux) shared(y, A, x)
     for(int i = 0; i < A->rows; i++){
         aux = 0.0;
         for(int j = A->row_ptr[i]; j < A->row_ptr[i+1]; j++){
             aux = fma(x->data[A->col[j]], A->val[j], aux);
         }
-        y->data[i] += aux;
+        y->data[i] = aux;
     }
  }
 
@@ -91,5 +91,14 @@ void off_sparse_matvec_mult(const SparseMatrixAny* A, Vector* x, Vector *y){
     } else {
         printf("Runtime error: OpenMP currently only works with CSR format\n");
         exit(EXIT_FAILURE);
+    }
+}
+
+void off_vector_norm_div(const Vector *x, Vector *y, double norm){
+
+    #pragma omp target map(to: x->data[0: x->size]) map(from: y->data[0: y->size])
+    #pragma omp parallel for default(none) shared(x,y,norm) 
+    for(int i = 0; i < x->size; i++){
+        y->data[i] =  x->data[i] / norm;
     }
 }

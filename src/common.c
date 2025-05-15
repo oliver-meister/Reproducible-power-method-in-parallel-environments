@@ -12,11 +12,11 @@
 #include "../include/vector.h"
 
 dot_fn dotprod;
-sparse_matvec_fn sparse_matvec;
-sparse_eigen_fn sparse_eigen;
-dense_matvec_fn dense_matvec;
-dense_eigen_fn dense_eigen;
 
+dense_matvec_fn dense_matvec;
+sparse_matvec_fn sparse_matvec;
+
+vector_norm_div_fun vector_norm_div;
 
 /**
  * @brief Compares two eigenvalues and determines whether they have converged
@@ -40,28 +40,34 @@ bool convergence(double lambda_new, double lambda_old, double threshold){
  * 
  * @return Nothing. The result is stored directly in the vector x.
  */
-void normalize_vector(Vector* x){
+void normalize_vector(Vector* x, Vector *y){
 
     #ifdef USE_OMP
         printf("in OMP def\n");
         dotprod = openMP_dot_product;
+        vector_norm_div = openMP_vector_norm_div;
     #elif defined(USE_OFF)
-        printf("in OFF def\n");
+        printf("in OFF 5 def\n");
         dotprod = off_dot_product;
+        vector_norm_div = off_vector_norm_div;
     #elif defined(USE_CUDA)
         printf("in CUDA def\n");
         dotprod = cuda_dot_product;
+        vector_norm_div = cuda_vector_norm_div;
     #elif defined(USE_EXBLAS)
         printf("in EXBLAS def\n");
         dotprod = cuda_ExBLAS_dot_product;
+        vector_norm_div = cuda_vector_norm_div;
     #else
         printf("in SERIAL def\n");
         dotprod = serial_dot_product;
+        vector_norm_div = serial_vector_norm_div;
     #endif
 
     double norm = sqrt(dotprod(x,x));
-    if (norm == 0) return;
-    for(int i = 0; i < x->size; i++){
-        x->data[i] =  x->data[i] / norm;
+    if (norm < 1.0E-10){
+        return;
     }
+    vector_norm_div(x,y,norm);
+
 }

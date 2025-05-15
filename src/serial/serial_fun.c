@@ -95,7 +95,7 @@ void serial_sparse_matvec_mult_CSR(const sparseMatrixCSR* A, Vector* x, Vector* 
  */
 void serial_sparse_matvec_mult_COO(const sparseMatrixCOO* A, Vector* x, Vector* y){
     
-    for (int i = 0; i < y->length; i++) {
+    for (int i = 0; i < y->size; i++) {
         y->data[i] = 0.0;
     }
     // iterate thrue all non zero elemets
@@ -114,5 +114,11 @@ void serial_sparse_matvec_mult(const SparseMatrixAny* A, Vector* x, Vector* y) {
         serial_sparse_matvec_mult_CSR(A->mat.csr, x, y);
     } else {
         serial_sparse_matvec_mult_COO(A->mat.coo, x, y);
+    }
+}
+
+void serial_vector_norm_div(const Vector *x, Vector *y, double norm){
+      for(int i = 0; i < x->size; i++){
+        y->data[i] =  x->data[i] / norm;
     }
 }

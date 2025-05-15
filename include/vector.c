@@ -51,3 +51,17 @@ Vector* generate_random_vector(int size){
     }
     return x;
 }
+
+
+Vector* generate_vector(int size){
+    double *vector_data = malloc(sizeof(double) * size);
+    Vector *x = malloc(sizeof(Vector));
+    x->data = vector_data;
+    x->size = size;
+    return x;
+}
+
+void delete_vector(Vector *x){
+    free(x->data);
+    free(x);
+}

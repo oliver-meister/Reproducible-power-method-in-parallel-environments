@@ -25,7 +25,7 @@
 void openMP_dense_matvec_mult(const denseMatrix* A, Vector* x, Vector* y){
 
     double sum;
-    #pragma omp parallel for default(none) private(sum) shared(temp, A, x)
+    #pragma omp parallel for default(none) private(sum) shared(y, A, x)
     for(int i = 0; i < A->rows; i++){
         sum = 0;
         for (int j = 0; j < A->cols; j++){
@@ -127,5 +127,14 @@ void openMP_sparse_matvec_mult(const SparseMatrixAny* A, Vector* x, Vector *y){
     } else {
         printf("Runtime error: OpenMP currently only works with CSR format\n");
         exit(EXIT_FAILURE);
+    }
+}
+
+
+void openMP_vector_norm_div(const Vector *x, Vector *y, double norm){
+
+    #pragma omp parallel for default(none) shared(x,y,norm) 
+    for(int i = 0; i < x->size; i++){
+        y->data[i] =  x->data[i] / norm;
     }
 }

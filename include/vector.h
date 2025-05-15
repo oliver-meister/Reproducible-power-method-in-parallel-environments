@@ -7,7 +7,9 @@ typedef struct {
 } Vector;
 
 double generate_random_double(double, double);
-Vector* generate_random_vector(int);
+Vector* generate_random_vector(int size);
+Vector* generate_vector(int size);
+void delete_vector(Vector* x);
 
 #endif 
 

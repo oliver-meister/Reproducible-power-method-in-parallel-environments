@@ -33,7 +33,7 @@ double dense_power_method(const denseMatrix* A){
         dotprod = openMP_dot_product;
         dense_matvec = openMP_dense_matvec_mult;
     #elif defined(USE_OFF)
-        printf("in OFF def\n");
+        printf("in OFF 1 def\n");
         dotprod = off_dot_product;
         dense_matvec = off_dense_matvec_mult;
     #elif defined(USE_CUDA)
@@ -54,16 +54,19 @@ double dense_power_method(const denseMatrix* A){
     double lambda_old = 0;
     double lambda_new = 0;
     Vector* x = generate_random_vector(A->rows);
+    Vector* y = generate_vector(A->rows);
+  
+
     do{
         lambda_old = lambda_new;
-        dense_matvec(A,x);
-        normalize_vector(x);
-        lambda_new = dense_approximate_eigenvalue(A, x, false);
+        dense_matvec(A,x,y);
+        normalize_vector(y,x);
+        lambda_new = dense_approximate_eigenvalue(A, x, y, false);
 
     } while(!convergence(lambda_new, lambda_old, 0.00001));
 
-    free(x->data);
-    free(x);
+   delete_vector(x);
+   delete_vector(y);
     return lambda_new;
 }
 
@@ -76,7 +79,7 @@ double dense_power_method(const denseMatrix* A){
  * 
  * @return The approximated dominant eigenvalue.
  */
-double dense_approximate_eigenvalue(const denseMatrix* A, const Vector* x, bool test){
+double dense_approximate_eigenvalue(const denseMatrix* A, Vector* x, Vector *y, bool test){
 
     if (test){
         #ifdef USE_OMP
@@ -84,7 +87,7 @@ double dense_approximate_eigenvalue(const denseMatrix* A, const Vector* x, bool 
         dotprod = openMP_dot_product;
         dense_matvec = openMP_dense_matvec_mult;
         #elif defined(USE_OFF)
-            printf("in OFF def\n");
+            printf("in OFF 2 def\n");
             dotprod = off_dot_product;
             dense_matvec = off_dense_matvec_mult;
         #elif defined(USE_CUDA)
@@ -101,15 +104,9 @@ double dense_approximate_eigenvalue(const denseMatrix* A, const Vector* x, bool 
             dense_matvec = serial_dense_matvec_mult;
         #endif
     }
-    Vector copy;
-    copy.size = x->size;
-    copy.data = malloc(sizeof(double) * copy.size);
-    for(int i = 0; i < copy.size; i++){
-        copy.data[i] = x->data[i];
-    }
-    dense_matvec(A, &copy);
-    double lambda = dotprod(x, &copy);
-    free(copy.data);
+
+    dense_matvec(A, x, y);
+    double lambda = dotprod(x,y);
     return lambda;
 }
 

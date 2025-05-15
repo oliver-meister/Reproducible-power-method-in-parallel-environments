@@ -113,4 +113,19 @@ void cuda_dense_matvec_mult(const denseMatrix *A, Vector *x, Vector *y){
 }
 
 
+void cuda_vector_norm_div(const Vector *x, Vector *y, double norm){
 
+    double *ivector, *ovector;
+
+    cudaMalloc((void **)&ivector, sizeof(double) * x->size);
+    cudaMalloc((void **)&ovector, sizeof(double) * y->size);
+
+    cudaMemcpy(ivector, x->data, sizeof(double) * x->size, cudaMemcpyHostToDevice);
+
+    launch_vector_norm_div(ivector, ovector, norm, x->size);
+
+    cudaMemcpy(y->data, ovector, sizeof(double) * x->size, cudaMemcpyDeviceToHost);
+
+    cudaFree(ivector);
+    cudaFree(ovector);
+}
