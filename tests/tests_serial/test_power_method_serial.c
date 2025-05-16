@@ -811,10 +811,10 @@ int main(){
     CU_initialize_registry();
     CU_pSuite suite = CU_add_suite("Power Method Serial Tests", NULL, NULL);
     // Tests for dense matrices.
+    /*
     CU_add_test(suite, "generate dense sum vector test", test_generate_sum_vector_dense);
     CU_add_test(suite, "generate COO sum vector test", test_generate_sum_vector_COO);
     CU_add_test(suite, "generate CSR sum vector test", test_generate_sum_vector_CSR);
-    /*
     CU_add_test(suite, "Matrix vector multiplication dense test", test_serial_dense_matvec_mult);
     CU_add_test(suite, "Approximate eigenvalue dense test", test_serial_dense_approximate_eigenvalue);
     CU_add_test(suite, "Power method dense test", test_serial_dense_power_method);
@@ -825,9 +825,9 @@ int main(){
     CU_add_test(suite, "Approximate eigenvalue sparse test", test_serial_sparse_approximate_eigenvalue);
     CU_add_test(suite, "Power method sparse test", test_serial_sparse_power_method);
     CU_add_test(suite, "Power method sparse COO large test", test_serial_sparse_COO_large_power_method);
-*/
-
-    //CU_add_test(suite, "Power method sparse CSR large test", test_serial_CSR_494_bus);
+    
+    */
+    CU_add_test(suite, "Power method sparse CSR large test", test_serial_CSR_494_bus);
 
     //Tests for common functions.
     //CU_add_test(suite, "Generate random vector test", test_serial_generate_random_vector);

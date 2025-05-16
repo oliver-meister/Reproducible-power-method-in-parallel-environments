@@ -3,55 +3,59 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "matrix.h"
+#include <stdbool.h>
 #include "../external/mmio.h"
 
 
-sparseMatrixCOO* createSparseMatrixCOO(char* file){
-    
+sparseMatrixCOO* createSparseMatrixCOO(char* file) {
     FILE *f;
     int *row, *col;
     double *val;
     int rows, cols, nnz;
-    
+
     if ((f = fopen(file, "r")) == NULL) {
         perror("Cannot open matrix file");
         exit(1);
     }
-    
-    // Matrix metadata
+
+    // Read matrix type and size
     MM_typecode matcode;
     mm_read_banner(f, &matcode);
     mm_read_mtx_crd_size(f, &rows, &cols, &nnz);
-    
-    // Allocate enough memory (max case: symmetric matrix → duplicate off-diagonal entries)
-    row = (int *) malloc(sizeof(int) * nnz * 2);
-    col = (int *) malloc(sizeof(int) * nnz * 2);
-    val = (double *) malloc(sizeof(double) * nnz * 2);
-    
+
+    // Determine if symmetric
+    bool is_symmetric = mm_is_symmetric(matcode);
+
+    // Allocate memory (symmetric → up to 2× nnz)
+    int max_nnz = is_symmetric ? nnz * 2 : nnz;
+    row = (int *) malloc(sizeof(int) * max_nnz);
+    col = (int *) malloc(sizeof(int) * max_nnz);
+    val = (double *) malloc(sizeof(double) * max_nnz);
+
     int current_nnz = 0;
-    
+
     for (int i = 0; i < nnz; i++) {
         int r, c;
         double v;
-    
+
         fscanf(f, "%d %d %lg", &r, &c, &v);
         r--; c--; // Convert to 0-based indexing
-    
-        // Add (r, c)
+
+        // Always store the original (r, c)
         row[current_nnz] = r;
         col[current_nnz] = c;
         val[current_nnz] = v;
         current_nnz++;
-    
-        // If off-diagonal, also add (c, r)
-        if (r != c) {
+
+        // If symmetric and off-diagonal, store (c, r)
+        if (is_symmetric && r != c) {
             row[current_nnz] = c;
             col[current_nnz] = r;
             val[current_nnz] = v;
             current_nnz++;
         }
     }
-    
+
     fclose(f);
 
     sparseMatrixCOO *A = malloc(sizeof(sparseMatrixCOO));
@@ -60,7 +64,7 @@ sparseMatrixCOO* createSparseMatrixCOO(char* file){
     A->val = val;
     A->rows = rows;
     A->cols = cols;
-    A->nnz = nnz;
+    A->nnz = current_nnz;  // Actual nnz used
 
     return A;
 }

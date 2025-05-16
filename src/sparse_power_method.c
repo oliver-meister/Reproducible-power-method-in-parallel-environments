@@ -79,7 +79,6 @@ double sparse_power_method(const SparseMatrixAny *A){
 
  double sparse_approximate_eigenvalue(const SparseMatrixAny* A, Vector* x, Vector *y){
     
-    sparse_matvec(A, x, y);
     double lambda = dotprod(x, y);
     
     return lambda;
