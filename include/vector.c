@@ -1,7 +1,6 @@
 #include "vector.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "matrix.h"
 
 /**
  * @brief Calculates the dot product of two Vectors.
@@ -69,4 +68,54 @@ void delete_vector(Vector *x){
 
 Vector* generate_sum_vector_CSR(sparseMatrixCSR *A){
 
+    Vector *x = malloc(sizeof(Vector));
+    x->size = A->rows;
+    x->data  = malloc(sizeof(double) * x->size);
+
+    for(int i = 0; i < A->rows; i++){
+        double sum = 0;
+        for(int j = A->row_ptr[i]; j < A->row_ptr[i+1]; j++){
+            sum += A->val[j];
+        }
+        x->data[i] = sum;
+    }
+    return x;
+}
+
+Vector* generate_sum_vector_COO(sparseMatrixCOO *A){
+    Vector *x = malloc(sizeof(Vector));
+    x->size = A->rows;
+    x->data  = calloc(x->size, sizeof(double));
+
+    for(int i = 0; i < A->nnz; i++){
+        double value = A->val[i];
+        int value_row = A->row[i];
+        x->data[value_row] += value;
+    }
+    return x;
+}
+
+Vector* generate_sum_vector_sparse(SparseMatrixAny *A){
+    if (A->type == CSR){
+        return generate_sum_vector_CSR(A->mat.csr);
+    } else{
+        return generate_sum_vector_COO(A->mat.coo);
+    }
+}
+
+Vector* generate_sum_vector_dense(denseMatrix *A){
+
+    Vector *x = malloc(sizeof(Vector));
+    x->size = A->rows;
+    x->data  = malloc(sizeof(double) * x->size);
+
+    for(int i = 0; i < A->rows; i++){
+        double sum = 0;
+        for(int j = 0; j < A->cols; j++){
+            sum += A->data[i * A->cols + j];
+        }
+        x->data[i] = sum;
+    }
+
+    return x;
 }

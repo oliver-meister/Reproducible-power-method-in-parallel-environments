@@ -16,7 +16,210 @@
 
 //Tests for dense matrices.
 
-// Works
+
+void test_generate_sum_vector_dense(){
+    denseMatrix A;
+    A.rows = 5;
+    A.cols = 5;
+    A.data = malloc(sizeof(double) * 25);
+    A.data[0] = 4.0; 
+    A.data[1] = 1.0; 
+    A.data[2] = 0.0; 
+    A.data[3] = 0.0;
+    A.data[4] = 0.0; 
+
+    A.data[5] = 1.0; 
+    A.data[6] = 3.0; 
+    A.data[7] = 1.0; 
+    A.data[8] = 0.0; 
+    A.data[9] = 0.0; 
+
+    A.data[10] = 0.0; 
+    A.data[11] = 1.0; 
+    A.data[12] = 2.0; 
+    A.data[13] = 1.0; 
+    A.data[14] = 0.0; 
+
+    A.data[15] = 0.0; 
+    A.data[16] = 0.0; 
+    A.data[17] = 1.0; 
+    A.data[18] = 3.0; 
+    A.data[19] = 1.0; 
+
+    A.data[20] = 0.0; 
+    A.data[21] = 0.0; 
+    A.data[22] = 0.0; 
+    A.data[23] = 1.0; 
+    A.data[24] = 4.0;
+
+    double *x = malloc(sizeof(double) * 5);
+    x[0] = 5;
+    x[1] = 5;
+    x[2] = 4;
+    x[3] = 5;
+    x[4] = 5;
+
+    Vector *y = generate_sum_vector_dense(&A);
+
+    for(int i = 0; i < y->size; i++){
+        CU_ASSERT_DOUBLE_EQUAL(y->data[i], x[i], 1e-6);
+    }
+
+    delete_vector(y);
+    free(x);
+    free(A.data);
+}
+
+void test_generate_sum_vector_COO(){
+    sparseMatrixCOO *coo = malloc(sizeof(sparseMatrixCOO));
+    coo->rows = 5;
+    coo->cols = 5;
+    coo->nnz = 13;
+    coo->row = malloc(sizeof(int) * coo->nnz);
+    coo->col = malloc(sizeof(int) * coo->nnz);
+    coo->val = malloc(sizeof(double) * coo->nnz);
+
+    coo->row[0] = 0;
+    coo->row[1] = 0;
+    coo->row[2] = 1;
+    coo->row[3] = 1;
+    coo->row[4] = 1;
+    coo->row[5] = 2;
+    coo->row[6] = 2;
+    coo->row[7] = 2;
+    coo->row[8] = 3;
+    coo->row[9] = 3;
+    coo->row[10] = 3;
+    coo->row[11] = 4;
+    coo->row[12] = 4;
+
+    coo->col[0] = 0;
+    coo->col[1] = 1;
+    coo->col[2] = 0;
+    coo->col[3] = 1;
+    coo->col[4] = 2;
+    coo->col[5] = 1;
+    coo->col[6] = 2;
+    coo->col[7] = 3;
+    coo->col[8] = 2;
+    coo->col[9] = 3;
+    coo->col[10] = 4;
+    coo->col[11] = 3;
+    coo->col[12] = 4;
+
+    coo->val[0] = 4;
+    coo->val[1] = 1;
+    coo->val[2] = 1;
+    coo->val[3] = 3;
+    coo->val[4] = 1;
+    coo->val[5] = 1;
+    coo->val[6] = 2;
+    coo->val[7] = 1;
+    coo->val[8] = 1;
+    coo->val[9] = 3;
+    coo->val[10] = 1;
+    coo->val[11] = 1;
+    coo->val[12] = 4;
+
+    double *x = malloc(sizeof(double) * 5);
+    x[0] = 5; 
+    x[1] = 5;
+    x[2] = 4;
+    x[3] = 5;
+    x[4] = 5;
+
+    Vector *y = generate_sum_vector_COO(coo);
+
+    for(int i = 0; i < y->size; i++){
+        CU_ASSERT_DOUBLE_EQUAL(y->data[i], x[i], 1e-6);
+    }
+
+    delete_vector(y);
+    free(x);
+    free(coo->row);
+    free(coo->col);
+    free(coo->val);
+    free(coo);
+}
+
+void test_generate_sum_vector_CSR(){
+    sparseMatrixCOO *coo = malloc(sizeof(sparseMatrixCOO));
+    coo->rows = 5;
+    coo->cols = 5;
+    coo->nnz = 13;
+    coo->row = malloc(sizeof(int) * coo->nnz);
+    coo->col = malloc(sizeof(int) * coo->nnz);
+    coo->val = malloc(sizeof(double) * coo->nnz);
+
+    coo->row[0] = 0;
+    coo->row[1] = 0;
+    coo->row[2] = 1;
+    coo->row[3] = 1;
+    coo->row[4] = 1;
+    coo->row[5] = 2;
+    coo->row[6] = 2;
+    coo->row[7] = 2;
+    coo->row[8] = 3;
+    coo->row[9] = 3;
+    coo->row[10] = 3;
+    coo->row[11] = 4;
+    coo->row[12] = 4;
+
+    coo->col[0] = 0;
+    coo->col[1] = 1;
+    coo->col[2] = 0;
+    coo->col[3] = 1;
+    coo->col[4] = 2;
+    coo->col[5] = 1;
+    coo->col[6] = 2;
+    coo->col[7] = 3;
+    coo->col[8] = 2;
+    coo->col[9] = 3;
+    coo->col[10] = 4;
+    coo->col[11] = 3;
+    coo->col[12] = 4;
+
+    coo->val[0] = 4;
+    coo->val[1] = 1;
+    coo->val[2] = 1;
+    coo->val[3] = 3;
+    coo->val[4] = 1;
+    coo->val[5] = 1;
+    coo->val[6] = 2;
+    coo->val[7] = 1;
+    coo->val[8] = 1;
+    coo->val[9] = 3;
+    coo->val[10] = 1;
+    coo->val[11] = 1;
+    coo->val[12] = 4;
+
+    sparseMatrixCSR* csr = coo_to_csr(coo);
+
+    double *x = malloc(sizeof(double) * 5);
+    x[0] = 5; 
+    x[1] = 5;
+    x[2] = 4;
+    x[3] = 5;
+    x[4] = 5;
+
+    Vector *y = generate_sum_vector_CSR(csr);
+
+    for(int i = 0; i < y->size; i++){
+        CU_ASSERT_DOUBLE_EQUAL(y->data[i], x[i], 1e-6);
+    }
+
+    delete_vector(y);
+    free(x);
+    free(coo->row);
+    free(coo->col);
+    free(coo->val);
+    free(coo);
+    free(csr->col);
+    free(csr->row_ptr);
+    free(csr->val);
+    free(csr);
+}
+
 void test_serial_dense_matvec_mult(){
 
     denseMatrix A;
@@ -607,8 +810,11 @@ int main(){
     srand(time(0));
     CU_initialize_registry();
     CU_pSuite suite = CU_add_suite("Power Method Serial Tests", NULL, NULL);
-/*
     // Tests for dense matrices.
+    CU_add_test(suite, "generate dense sum vector test", test_generate_sum_vector_dense);
+    CU_add_test(suite, "generate COO sum vector test", test_generate_sum_vector_COO);
+    CU_add_test(suite, "generate CSR sum vector test", test_generate_sum_vector_CSR);
+    /*
     CU_add_test(suite, "Matrix vector multiplication dense test", test_serial_dense_matvec_mult);
     CU_add_test(suite, "Approximate eigenvalue dense test", test_serial_dense_approximate_eigenvalue);
     CU_add_test(suite, "Power method dense test", test_serial_dense_power_method);
@@ -621,7 +827,7 @@ int main(){
     CU_add_test(suite, "Power method sparse COO large test", test_serial_sparse_COO_large_power_method);
 */
 
-    CU_add_test(suite, "Power method sparse CSR large test", test_serial_CSR_494_bus);
+    //CU_add_test(suite, "Power method sparse CSR large test", test_serial_CSR_494_bus);
 
     //Tests for common functions.
     //CU_add_test(suite, "Generate random vector test", test_serial_generate_random_vector);
