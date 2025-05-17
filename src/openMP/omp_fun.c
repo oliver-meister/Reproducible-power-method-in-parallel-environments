@@ -28,6 +28,7 @@ void openMP_dense_matvec_mult(const denseMatrix* A, Vector* x, Vector* y){
     #pragma omp parallel for default(none) private(sum) shared(y, A, x)
     for(int i = 0; i < A->rows; i++){
         sum = 0;
+        
         for (int j = 0; j < A->cols; j++){
             // each row has cols elements
             double value = A->data[i * A->cols + j];
@@ -40,7 +41,7 @@ void openMP_dense_matvec_mult(const denseMatrix* A, Vector* x, Vector* y){
 }
 
 
-double openMP_dot_product2(const Vector* x, const Vector* y){
+double openMP_dot_product(const Vector* x, const Vector* y){
     if(x->size != y->size){
         printf("Error: Vectors must have the same size (x: %d, y: %d)\n", x->size, y->size);
         return 0.0;
@@ -56,7 +57,7 @@ double openMP_dot_product2(const Vector* x, const Vector* y){
 }
 
 
-double openMP_dot_product(const Vector* x, const Vector* y){
+double openMP_dot_product2(const Vector* x, const Vector* y){
     if(x->size != y->size){
         printf("Error: Vectors must have the same size (x: %d, y: %d)\n", x->size, y->size);
         return 0.0;

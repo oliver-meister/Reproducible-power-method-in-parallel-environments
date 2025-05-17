@@ -26,7 +26,7 @@ extern sparse_matvec_fn sparse_matvec;
  * 
  * @return The dominant eigenvalue of matrix A.
  */
-double sparse_power_method(const SparseMatrixAny *A){
+Res sparse_power_method(const SparseMatrixAny *A){
     
     double lambda_old = 0;
     double lambda_new = 0;
@@ -57,6 +57,7 @@ double sparse_power_method(const SparseMatrixAny *A){
 
     clock_t end = clock();
     double time = (double) (end - start) / CLOCKS_PER_SEC;
+    Res result = {.lambda = lambda_new, .time = time};
 
     if (iterations >= MAX_ITERATIONS) {
         printf("Warning: Power method did not converge within max iterations.\n");
@@ -67,7 +68,7 @@ double sparse_power_method(const SparseMatrixAny *A){
     }
     delete_vector(x);
     delete_vector(y);
-    return lambda_new;
+    return result;
 }
 
 

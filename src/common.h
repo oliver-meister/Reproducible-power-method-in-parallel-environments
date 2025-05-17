@@ -13,4 +13,10 @@ bool convergence(double prev, double curr, double tolerance);
 void normalize_vector(Vector* x, Vector* y);
 void init_backend();
 
+typedef struct {
+    double lambda;
+    double time;
+} Res;
+
+
 #endif
