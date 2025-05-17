@@ -68,8 +68,6 @@ double dense_power_method(const denseMatrix* A){
  * @return The approximated dominant eigenvalue.
  */
 double dense_approximate_eigenvalue(const denseMatrix* A, Vector* x, Vector *y){
-
-    dense_matvec(A, x, y);
     double lambda = dotprod(x,y);
     return lambda;
 }

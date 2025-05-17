@@ -15,5 +15,6 @@ Vector* generate_sum_vector_sparse(SparseMatrixAny *A);
 Vector* generate_sum_vector_dense(denseMatrix *A);
 Vector* generate_sum_vector_COO(sparseMatrixCOO *A);
 Vector* generate_sum_vector_CSR(sparseMatrixCSR *A);
+Vector* generate_1_vector(int size);
 #endif 
 

@@ -16,7 +16,7 @@
 extern dot_fn dotprod;
 extern sparse_matvec_fn sparse_matvec;
 
-#define MAX_ITERATIONS 1000
+#define MAX_ITERATIONS 10000
 
 
 /**
@@ -39,17 +39,19 @@ double sparse_power_method(const SparseMatrixAny *A){
     }
 
     // initial vector
-    Vector* x = generate_random_vector(size);
+    Vector* x = generate_1_vector(size);
     Vector* y = generate_vector(size);
     int iterations = 0;
 
     clock_t start = clock();
+    //y_1
+    sparse_matvec(A,x,y);
     do{
-        iterations += 1;
         lambda_old = lambda_new;
-        sparse_matvec(A,x,y);
         normalize_vector(y,x);
         lambda_new = sparse_approximate_eigenvalue(A, x, y);
+        sparse_matvec(A,x,y);
+        iterations += 1;
         
     } while(!convergence(lambda_new, lambda_old, 1.0E-6) && iterations < MAX_ITERATIONS);
 
@@ -61,6 +63,7 @@ double sparse_power_method(const SparseMatrixAny *A){
     } else{
         printf("Number of iterations: %d\n", iterations);
         printf("Execution time: %f\n", time);
+        printf("Lambda: %f\n", lambda_new);
     }
     delete_vector(x);
     delete_vector(y);
@@ -79,6 +82,7 @@ double sparse_power_method(const SparseMatrixAny *A){
 
  double sparse_approximate_eigenvalue(const SparseMatrixAny* A, Vector* x, Vector *y){
     
+    //sparse_matvec(A, x, y);
     double lambda = dotprod(x, y);
     
     return lambda;

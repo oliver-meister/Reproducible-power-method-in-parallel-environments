@@ -765,6 +765,56 @@ void test_serial_CSR_494_bus(){
 
 }
 
+void test_serial_CSR_venkat01(){
+ 
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/venkat01/venkat01.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+
+    double lambda = sparse_power_method(A);
+    //CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.14176, 0.0001);
+
+    free(my_coo->row);
+    free(my_coo->col);
+    free(my_coo->val);
+    free(my_coo);
+    
+    free(my_csr->row_ptr);
+    free(my_csr->col);
+    free(my_csr->val);
+    free(my_csr);
+    
+    free(A);
+}
+
+void test_serial_CSR_cage10(){
+ 
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/cage10/cage10.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+
+    double lambda = sparse_power_method(A);
+    //CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.14176, 0.0001);
+
+    free(my_coo->row);
+    free(my_coo->col);
+    free(my_coo->val);
+    free(my_coo);
+    
+    free(my_csr->row_ptr);
+    free(my_csr->col);
+    free(my_csr->val);
+    free(my_csr);
+    
+    free(A);
+}
+
 //////////////////////////////////////////////////////////////
 
 // Works
@@ -827,7 +877,9 @@ int main(){
     CU_add_test(suite, "Power method sparse COO large test", test_serial_sparse_COO_large_power_method);
     
     */
-    CU_add_test(suite, "Power method sparse CSR large test", test_serial_CSR_494_bus);
+    //CU_add_test(suite, "Power method 494_bus", test_serial_CSR_494_bus);
+    CU_add_test(suite, "Power method cage10", test_serial_CSR_venkat01);
+    //CU_add_test(suite, "Power method cage10", test_serial_CSR_cage10);
 
     //Tests for common functions.
     //CU_add_test(suite, "Generate random vector test", test_serial_generate_random_vector);

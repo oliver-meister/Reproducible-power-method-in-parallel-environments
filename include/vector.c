@@ -119,3 +119,15 @@ Vector* generate_sum_vector_dense(denseMatrix *A){
 
     return x;
 }
+
+Vector* generate_1_vector(int size){
+
+    Vector *x = malloc(sizeof(Vector));
+    x->size = size;
+    x->data  = malloc(sizeof(double) * size);
+
+    for(int i = 0; i < size; i++){
+        x->data[i] = 1.0;
+    }
+    return x;
+}
