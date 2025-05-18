@@ -32,8 +32,6 @@ TEST_CUDA = tests/tests_CUDA/test_power_method_cuda.c
 TEST_EXBLAS = tests/tests_CUDA_EXBLAS/test_power_method_cuda_exblas.c
 
 
-
-
 include/vector.o: include/vector.c include/vector.h
 	$(CC) -c $< -o $@ $(CFLAGS)
 

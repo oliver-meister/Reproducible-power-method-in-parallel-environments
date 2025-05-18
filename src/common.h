@@ -9,6 +9,9 @@ typedef void (*sparse_matvec_fn)(const SparseMatrixAny*, Vector*, Vector*);
 typedef double (*dot_fn)(const Vector*, const Vector*);
 typedef void (*vector_norm_div_fun)(const Vector*, Vector*, double);
 
+typedef double (*start_timer)();
+typedef double (*stop_timer)(double start);
+
 bool convergence(double prev, double curr, double tolerance);
 void normalize_vector(Vector* x, Vector* y);
 void init_backend();

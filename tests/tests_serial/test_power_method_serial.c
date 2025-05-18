@@ -16,6 +16,7 @@
 
 //Tests for dense matrices.
 
+/*
 
 void test_generate_sum_vector_dense(){
     denseMatrix A;
@@ -27,44 +28,44 @@ void test_generate_sum_vector_dense(){
     A.data[2] = 0.0; 
     A.data[3] = 0.0;
     A.data[4] = 0.0; 
-
+    
     A.data[5] = 1.0; 
     A.data[6] = 3.0; 
     A.data[7] = 1.0; 
     A.data[8] = 0.0; 
     A.data[9] = 0.0; 
-
+    
     A.data[10] = 0.0; 
     A.data[11] = 1.0; 
     A.data[12] = 2.0; 
     A.data[13] = 1.0; 
     A.data[14] = 0.0; 
-
+    
     A.data[15] = 0.0; 
     A.data[16] = 0.0; 
     A.data[17] = 1.0; 
     A.data[18] = 3.0; 
     A.data[19] = 1.0; 
-
+    
     A.data[20] = 0.0; 
     A.data[21] = 0.0; 
     A.data[22] = 0.0; 
     A.data[23] = 1.0; 
     A.data[24] = 4.0;
-
+    
     double *x = malloc(sizeof(double) * 5);
     x[0] = 5;
     x[1] = 5;
     x[2] = 4;
     x[3] = 5;
     x[4] = 5;
-
+    
     Vector *y = generate_sum_vector_dense(&A);
-
+    
     for(int i = 0; i < y->size; i++){
         CU_ASSERT_DOUBLE_EQUAL(y->data[i], x[i], 1e-6);
     }
-
+    
     delete_vector(y);
     free(x);
     free(A.data);
@@ -78,7 +79,7 @@ void test_generate_sum_vector_COO(){
     coo->row = malloc(sizeof(int) * coo->nnz);
     coo->col = malloc(sizeof(int) * coo->nnz);
     coo->val = malloc(sizeof(double) * coo->nnz);
-
+    
     coo->row[0] = 0;
     coo->row[1] = 0;
     coo->row[2] = 1;
@@ -92,7 +93,7 @@ void test_generate_sum_vector_COO(){
     coo->row[10] = 3;
     coo->row[11] = 4;
     coo->row[12] = 4;
-
+    
     coo->col[0] = 0;
     coo->col[1] = 1;
     coo->col[2] = 0;
@@ -106,7 +107,7 @@ void test_generate_sum_vector_COO(){
     coo->col[10] = 4;
     coo->col[11] = 3;
     coo->col[12] = 4;
-
+    
     coo->val[0] = 4;
     coo->val[1] = 1;
     coo->val[2] = 1;
@@ -120,20 +121,20 @@ void test_generate_sum_vector_COO(){
     coo->val[10] = 1;
     coo->val[11] = 1;
     coo->val[12] = 4;
-
+    
     double *x = malloc(sizeof(double) * 5);
     x[0] = 5; 
     x[1] = 5;
     x[2] = 4;
     x[3] = 5;
     x[4] = 5;
-
+    
     Vector *y = generate_sum_vector_COO(coo);
-
+    
     for(int i = 0; i < y->size; i++){
         CU_ASSERT_DOUBLE_EQUAL(y->data[i], x[i], 1e-6);
     }
-
+    
     delete_vector(y);
     free(x);
     free(coo->row);
@@ -150,7 +151,7 @@ void test_generate_sum_vector_CSR(){
     coo->row = malloc(sizeof(int) * coo->nnz);
     coo->col = malloc(sizeof(int) * coo->nnz);
     coo->val = malloc(sizeof(double) * coo->nnz);
-
+    
     coo->row[0] = 0;
     coo->row[1] = 0;
     coo->row[2] = 1;
@@ -164,7 +165,7 @@ void test_generate_sum_vector_CSR(){
     coo->row[10] = 3;
     coo->row[11] = 4;
     coo->row[12] = 4;
-
+    
     coo->col[0] = 0;
     coo->col[1] = 1;
     coo->col[2] = 0;
@@ -178,7 +179,7 @@ void test_generate_sum_vector_CSR(){
     coo->col[10] = 4;
     coo->col[11] = 3;
     coo->col[12] = 4;
-
+    
     coo->val[0] = 4;
     coo->val[1] = 1;
     coo->val[2] = 1;
@@ -192,22 +193,22 @@ void test_generate_sum_vector_CSR(){
     coo->val[10] = 1;
     coo->val[11] = 1;
     coo->val[12] = 4;
-
+    
     sparseMatrixCSR* csr = coo_to_csr(coo);
-
+    
     double *x = malloc(sizeof(double) * 5);
     x[0] = 5; 
     x[1] = 5;
     x[2] = 4;
     x[3] = 5;
     x[4] = 5;
-
+    
     Vector *y = generate_sum_vector_CSR(csr);
-
+    
     for(int i = 0; i < y->size; i++){
         CU_ASSERT_DOUBLE_EQUAL(y->data[i], x[i], 1e-6);
     }
-
+    
     delete_vector(y);
     free(x);
     free(coo->row);
@@ -221,162 +222,162 @@ void test_generate_sum_vector_CSR(){
 }
 
 void test_serial_dense_matvec_mult(){
-
-    denseMatrix A;
-    A.rows = 5;
-    A.cols = 5;
-    A.data = malloc(sizeof(double) * 25);
-    A.data[0] = 4.0; 
-    A.data[1] = 1.0; 
-    A.data[2] = 0.0; 
-    A.data[3] = 0.0;
-    A.data[4] = 0.0; 
-
-    A.data[5] = 1.0; 
-    A.data[6] = 3.0; 
-    A.data[7] = 1.0; 
-    A.data[8] = 0.0; 
-    A.data[9] = 0.0; 
-
-    A.data[10] = 0.0; 
-    A.data[11] = 1.0; 
-    A.data[12] = 2.0; 
-    A.data[13] = 1.0; 
-    A.data[14] = 0.0; 
-
-    A.data[15] = 0.0; 
-    A.data[16] = 0.0; 
-    A.data[17] = 1.0; 
-    A.data[18] = 3.0; 
-    A.data[19] = 1.0; 
-
-    A.data[20] = 0.0; 
-    A.data[21] = 0.0; 
-    A.data[22] = 0.0; 
-    A.data[23] = 1.0; 
-    A.data[24] = 4.0; 
-
-    Vector x;
-    x.size = 5;
-    x.data = malloc(sizeof(double) * 5);
-    x.data[0] = -1;
-    x.data[1] = 1;
-    x.data[2] = -1;
-    x.data[3] = 1;
-    x.data[4] = 1;
-
-    double* test_array = malloc(sizeof(double) * 5);
-
-    test_array[0] = -3;
-    test_array[1] = 1;
-    test_array[2] = 0;
-    test_array[3] = 3;
-    test_array[4] = 5;
-
-    Vector *y = generate_vector(5);
-    serial_dense_matvec_mult(&A, &x, y);
-    for(int i = 0; i < y->size; i++){
-        CU_ASSERT_DOUBLE_EQUAL(y->data[i], test_array[i], 1e-6);
-    }
-    free(A.data);
-    free(x.data);
-    free(test_array);
-    delete_vector(y);
     
+denseMatrix A;
+A.rows = 5;
+A.cols = 5;
+A.data = malloc(sizeof(double) * 25);
+A.data[0] = 4.0; 
+A.data[1] = 1.0; 
+A.data[2] = 0.0; 
+A.data[3] = 0.0;
+A.data[4] = 0.0; 
+
+A.data[5] = 1.0; 
+A.data[6] = 3.0; 
+A.data[7] = 1.0; 
+A.data[8] = 0.0; 
+A.data[9] = 0.0; 
+
+A.data[10] = 0.0; 
+A.data[11] = 1.0; 
+A.data[12] = 2.0; 
+A.data[13] = 1.0; 
+A.data[14] = 0.0; 
+
+A.data[15] = 0.0; 
+A.data[16] = 0.0; 
+A.data[17] = 1.0; 
+A.data[18] = 3.0; 
+A.data[19] = 1.0; 
+
+A.data[20] = 0.0; 
+A.data[21] = 0.0; 
+A.data[22] = 0.0; 
+A.data[23] = 1.0; 
+A.data[24] = 4.0; 
+
+Vector x;
+x.size = 5;
+x.data = malloc(sizeof(double) * 5);
+x.data[0] = -1;
+x.data[1] = 1;
+x.data[2] = -1;
+x.data[3] = 1;
+x.data[4] = 1;
+
+double* test_array = malloc(sizeof(double) * 5);
+
+test_array[0] = -3;
+test_array[1] = 1;
+test_array[2] = 0;
+test_array[3] = 3;
+test_array[4] = 5;
+
+Vector *y = generate_vector(5);
+serial_dense_matvec_mult(&A, &x, y);
+for(int i = 0; i < y->size; i++){
+    CU_ASSERT_DOUBLE_EQUAL(y->data[i], test_array[i], 1e-6);
+}
+free(A.data);
+free(x.data);
+free(test_array);
+delete_vector(y);
+
 }
 
 // Works
 void test_serial_dense_approximate_eigenvalue(){
+    
+denseMatrix A;
+A.rows = 5;
+A.cols = 5;
+A.data = malloc(sizeof(double) * 25);
+A.data[0] = 4.0; 
+A.data[1] = 1.0; 
+A.data[2] = 0.0; 
+A.data[3] = 0.0;
+A.data[4] = 0.0; 
 
-    denseMatrix A;
-    A.rows = 5;
-    A.cols = 5;
-    A.data = malloc(sizeof(double) * 25);
-    A.data[0] = 4.0; 
-    A.data[1] = 1.0; 
-    A.data[2] = 0.0; 
-    A.data[3] = 0.0;
-    A.data[4] = 0.0; 
+A.data[5] = 1.0; 
+A.data[6] = 3.0; 
+A.data[7] = 1.0; 
+A.data[8] = 0.0; 
+A.data[9] = 0.0; 
 
-    A.data[5] = 1.0; 
-    A.data[6] = 3.0; 
-    A.data[7] = 1.0; 
-    A.data[8] = 0.0; 
-    A.data[9] = 0.0; 
+A.data[10] = 0.0; 
+A.data[11] = 1.0; 
+A.data[12] = 2.0; 
+A.data[13] = 1.0; 
+A.data[14] = 0.0; 
 
-    A.data[10] = 0.0; 
-    A.data[11] = 1.0; 
-    A.data[12] = 2.0; 
-    A.data[13] = 1.0; 
-    A.data[14] = 0.0; 
+A.data[15] = 0.0; 
+A.data[16] = 0.0; 
+A.data[17] = 1.0; 
+A.data[18] = 3.0; 
+A.data[19] = 1.0; 
 
-    A.data[15] = 0.0; 
-    A.data[16] = 0.0; 
-    A.data[17] = 1.0; 
-    A.data[18] = 3.0; 
-    A.data[19] = 1.0; 
+A.data[20] = 0.0; 
+A.data[21] = 0.0; 
+A.data[22] = 0.0; 
+A.data[23] = 1.0; 
+A.data[24] = 4.0; 
 
-    A.data[20] = 0.0; 
-    A.data[21] = 0.0; 
-    A.data[22] = 0.0; 
-    A.data[23] = 1.0; 
-    A.data[24] = 4.0; 
+Vector x;
+x.size = 5;
+x.data = malloc(sizeof(double) * 5);
+x.data[0] = -1;
+x.data[1] = 1;
+x.data[2] = -1;
+x.data[3] = 1;
+x.data[4] = 1;
 
-    Vector x;
-    x.size = 5;
-    x.data = malloc(sizeof(double) * 5);
-    x.data[0] = -1;
-    x.data[1] = 1;
-    x.data[2] = -1;
-    x.data[3] = 1;
-    x.data[4] = 1;
+Vector *y = generate_vector(5);
+double lambda = dense_approximate_eigenvalue(&A, &x, y);
 
-    Vector *y = generate_vector(5);
-    double lambda = dense_approximate_eigenvalue(&A, &x, y);
-
-    CU_ASSERT_DOUBLE_EQUAL(lambda, 12, 0.0001);
-    free(A.data);
-    free(x.data);
-    delete_vector(y);
+CU_ASSERT_DOUBLE_EQUAL(lambda, 12, 0.0001);
+free(A.data);
+free(x.data);
+delete_vector(y);
 
 }
 
 // Works
 void test_serial_dense_power_method(){
     
-    denseMatrix A;
-    A.rows = 5;
-    A.cols = 5;
-    A.data = malloc(sizeof(double) * 25);
-    A.data[0] = 4.0; 
-    A.data[1] = 1.0; 
-    A.data[2] = 0.0; 
-    A.data[3] = 0.0;
-    A.data[4] = 0.0; 
-    A.data[5] = 1.0; 
-    A.data[6] = 3.0; 
-    A.data[7] = 1.0; 
-    A.data[8] = 0.0; 
-    A.data[9] = 0.0; 
-    A.data[10] = 0.0; 
-    A.data[11] = 1.0; 
-    A.data[12] = 2.0; 
-    A.data[13] = 1.0; 
-    A.data[14] = 0.0; 
-    A.data[15] = 0.0; 
-    A.data[16] = 0.0; 
-    A.data[17] = 1.0; 
-    A.data[18] = 3.0; 
-    A.data[19] = 1.0; 
-    A.data[20] = 0.0; 
-    A.data[21] = 0.0; 
-    A.data[22] = 0.0; 
-    A.data[23] = 1.0; 
-    A.data[24] = 4.0; 
+denseMatrix A;
+A.rows = 5;
+A.cols = 5;
+A.data = malloc(sizeof(double) * 25);
+A.data[0] = 4.0; 
+A.data[1] = 1.0; 
+A.data[2] = 0.0; 
+A.data[3] = 0.0;
+A.data[4] = 0.0; 
+A.data[5] = 1.0; 
+A.data[6] = 3.0; 
+A.data[7] = 1.0; 
+A.data[8] = 0.0; 
+A.data[9] = 0.0; 
+A.data[10] = 0.0; 
+A.data[11] = 1.0; 
+A.data[12] = 2.0; 
+A.data[13] = 1.0; 
+A.data[14] = 0.0; 
+A.data[15] = 0.0; 
+A.data[16] = 0.0; 
+A.data[17] = 1.0; 
+A.data[18] = 3.0; 
+A.data[19] = 1.0; 
+A.data[20] = 0.0; 
+A.data[21] = 0.0; 
+A.data[22] = 0.0; 
+A.data[23] = 1.0; 
+A.data[24] = 4.0; 
 
-    double lambda = dense_power_method(&A);
-    CU_ASSERT_DOUBLE_EQUAL(lambda, 4.8608, 0.001);
-    free(A.data);
+double lambda = dense_power_method(&A);
+CU_ASSERT_DOUBLE_EQUAL(lambda, 4.8608, 0.001);
+free(A.data);
 }
 
 
@@ -388,181 +389,181 @@ void test_serial_dense_power_method(){
 // Works
 void test_serial_sparse_COO_matvec_mult(){
     
-    sparseMatrixCOO *coo = malloc(sizeof(sparseMatrixCOO));
-    coo->rows = 5;
-    coo->cols = 5;
-    coo->nnz = 13;
-    coo->row = malloc(sizeof(int) * coo->nnz);
-    coo->col = malloc(sizeof(int) * coo->nnz);
-    coo->val = malloc(sizeof(double) * coo->nnz);
+sparseMatrixCOO *coo = malloc(sizeof(sparseMatrixCOO));
+coo->rows = 5;
+coo->cols = 5;
+coo->nnz = 13;
+coo->row = malloc(sizeof(int) * coo->nnz);
+coo->col = malloc(sizeof(int) * coo->nnz);
+coo->val = malloc(sizeof(double) * coo->nnz);
 
-    coo->row[0] = 0;
-    coo->row[1] = 0;
-    coo->row[2] = 1;
-    coo->row[3] = 1;
-    coo->row[4] = 1;
-    coo->row[5] = 2;
-    coo->row[6] = 2;
-    coo->row[7] = 2;
-    coo->row[8] = 3;
-    coo->row[9] = 3;
-    coo->row[10] = 3;
-    coo->row[11] = 4;
-    coo->row[12] = 4;
+coo->row[0] = 0;
+coo->row[1] = 0;
+coo->row[2] = 1;
+coo->row[3] = 1;
+coo->row[4] = 1;
+coo->row[5] = 2;
+coo->row[6] = 2;
+coo->row[7] = 2;
+coo->row[8] = 3;
+coo->row[9] = 3;
+coo->row[10] = 3;
+coo->row[11] = 4;
+coo->row[12] = 4;
 
-    coo->col[0] = 0;
-    coo->col[1] = 1;
-    coo->col[2] = 0;
-    coo->col[3] = 1;
-    coo->col[4] = 2;
-    coo->col[5] = 1;
-    coo->col[6] = 2;
-    coo->col[7] = 3;
-    coo->col[8] = 2;
-    coo->col[9] = 3;
-    coo->col[10] = 4;
-    coo->col[11] = 3;
-    coo->col[12] = 4;
+coo->col[0] = 0;
+coo->col[1] = 1;
+coo->col[2] = 0;
+coo->col[3] = 1;
+coo->col[4] = 2;
+coo->col[5] = 1;
+coo->col[6] = 2;
+coo->col[7] = 3;
+coo->col[8] = 2;
+coo->col[9] = 3;
+coo->col[10] = 4;
+coo->col[11] = 3;
+coo->col[12] = 4;
 
-    coo->val[0] = 4;
-    coo->val[1] = 1;
-    coo->val[2] = 1;
-    coo->val[3] = 3;
-    coo->val[4] = 1;
-    coo->val[5] = 1;
-    coo->val[6] = 2;
-    coo->val[7] = 1;
-    coo->val[8] = 1;
-    coo->val[9] = 3;
-    coo->val[10] = 1;
-    coo->val[11] = 1;
-    coo->val[12] = 4;
+coo->val[0] = 4;
+coo->val[1] = 1;
+coo->val[2] = 1;
+coo->val[3] = 3;
+coo->val[4] = 1;
+coo->val[5] = 1;
+coo->val[6] = 2;
+coo->val[7] = 1;
+coo->val[8] = 1;
+coo->val[9] = 3;
+coo->val[10] = 1;
+coo->val[11] = 1;
+coo->val[12] = 4;
 
-  
-    Vector x;
-    x.size = 5;
-    x.data = malloc(sizeof(double) * 5);
-    x.data[0] = -1;
-    x.data[1] = 1;
-    x.data[2] = -1;
-    x.data[3] = 1;
-    x.data[4] = 1;
 
-    double* test_array = malloc(sizeof(double) * 5);
+Vector x;
+x.size = 5;
+x.data = malloc(sizeof(double) * 5);
+x.data[0] = -1;
+x.data[1] = 1;
+x.data[2] = -1;
+x.data[3] = 1;
+x.data[4] = 1;
 
-    test_array[0] = -3;
-    test_array[1] = 1;
-    test_array[2] = 0;
-    test_array[3] = 3;
-    test_array[4] = 5;
+double* test_array = malloc(sizeof(double) * 5);
 
-    Vector *y = generate_vector(5);
-    serial_sparse_matvec_mult_COO(coo, &x, y);
+test_array[0] = -3;
+test_array[1] = 1;
+test_array[2] = 0;
+test_array[3] = 3;
+test_array[4] = 5;
 
-    for(int i = 0; i < y->size; i++){
-        CU_ASSERT_DOUBLE_EQUAL(y->data[i], test_array[i], 1e-6);
-    }
-   
-    free(coo->col);
-    free(coo->row);
-    free(coo->val);
-    free(coo);
-    free(x.data);
-    free(test_array);
-    delete_vector(y);
+Vector *y = generate_vector(5);
+serial_sparse_matvec_mult_COO(coo, &x, y);
+
+for(int i = 0; i < y->size; i++){
+    CU_ASSERT_DOUBLE_EQUAL(y->data[i], test_array[i], 1e-6);
+}
+
+free(coo->col);
+free(coo->row);
+free(coo->val);
+free(coo);
+free(x.data);
+free(test_array);
+delete_vector(y);
 }
 
 
 
 void test_serial_sparse_CSR_matvec_mult(){
     
-    sparseMatrixCOO *coo = malloc(sizeof(sparseMatrixCOO));
-    coo->rows = 5;
-    coo->cols = 5;
-    coo->nnz = 13;
-    coo->row = malloc(sizeof(int) * coo->nnz);
-    coo->col = malloc(sizeof(int) * coo->nnz);
-    coo->val = malloc(sizeof(double) * coo->nnz);
+sparseMatrixCOO *coo = malloc(sizeof(sparseMatrixCOO));
+coo->rows = 5;
+coo->cols = 5;
+coo->nnz = 13;
+coo->row = malloc(sizeof(int) * coo->nnz);
+coo->col = malloc(sizeof(int) * coo->nnz);
+coo->val = malloc(sizeof(double) * coo->nnz);
 
-    coo->row[0] = 0;
-    coo->row[1] = 0;
-    coo->row[2] = 1;
-    coo->row[3] = 1;
-    coo->row[4] = 1;
-    coo->row[5] = 2;
-    coo->row[6] = 2;
-    coo->row[7] = 2;
-    coo->row[8] = 3;
-    coo->row[9] = 3;
-    coo->row[10] = 3;
-    coo->row[11] = 4;
-    coo->row[12] = 4;
+coo->row[0] = 0;
+coo->row[1] = 0;
+coo->row[2] = 1;
+coo->row[3] = 1;
+coo->row[4] = 1;
+coo->row[5] = 2;
+coo->row[6] = 2;
+coo->row[7] = 2;
+coo->row[8] = 3;
+coo->row[9] = 3;
+coo->row[10] = 3;
+coo->row[11] = 4;
+coo->row[12] = 4;
 
-    coo->col[0] = 0;
-    coo->col[1] = 1;
-    coo->col[2] = 0;
-    coo->col[3] = 1;
-    coo->col[4] = 2;
-    coo->col[5] = 1;
-    coo->col[6] = 2;
-    coo->col[7] = 3;
-    coo->col[8] = 2;
-    coo->col[9] = 3;
-    coo->col[10] = 4;
-    coo->col[11] = 3;
-    coo->col[12] = 4;
+coo->col[0] = 0;
+coo->col[1] = 1;
+coo->col[2] = 0;
+coo->col[3] = 1;
+coo->col[4] = 2;
+coo->col[5] = 1;
+coo->col[6] = 2;
+coo->col[7] = 3;
+coo->col[8] = 2;
+coo->col[9] = 3;
+coo->col[10] = 4;
+coo->col[11] = 3;
+coo->col[12] = 4;
 
-    coo->val[0] = 4;
-    coo->val[1] = 1;
-    coo->val[2] = 1;
-    coo->val[3] = 3;
-    coo->val[4] = 1;
-    coo->val[5] = 1;
-    coo->val[6] = 2;
-    coo->val[7] = 1;
-    coo->val[8] = 1;
-    coo->val[9] = 3;
-    coo->val[10] = 1;
-    coo->val[11] = 1;
-    coo->val[12] = 4;
+coo->val[0] = 4;
+coo->val[1] = 1;
+coo->val[2] = 1;
+coo->val[3] = 3;
+coo->val[4] = 1;
+coo->val[5] = 1;
+coo->val[6] = 2;
+coo->val[7] = 1;
+coo->val[8] = 1;
+coo->val[9] = 3;
+coo->val[10] = 1;
+coo->val[11] = 1;
+coo->val[12] = 4;
 
-    sparseMatrixCSR* csr = coo_to_csr(coo);
+sparseMatrixCSR* csr = coo_to_csr(coo);
 
-    Vector x;
-    x.size = 5;
-    x.data = malloc(sizeof(double) * 5);
-    x.data[0] = -1;
-    x.data[1] = 1;
-    x.data[2] = -1;
-    x.data[3] = 1;
-    x.data[4] = 1;
+Vector x;
+x.size = 5;
+x.data = malloc(sizeof(double) * 5);
+x.data[0] = -1;
+x.data[1] = 1;
+x.data[2] = -1;
+x.data[3] = 1;
+x.data[4] = 1;
 
-    double* test_array = malloc(sizeof(double) * 5);
+double* test_array = malloc(sizeof(double) * 5);
 
-    test_array[0] = -3;
-    test_array[1] = 1;
-    test_array[2] = 0;
-    test_array[3] = 3;
-    test_array[4] = 5;
+test_array[0] = -3;
+test_array[1] = 1;
+test_array[2] = 0;
+test_array[3] = 3;
+test_array[4] = 5;
 
-    Vector *y = generate_vector(5);
-    serial_sparse_matvec_mult_CSR(csr, &x, y);
+Vector *y = generate_vector(5);
+serial_sparse_matvec_mult_CSR(csr, &x, y);
 
-    for(int i = 0; i < y->size; i++){
-        CU_ASSERT_DOUBLE_EQUAL(y->data[i], test_array[i], 1e-6);
-    }
-   
-    free(coo->col);
-    free(coo->row);
-    free(coo->val);
-    free(coo);
-    free(csr->col);
-    free(csr->row_ptr);
-    free(csr->val);
-    free(csr);
-    free(x.data);
-    free(test_array);
-    delete_vector(y);
+for(int i = 0; i < y->size; i++){
+    CU_ASSERT_DOUBLE_EQUAL(y->data[i], test_array[i], 1e-6);
+}
+
+free(coo->col);
+free(coo->row);
+free(coo->val);
+free(coo);
+free(csr->col);
+free(csr->row_ptr);
+free(csr->val);
+free(csr);
+free(x.data);
+free(test_array);
+delete_vector(y);
 }
 
 
@@ -571,81 +572,81 @@ void test_serial_sparse_CSR_matvec_mult(){
 
 //Works
 void test_serial_sparse_approximate_eigenvalue(){
-
-    sparseMatrixCOO *coo = malloc(sizeof(sparseMatrixCOO));
-    coo->rows = 5;
-    coo->cols = 5;
-    coo->nnz = 13;
-    coo->row = malloc(sizeof(int) * coo->nnz);
-    coo->col = malloc(sizeof(int) * coo->nnz);
-    coo->val = malloc(sizeof(double) * coo->nnz);
-
-    coo->row[0] = 0;
-    coo->row[1] = 0;
-    coo->row[2] = 1;
-    coo->row[3] = 1;
-    coo->row[4] = 1;
-    coo->row[5] = 2;
-    coo->row[6] = 2;
-    coo->row[7] = 2;
-    coo->row[8] = 3;
-    coo->row[9] = 3;
-    coo->row[10] = 3;
-    coo->row[11] = 4;
-    coo->row[12] = 4;
-
-    coo->col[0] = 0;
-    coo->col[1] = 1;
-    coo->col[2] = 0;
-    coo->col[3] = 1;
-    coo->col[4] = 2;
-    coo->col[5] = 1;
-    coo->col[6] = 2;
-    coo->col[7] = 3;
-    coo->col[8] = 2;
-    coo->col[9] = 3;
-    coo->col[10] = 4;
-    coo->col[11] = 3;
-    coo->col[12] = 4;
-
-    coo->val[0] = 4;
-    coo->val[1] = 1;
-    coo->val[2] = 1;
-    coo->val[3] = 3;
-    coo->val[4] = 1;
-    coo->val[5] = 1;
-    coo->val[6] = 2;
-    coo->val[7] = 1;
-    coo->val[8] = 1;
-    coo->val[9] = 3;
-    coo->val[10] = 1;
-    coo->val[11] = 1;
-    coo->val[12] = 4;
-
-    SparseMatrixAny *A = malloc(sizeof(SparseMatrixAny));
-    A->type = COO;
-    A->mat.coo = coo;
     
-    Vector x;
-    x.size = 5;
-    x.data = malloc(sizeof(double) * 5);
-    x.data[0] = -1;
-    x.data[1] = 1;
-    x.data[2] = -1;
-    x.data[3] = 1;
-    x.data[4] = 1;
+sparseMatrixCOO *coo = malloc(sizeof(sparseMatrixCOO));
+coo->rows = 5;
+coo->cols = 5;
+coo->nnz = 13;
+coo->row = malloc(sizeof(int) * coo->nnz);
+coo->col = malloc(sizeof(int) * coo->nnz);
+coo->val = malloc(sizeof(double) * coo->nnz);
 
-    Vector *y = generate_vector(5);
-    double lambda = sparse_approximate_eigenvalue(A, &x, y);
-    CU_ASSERT_DOUBLE_EQUAL(lambda, 12.0, 0.0001);
-    
-    free(coo->col);
-    free(coo->row);
-    free(coo->val);
-    free(coo);
-    free(A);
-    free(x.data);
-    delete_vector(y);
+coo->row[0] = 0;
+coo->row[1] = 0;
+coo->row[2] = 1;
+coo->row[3] = 1;
+coo->row[4] = 1;
+coo->row[5] = 2;
+coo->row[6] = 2;
+coo->row[7] = 2;
+coo->row[8] = 3;
+coo->row[9] = 3;
+coo->row[10] = 3;
+coo->row[11] = 4;
+coo->row[12] = 4;
+
+coo->col[0] = 0;
+coo->col[1] = 1;
+coo->col[2] = 0;
+coo->col[3] = 1;
+coo->col[4] = 2;
+coo->col[5] = 1;
+coo->col[6] = 2;
+coo->col[7] = 3;
+coo->col[8] = 2;
+coo->col[9] = 3;
+coo->col[10] = 4;
+coo->col[11] = 3;
+coo->col[12] = 4;
+
+coo->val[0] = 4;
+coo->val[1] = 1;
+coo->val[2] = 1;
+coo->val[3] = 3;
+coo->val[4] = 1;
+coo->val[5] = 1;
+coo->val[6] = 2;
+coo->val[7] = 1;
+coo->val[8] = 1;
+coo->val[9] = 3;
+coo->val[10] = 1;
+coo->val[11] = 1;
+coo->val[12] = 4;
+
+SparseMatrixAny *A = malloc(sizeof(SparseMatrixAny));
+A->type = COO;
+A->mat.coo = coo;
+
+Vector x;
+x.size = 5;
+x.data = malloc(sizeof(double) * 5);
+x.data[0] = -1;
+x.data[1] = 1;
+x.data[2] = -1;
+x.data[3] = 1;
+x.data[4] = 1;
+
+Vector *y = generate_vector(5);
+double lambda = sparse_approximate_eigenvalue(A, &x, y);
+CU_ASSERT_DOUBLE_EQUAL(lambda, 12.0, 0.0001);
+
+free(coo->col);
+free(coo->row);
+free(coo->val);
+free(coo);
+free(A);
+free(x.data);
+delete_vector(y);
 
 
 }
@@ -719,6 +720,7 @@ free(A);
 }
 */
 
+
 /*
 void test_serial_sparse_COO_large_power_method(){
     
@@ -738,6 +740,31 @@ free(my_coo);
 free(A);
 }
 */
+void test_serial_CSR_cage10(){
+ 
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/cage10/cage10.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+
+    test_sparse_power_method(A, "cage10");
+
+    free(my_coo->row);
+    free(my_coo->col);
+    free(my_coo->val);
+    free(my_coo);
+    
+    free(my_csr->row_ptr);
+    free(my_csr->col);
+    free(my_csr->val);
+    free(my_csr);
+    
+    free(A);
+
+
+}
 
 
 void test_serial_CSR_494_bus(){
@@ -749,14 +776,7 @@ void test_serial_CSR_494_bus(){
     A->type = CSR;
     A->mat.csr = my_csr;
 
-    double total_time = 0.0;
-    for (int i = 0; i < 10; i++){
-        Res result = sparse_power_method(A);
-        double lambda = result.lambda;
-        total_time += result.time;
-        //CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.141764, 1.0e-9);
-    }
-    printf("494_bus: average time: %.6f\n", total_time/10);
+   test_sparse_power_method(A, "494_bus");
 
     free(my_coo->row);
     free(my_coo->col);
@@ -773,38 +793,6 @@ void test_serial_CSR_494_bus(){
 
 }
 
-void test_serial_CSR_cage10(){
- 
-    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/cage10/cage10.mtx");
-    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
-
-    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
-    A->type = CSR;
-    A->mat.csr = my_csr;
-
-    double total_time = 0.0;
-    for (int i = 0; i < 10; i++){
-        Res result = sparse_power_method(A);
-        double lambda = result.lambda;
-        total_time += result.time;
-        //CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.141763, 1.0e-6);
-    }
-    printf("average time: %.6f\n", total_time/10);
-
-    free(my_coo->row);
-    free(my_coo->col);
-    free(my_coo->val);
-    free(my_coo);
-    
-    free(my_csr->row_ptr);
-    free(my_csr->col);
-    free(my_csr->val);
-    free(my_csr);
-    
-    free(A);
-
-
-}
 
 void test_serial_CSR_venkat01(){
  
@@ -815,14 +803,7 @@ void test_serial_CSR_venkat01(){
     A->type = CSR;
     A->mat.csr = my_csr;
 
-    double total_time = 0.0;
-    for (int i = 0; i < 10; i++){
-        Res result = sparse_power_method(A);
-        double lambda = result.lambda;
-        total_time += result.time;
-        //CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.141763, 1.0e-6);
-    }
-    printf("venkat01: average time: %.6f\n", total_time/10);
+    test_sparse_power_method(A, "venkat01");
 
     free(my_coo->row);
     free(my_coo->col);
@@ -846,14 +827,7 @@ void test_serial_CSR_siH4(){
     A->type = CSR;
     A->mat.csr = my_csr;
 
-    double total_time = 0.0;
-    for (int i = 0; i < 10; i++){
-        Res result = sparse_power_method(A);
-        double lambda = result.lambda;
-        total_time += result.time;
-        //CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.141763, 1.0e-6);
-    }
-    printf("siH4: average time: %.6f\n", total_time/10);
+    test_sparse_power_method(A, "siH4");
 
     free(my_coo->row);
     free(my_coo->col);
@@ -877,14 +851,7 @@ void test_serial_CSR_benzene(){
     A->type = CSR;
     A->mat.csr = my_csr;
 
-    double total_time = 0.0;
-    for (int i = 0; i < 10; i++){
-        Res result = sparse_power_method(A);
-        double lambda = result.lambda;
-        total_time += result.time;
-        //CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.141763, 1.0e-6);
-    }
-    printf("benzene: average time: %.6f\n", total_time/10);
+    test_sparse_power_method(A, "benzene");
 
     free(my_coo->row);
     free(my_coo->col);
@@ -908,14 +875,7 @@ void test_serial_CSR_SiO(){
     A->type = CSR;
     A->mat.csr = my_csr;
 
-    double total_time = 0.0;
-    for (int i = 0; i < 10; i++){
-        Res result = sparse_power_method(A);
-        double lambda = result.lambda;
-        total_time += result.time;
-        //CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.141763, 1.0e-6);
-    }
-    printf("SiO: average time: %.6f\n", total_time/10);
+   test_sparse_power_method(A, "SiO");
 
     free(my_coo->row);
     free(my_coo->col);
@@ -939,14 +899,7 @@ void test_serial_CSR_bcsstk01(){
     A->type = CSR;
     A->mat.csr = my_csr;
 
-    double total_time = 0.0;
-    for (int i = 0; i < 10; i++){
-        Res result = sparse_power_method(A);
-        double lambda = result.lambda;
-        total_time += result.time;
-        //CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.141763, 1.0e-6);
-    }
-    printf("bcsstk01: average time: %.6f\n", total_time/10);
+   test_sparse_power_method(A, "bcsstk01");
 
     free(my_coo->row);
     free(my_coo->col);
@@ -970,14 +923,7 @@ void test_serial_CSR_pkustk13(){
     A->type = CSR;
     A->mat.csr = my_csr;
 
-    double total_time = 0.0;
-    for (int i = 0; i < 10; i++){
-        Res result = sparse_power_method(A);
-        double lambda = result.lambda;
-        total_time += result.time;
-        //CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.141763, 1.0e-6);
-    }
-    printf("venkat01: average time: %.6f\n", total_time/10);
+    test_sparse_power_method(A, "pkustk13");
 
     free(my_coo->row);
     free(my_coo->col);
@@ -1054,13 +1000,13 @@ int main(){
     
     */
     //CU_add_test(suite, "Power method cage10", test_serial_CSR_cage10);
-    //CU_add_test(suite, "Power method 494_bus", test_serial_CSR_494_bus);
-    //CU_add_test(suite, "Power method cage10", test_serial_CSR_venkat01);
-    //CU_add_test(suite, "Power method siH4", test_serial_CSR_siH4);
-    //CU_add_test(suite, "Power method benzene", test_serial_CSR_benzene);
-    //CU_add_test(suite, "Power method SiO", test_serial_CSR_SiO);
-    //CU_add_test(suite, "Power method SiO", test_serial_CSR_bcsstk01);
-    CU_add_test(suite, "Power method SiO", test_serial_CSR_pkustk13);
+    CU_add_test(suite, "Power method 494_bus", test_serial_CSR_494_bus);
+    CU_add_test(suite, "Power method cage10", test_serial_CSR_venkat01);
+    CU_add_test(suite, "Power method siH4", test_serial_CSR_siH4);
+    CU_add_test(suite, "Power method benzene", test_serial_CSR_benzene);
+    CU_add_test(suite, "Power method SiO", test_serial_CSR_SiO);
+    CU_add_test(suite, "Power method bcsstk01", test_serial_CSR_bcsstk01);
+    //CU_add_test(suite, "Power method pkustk13", test_serial_CSR_pkustk13);
 
     //Tests for common functions.
     //CU_add_test(suite, "Generate random vector test", test_serial_generate_random_vector);
