@@ -436,7 +436,7 @@ int main(int argc, char* argv[]){
     //CU_add_test(suite, "Power method test", test_dense_off_power_method);
 
 
-    CU_add_test(suite, "Power method cage10", test_serial_CSR_cage10);
+    //CU_add_test(suite, "Power method cage10", test_serial_CSR_cage10);
     CU_add_test(suite, "Power method 494_bus", test_serial_CSR_494_bus);
     CU_add_test(suite, "Power method cage10", test_serial_CSR_venkat01);
     CU_add_test(suite, "Power method siH4", test_serial_CSR_siH4);

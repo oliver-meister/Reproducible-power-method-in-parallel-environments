@@ -9,8 +9,8 @@
 #include <time.h>
 #include <omp.h>
 
-#define NUM_BLOCKS 96  // or try 128, 256
-#define BLOCK_SIZE 256
+
+#define BLOCK_SIZE 512
 
 
 /**
@@ -31,7 +31,7 @@ void off_dense_matvec_mult(const denseMatrix* A, Vector* x, Vector* y) {
     double* y_data = y->data;
 
     #pragma omp target teams distribute parallel for \
-        num_teams(NUM_BLOCKS) thread_limit(BLOCK_SIZE) \
+        num_teams((rows + BLOCK_SIZE -1 )/ BLOCK_SIZE) thread_limit(BLOCK_SIZE) \
         map(to: A_data[0:rows * cols], x_data[0:cols]) \
         map(from: y_data[0:rows]) \
         default(none) firstprivate(rows, cols) shared(A_data, x_data, y_data)
@@ -58,7 +58,7 @@ double off_dot_product(const Vector* x, const Vector* y) {
     double dot = 0.0;
 
     #pragma omp target teams distribute parallel for \
-        num_teams(NUM_BLOCKS) thread_limit(BLOCK_SIZE) \
+        num_teams((size + BLOCK_SIZE - 1 )/ BLOCK_SIZE) thread_limit(BLOCK_SIZE) \
         map(to: x_data[0:size], y_data[0:size]) \
         map(tofrom: dot) default(none) firstprivate(size) shared(x_data, y_data) reduction(+:dot)
     for (int i = 0; i < size; i++) {
@@ -95,7 +95,7 @@ void off_sparse_matvec_mult_CSR(const sparseMatrixCSR* A, Vector* x, Vector *y) 
     double* x_data = x->data;
     double* y_data = y->data;
 
-    #pragma omp target teams distribute parallel for num_teams(NUM_BLOCKS) thread_limit(BLOCK_SIZE) \
+    #pragma omp target teams distribute parallel for num_teams((rows + BLOCK_SIZE -1 )/ BLOCK_SIZE) thread_limit(BLOCK_SIZE) \
         map(to: row_ptr[0:rows + 1], val[0:nnz], col[0:nnz], x_data[0:x_size]) \
         map(from: y_data[0:rows]) \
         default(none) firstprivate(rows) shared(row_ptr, col, val, x_data, y_data)
@@ -125,7 +125,7 @@ void off_vector_norm_div(const Vector *x, Vector *y, double norm) {
     double* x_data = x->data;
     double* y_data = y->data;
 
-    #pragma omp target teams distribute parallel for num_teams(NUM_BLOCKS) thread_limit(BLOCK_SIZE) \
+    #pragma omp target teams distribute parallel for num_teams((size + BLOCK_SIZE -1 )/ BLOCK_SIZE) thread_limit(BLOCK_SIZE) \
         map(to: x_data[0:size]) \
         map(from: y_data[0:size]) \
         default(none) firstprivate(size, norm) shared(x_data, y_data)

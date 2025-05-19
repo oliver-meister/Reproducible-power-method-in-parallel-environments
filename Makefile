@@ -7,7 +7,12 @@ OFFLOAD_CC = nvc
 CFLAGS = -Wall -Wextra -O2 -fopenmp -I/usr/include -L/usr/lib/x86_64-linux-gnu -lm
 OFFLOAD_FLAGS = -mp=gpu -O2 -Minfo=accel -lcudart
 CUDA_LIBS = -L/usr/lib/x86_64-linux-gnu -lcudart
-CUDA_FLAGS = $(CUDA_LIBS) -Xcompiler="-Wall -Wextra -fopenmp"
+
+# CUDA architecture flag optimized for NVIDIA RTX 4060 (Ada / sm_89)
+CUDA_ARCH_FLAGS = -gencode=arch=compute_89,code=sm_89
+CUDA_WARN_FLAGS = -Wno-deprecated-gpu-targets
+CUDA_FLAGS = $(CUDA_ARCH_FLAGS) $(CUDA_WARN_FLAGS) $(CUDA_LIBS) -Xcompiler="-Wall -Wextra -fopenmp"
+
 CUNIT = -lcunit
 
 # === Object Files ===
@@ -111,8 +116,9 @@ clean:
 	find . -name '*.o' -delete
 	rm -f test_serial test_openmp test_offload test_cuda test_cuda_exblas
 
+# === Test Offload Run Helper ===
 
 run_test_offload: test_offload
-	export OMP_TARGET_OFFLOAD=MANDATORY
-	export LIBOMPTARGET_INFO=30
+	export OMP_TARGET_OFFLOAD=MANDATORY && \
+	export LIBOMPTARGET_INFO=30 && \
 	./test_offload

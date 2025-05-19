@@ -2,9 +2,8 @@
 #include <device_launch_parameters.h>
 #include <stdio.h>
 
-#define WARP_COUNT 8
-#define WARP_SIZE 32
-#define BLOCK_SIZE (WARP_COUNT * WARP_SIZE)
+
+#define BLOCK_SIZE 32
 
 
 template <unsigned int blockSize>
@@ -83,6 +82,8 @@ extern "C" void launch_matvec_CSR_kernel(const int num_rows,
                                             double* output_vector)
 {
     int gridSize = (num_rows + BLOCK_SIZE - 1) / BLOCK_SIZE;
+
+
     matvec_CSR_kernel<<<gridSize, BLOCK_SIZE>>>(num_rows, 
                                                 row_ptr, 
                                                 col, 

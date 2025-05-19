@@ -5,9 +5,8 @@
 #include "cuda_fun.h"
 #include <stdio.h>
 
-#define WARP_COUNT 8
-#define WARP_SIZE 32
-#define BLOCK_SIZE (WARP_COUNT * WARP_SIZE)
+
+#define BLOCK_SIZE 32
 
 
 
@@ -22,37 +21,48 @@ double cuda_dot_product(Vector* x, Vector* y) {
     cudaMalloc((void**)&d_x, sizeof(double) * vector_size);
     cudaMalloc((void**)&d_y, sizeof(double) * vector_size);
 
-    
-    int numBlocks = (vector_size + BLOCK_SIZE * 2 - 1) / (BLOCK_SIZE * 2);
-    cudaMalloc((void**)&d_result, sizeof(double) * numBlocks);
+    // what shall the block size be?
+    int maxBlocks = (vector_size + BLOCK_SIZE * 2 - 1) / (BLOCK_SIZE * 2);
 
+    cudaMalloc((void**)&d_result, sizeof(double) * maxBlocks);
+    cudaMalloc((void**)&d_temp,   sizeof(double) * maxBlocks);  
+
+   
     cudaMemcpy(d_x, x->data, sizeof(double) * vector_size, cudaMemcpyHostToDevice);
     cudaMemcpy(d_y, y->data, sizeof(double) * vector_size, cudaMemcpyHostToDevice);
 
-    // First kernel: compute x[i]*y[i]
+    // First reduction kernel: compute x[i] * y[i]
+    int numBlocks = maxBlocks;
     launch_reduce1_kernel(d_x, d_y, d_result, vector_size, numBlocks, BLOCK_SIZE);
 
-    // Keep reducing until one value remains
-    double result = 0.0;
+    
     int currentSize = numBlocks;
+    double* input = d_result;
+    double* output = d_temp;
+
     while (currentSize > 1) {
         int nextSize = (currentSize + BLOCK_SIZE * 2 - 1) / (BLOCK_SIZE * 2);
-        cudaMalloc((void**)&d_temp, sizeof(double) * nextSize);
+        launch_reduce2_kernel(input, output, currentSize, nextSize, BLOCK_SIZE);
 
-        launch_reduce2_kernel(d_result, d_temp, currentSize, nextSize, BLOCK_SIZE);
+        double* temp = input;
+        input = output;
+        output = temp;
 
-        cudaFree(d_result);
-        d_result = d_temp;
         currentSize = nextSize;
     }
 
-    cudaMemcpy(&result, d_result, sizeof(double), cudaMemcpyDeviceToHost);
+    double result = 0.0;
+    cudaMemcpy(&result, input, sizeof(double), cudaMemcpyDeviceToHost);
 
+    // Clean up
     cudaFree(d_x);
     cudaFree(d_y);
     cudaFree(d_result);
+    cudaFree(d_temp);
+
     return result;
 }
+
 
 
 void cuda_sparse_matvec_mult_CSR(const sparseMatrixCSR *A, Vector *x, Vector *y){

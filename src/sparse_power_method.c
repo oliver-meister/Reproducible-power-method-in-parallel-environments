@@ -19,7 +19,7 @@ extern start_timer timer_start;
 extern stop_timer timer_stop;
 
 #define MAX_ITERATIONS 10000
-#define NUM_RUNS 30
+#define NUM_RUNS 20
 
 /**
  * @brief Calculates the dominant eigenvalue and its coresponding eigenvector of a matrix.
