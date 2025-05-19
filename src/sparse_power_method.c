@@ -55,7 +55,7 @@ Res sparse_power_method(const SparseMatrixAny *A){
         sparse_matvec(A,x,y);
         iterations += 1;
         
-    } while(!convergence(lambda_new, lambda_old, 1.0E-12) && iterations < MAX_ITERATIONS);
+    } while(!convergence(lambda_new, lambda_old, 1.0E-6) && iterations < MAX_ITERATIONS);
     double time = timer_stop(start);
     
     Res result;

@@ -216,38 +216,6 @@ void test_dense_off_power_method(){
 }
 */
 
-void test_serial_CSR_494_bus(){
- 
-    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/494_bus/494_bus.mtx");
-    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
-
-    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
-    A->type = CSR;
-    A->mat.csr = my_csr;
-
-    double total_time = 0.0;
-    for (int i = 0; i < 10; i++){
-        Res result = sparse_power_method(A);
-        double lambda = result.lambda;
-        total_time += result.time;
-        //CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.141764, 1.0e-9);
-    }
-    printf("494_bus: average time: %.6f\n", total_time/10);
-
-    free(my_coo->row);
-    free(my_coo->col);
-    free(my_coo->val);
-    free(my_coo);
-    
-    free(my_csr->row_ptr);
-    free(my_csr->col);
-    free(my_csr->val);
-    free(my_csr);
-    
-    free(A);
-
-
-}
 
 void test_serial_CSR_cage10(){
  
@@ -258,14 +226,7 @@ void test_serial_CSR_cage10(){
     A->type = CSR;
     A->mat.csr = my_csr;
 
-    double total_time = 0.0;
-    for (int i = 0; i < 10; i++){
-        Res result = sparse_power_method(A);
-        double lambda = result.lambda;
-        total_time += result.time;
-        //CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.141763, 1.0e-6);
-    }
-    printf("average time: %.6f\n", total_time/10);
+    test_sparse_power_method(A, "cage10");
 
     free(my_coo->row);
     free(my_coo->col);
@@ -282,6 +243,34 @@ void test_serial_CSR_cage10(){
 
 }
 
+
+void test_serial_CSR_494_bus(){
+ 
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/494_bus/494_bus.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+
+   test_sparse_power_method(A, "494_bus");
+
+    free(my_coo->row);
+    free(my_coo->col);
+    free(my_coo->val);
+    free(my_coo);
+    
+    free(my_csr->row_ptr);
+    free(my_csr->col);
+    free(my_csr->val);
+    free(my_csr);
+    
+    free(A);
+
+
+}
+
+
 void test_serial_CSR_venkat01(){
  
     sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/venkat01/venkat01.mtx");
@@ -291,14 +280,7 @@ void test_serial_CSR_venkat01(){
     A->type = CSR;
     A->mat.csr = my_csr;
 
-    double total_time = 0.0;
-    for (int i = 0; i < 10; i++){
-        Res result = sparse_power_method(A);
-        double lambda = result.lambda;
-        total_time += result.time;
-        //CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.141763, 1.0e-6);
-    }
-    printf("venkat01: average time: %.6f\n", total_time/10);
+    test_sparse_power_method(A, "venkat01");
 
     free(my_coo->row);
     free(my_coo->col);
@@ -322,14 +304,7 @@ void test_serial_CSR_siH4(){
     A->type = CSR;
     A->mat.csr = my_csr;
 
-    double total_time = 0.0;
-    for (int i = 0; i < 10; i++){
-        Res result = sparse_power_method(A);
-        double lambda = result.lambda;
-        total_time += result.time;
-        //CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.141763, 1.0e-6);
-    }
-    printf("siH4: average time: %.6f\n", total_time/10);
+    test_sparse_power_method(A, "siH4");
 
     free(my_coo->row);
     free(my_coo->col);
@@ -353,14 +328,7 @@ void test_serial_CSR_benzene(){
     A->type = CSR;
     A->mat.csr = my_csr;
 
-    double total_time = 0.0;
-    for (int i = 0; i < 10; i++){
-        Res result = sparse_power_method(A);
-        double lambda = result.lambda;
-        total_time += result.time;
-        //CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.141763, 1.0e-6);
-    }
-    printf("benzene: average time: %.6f\n", total_time/10);
+    test_sparse_power_method(A, "benzene");
 
     free(my_coo->row);
     free(my_coo->col);
@@ -384,14 +352,7 @@ void test_serial_CSR_SiO(){
     A->type = CSR;
     A->mat.csr = my_csr;
 
-    double total_time = 0.0;
-    for (int i = 0; i < 10; i++){
-        Res result = sparse_power_method(A);
-        double lambda = result.lambda;
-        total_time += result.time;
-        //CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.141763, 1.0e-6);
-    }
-    printf("SiO: average time: %.6f\n", total_time/10);
+   test_sparse_power_method(A, "SiO");
 
     free(my_coo->row);
     free(my_coo->col);
@@ -415,14 +376,7 @@ void test_serial_CSR_bcsstk01(){
     A->type = CSR;
     A->mat.csr = my_csr;
 
-    double total_time = 0.0;
-    for (int i = 0; i < 10; i++){
-        Res result = sparse_power_method(A);
-        double lambda = result.lambda;
-        total_time += result.time;
-        //CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.141763, 1.0e-6);
-    }
-    printf("bcsstk01: average time: %.6f\n", total_time/10);
+   test_sparse_power_method(A, "bcsstk01");
 
     free(my_coo->row);
     free(my_coo->col);
@@ -446,14 +400,7 @@ void test_serial_CSR_pkustk13(){
     A->type = CSR;
     A->mat.csr = my_csr;
 
-    double total_time = 0.0;
-    for (int i = 0; i < 10; i++){
-        Res result = sparse_power_method(A);
-        double lambda = result.lambda;
-        total_time += result.time;
-        //CU_ASSERT_DOUBLE_EQUAL(lambda, 30005.141763, 1.0e-6);
-    }
-    printf("pkustk13: average time: %.6f\n", total_time/10);
+    test_sparse_power_method(A, "pkustk13");
 
     free(my_coo->row);
     free(my_coo->col);
@@ -501,7 +448,7 @@ int main(int argc, char* argv[]){
     //CU_add_test(suite, "Power method test", test_dense_off_power_method);
 
 
-    //CU_add_test(suite, "Power method cage10", test_serial_CSR_cage10);
+    CU_add_test(suite, "Power method cage10", test_serial_CSR_cage10);
     CU_add_test(suite, "Power method 494_bus", test_serial_CSR_494_bus);
     CU_add_test(suite, "Power method cage10", test_serial_CSR_venkat01);
     CU_add_test(suite, "Power method siH4", test_serial_CSR_siH4);
