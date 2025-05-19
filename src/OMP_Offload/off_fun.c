@@ -9,7 +9,8 @@
 #include <time.h>
 #include <omp.h>
 
-
+#define NUM_BLOCKS 96  // or try 128, 256
+#define BLOCK_SIZE 256
 
 
 /**
@@ -22,37 +23,52 @@
  */
 
  // we shall have the same amount of threads as number of rows, sutch that eatch thread handles an entire row.
-void off_dense_matvec_mult(const denseMatrix* A, Vector* x, Vector* y){
+void off_dense_matvec_mult(const denseMatrix* A, Vector* x, Vector* y) {
+    int rows = A->rows;
+    int cols = A->cols;
+    double* A_data = A->data;
+    double* x_data = x->data;
+    double* y_data = y->data;
 
-    double sum;
-    #pragma omp target map(to: A->data[0: A->rows * A->cols], x->data[0: x->size]) map(from: y->data[0: y->size])
-    #pragma omp parallel for default(none) private(sum) shared(y, A, x)
-    for(int i = 0; i < A->rows; i++){
-        sum = 0;
-        for (int j = 0; j < A->cols; j++){
-            double value = A->data[i * A->cols + j];
-            sum = fma(value, x->data[j], sum);
+    #pragma omp target teams distribute parallel for \
+        num_teams(NUM_BLOCKS) thread_limit(BLOCK_SIZE) \
+        map(to: A_data[0:rows * cols], x_data[0:cols]) \
+        map(from: y_data[0:rows]) \
+        default(none) firstprivate(rows, cols) shared(A_data, x_data, y_data)
+    for (int i = 0; i < rows; i++) {
+        double sum = 0.0;
+        for (int j = 0; j < cols; j++) {
+            sum += A_data[i * cols + j] * x_data[j];
         }
-        y->data[i] = sum;
+        y_data[i] = sum;
     }
 }
 
 
-double off_dot_product(const Vector* x, const Vector* y){
-    if(x->size != y->size){
-        printf("Error: Vectors must have the same size (x: %d, y: %d)\n", x->size, y->size);
+
+double off_dot_product(const Vector* x, const Vector* y) {
+    if (x->size != y->size) {
+        printf("Error: Vectors must have the same size \n");
         return 0.0;
     }
 
+    int size = x->size;
+    double* x_data = x->data;
+    double* y_data = y->data;
     double dot = 0.0;
-    #pragma omp target map(to: x->data[0: x->size], y->data[0: y->size]) map(from: dot)
-    #pragma omp parallel for default(none) shared(x, y) reduction(+:dot) 
-    for(int i = 0; i < x->size; i++){
-        //dot = fma(x->data[i], y->data[i], dot);
-        dot += x->data[i] * y->data[i];
+
+    #pragma omp target teams distribute parallel for \
+        num_teams(NUM_BLOCKS) thread_limit(BLOCK_SIZE) \
+        map(to: x_data[0:size], y_data[0:size]) \
+        map(tofrom: dot) default(none) firstprivate(size) shared(x_data, y_data) reduction(+:dot)
+    for (int i = 0; i < size; i++) {
+        dot += x_data[i] * y_data[i];
     }
+
     return dot;
 }
+
+
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -68,20 +84,30 @@ double off_dot_product(const Vector* x, const Vector* y){
  */
 
 
- void off_sparse_matvec_mult_CSR(const sparseMatrixCSR* A, Vector* x, Vector *y){
+void off_sparse_matvec_mult_CSR(const sparseMatrixCSR* A, Vector* x, Vector *y) {
+    int rows = A->rows;
+    int nnz = A->nnz;
+    int* row_ptr = A->row_ptr;
+    int* col = A->col;
+    double* val = A->val;
 
-    double aux;
+    int x_size = x->size;
+    double* x_data = x->data;
+    double* y_data = y->data;
 
-    #pragma omp target map(to: A->row_ptr[0: A->rows + 1], A->val[0: A->nnz], A->col[0: A->nnz], x->data[0: x->size]) map(from: y->data[0: y->size])
-    #pragma omp parallel for default(none) private(aux) shared(y, A, x)
-    for(int i = 0; i < A->rows; i++){
-        aux = 0.0;
-        for(int j = A->row_ptr[i]; j < A->row_ptr[i+1]; j++){
-            aux = fma(x->data[A->col[j]], A->val[j], aux);
+    #pragma omp target teams distribute parallel for num_teams(NUM_BLOCKS) thread_limit(BLOCK_SIZE) \
+        map(to: row_ptr[0:rows + 1], val[0:nnz], col[0:nnz], x_data[0:x_size]) \
+        map(from: y_data[0:rows]) \
+        default(none) firstprivate(rows) shared(row_ptr, col, val, x_data, y_data)
+    for (int i = 0; i < rows; i++) {
+        double aux = 0.0;
+        for (int j = row_ptr[i]; j < row_ptr[i + 1]; j++) {
+            aux += x_data[col[j]] * val[j];
         }
-        y->data[i] = aux;
+        y_data[i] = aux;
     }
- }
+}
+
 
 
 void off_sparse_matvec_mult(const SparseMatrixAny* A, Vector* x, Vector *y){
@@ -94,11 +120,16 @@ void off_sparse_matvec_mult(const SparseMatrixAny* A, Vector* x, Vector *y){
     }
 }
 
-void off_vector_norm_div(const Vector *x, Vector *y, double norm){
+void off_vector_norm_div(const Vector *x, Vector *y, double norm) {
+    int size = x->size;
+    double* x_data = x->data;
+    double* y_data = y->data;
 
-    #pragma omp target map(to: x->data[0: x->size]) map(from: y->data[0: y->size])
-    #pragma omp parallel for default(none) shared(x,y,norm) 
-    for(int i = 0; i < x->size; i++){
-        y->data[i] =  x->data[i] / norm;
+    #pragma omp target teams distribute parallel for num_teams(NUM_BLOCKS) thread_limit(BLOCK_SIZE) \
+        map(to: x_data[0:size]) \
+        map(from: y_data[0:size]) \
+        default(none) firstprivate(size, norm) shared(x_data, y_data)
+    for (int i = 0; i < size; i++) {
+        y_data[i] = x_data[i] / norm;
     }
 }

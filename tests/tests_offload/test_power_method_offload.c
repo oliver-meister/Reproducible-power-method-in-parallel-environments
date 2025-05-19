@@ -418,19 +418,7 @@ void test_serial_CSR_pkustk13(){
 
 int main(int argc, char* argv[]){
 
-    if(argc < 2){
-        printf("expected number of threads as argumet\n");
-        return 1;
-    }
-
-    int num_threads = atoi(argv[1]);
-
-    if (num_threads <= 0) {
-        printf("Error: num_threads must be greater than 0\n");
-        return 1;
-    }
     
-    omp_set_num_threads(num_threads);
     init_backend();
     srand(time(0));
     CU_initialize_registry();

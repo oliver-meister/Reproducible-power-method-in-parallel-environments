@@ -32,7 +32,7 @@ void openMP_dense_matvec_mult(const denseMatrix* A, Vector* x, Vector* y){
         for (int j = 0; j < A->cols; j++){
             // each row has cols elements
             double value = A->data[i * A->cols + j];
-            sum = fma(value, x->data[j], sum);
+            sum += value * x->data[j];
         }
         //int thread_id = omp_get_thread_num();
         //printf("Thread %d is processing row %d\n", thread_id, i);
@@ -50,7 +50,6 @@ double openMP_dot_product(const Vector* x, const Vector* y){
     double dot = 0.0;
     #pragma omp parallel for default(none) shared(x, y) reduction(+:dot) 
     for(int i = 0; i < x->size; i++){
-        //dot = fma(x->data[i], y->data[i], dot);
         dot += x->data[i] * y->data[i];
     }
     return dot;
@@ -112,7 +111,7 @@ double openMP_dot_product2(const Vector* x, const Vector* y){
     for(int i = 0; i < A->rows; i++){
         aux = 0.0;
         for(int j = A->row_ptr[i]; j < A->row_ptr[i+1]; j++){
-            aux = fma(x->data[A->col[j]], A->val[j], aux);
+            aux += x->data[A->col[j]] * A->val[j];
         }
         y->data[i] = aux;
     }
