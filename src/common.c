@@ -129,10 +129,17 @@ bool convergence(double lambda_new, double lambda_old, double threshold){
  */
 void normalize_vector(Vector* x, Vector *y){
 
-    double norm = sqrt(dotprod(x,x));
-    if (norm < 1.0E-10){
+
+    printf("call from norm\n");
+   double norm_sq = dotprod(x, x);
+
+    if (norm_sq <= 1.0e-20 || isnan(norm_sq)) {
+        fprintf(stderr, "Warning: norm is too small or invalid, skipping normalization.\n");
         return;
     }
-    vector_norm_div(x,y,norm);
+
+    double norm = sqrt(norm_sq);
+    vector_norm_div(x, y, norm);
+
 }
 

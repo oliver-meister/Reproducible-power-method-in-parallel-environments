@@ -9,7 +9,10 @@
 #define BIN_COUNT      39
 
 double runExDOT(const double *h_x, const double *h_y, int N){
-    
+    static int call_count = 0;
+    call_count++;
+    printf("[DEBUG] runExDOT called %d times\n", call_count);
+
     double *d_x;
     double *d_y;
     double *d_result;
@@ -27,26 +30,25 @@ double runExDOT(const double *h_x, const double *h_y, int N){
     cudaMalloc((void**)&d_y, sizeof(double) * N);
     cudaMalloc((void**)&d_result, sizeof(double));
     
+   
     cudaMemcpy(d_x, h_x, sizeof(double) * N, cudaMemcpyHostToDevice);
     cudaMemcpy(d_y, h_y, sizeof(double) * N, cudaMemcpyHostToDevice);
     
     // Running CUDA ExDOT
-    
+    cudaMemset(d_PartialSuperaccs, 0, size);
     launch_ExDOT(d_PartialSuperaccs, d_x, d_y, N);
     launch_ExDOTComplete(d_PartialSuperaccs);
+    cudaMemset(d_result, 0, sizeof(double));
     launch_FinalReduceAndRound(d_result, d_PartialSuperaccs);
-    
     double h_result;  
     cudaMemcpy(&h_result, d_result, sizeof(double), cudaMemcpyDeviceToHost);
+    printf("ExDOT dot result, not in kernel: %.20e\n", h_result);
 
     cudaFree(d_PartialSuperaccs);
     cudaFree(d_x);
     cudaFree(d_y);
     cudaFree(d_result);
-    
-    printf("exblas dot: %f\n", (double) h_result);
-    printf("exblas dot / 2: %f\n", (double) h_result / 2.0);
-    
+
     return h_result;
 }
 

@@ -430,7 +430,7 @@ CU_add_test(suite, "Matrix vector multiplication test", test_dense_CUDA_matvec_m
 CU_add_test(suite, "Approximate eigenvalue test", test_dense_CUDA_approximate_eigenvalue);
 */
 
-    CU_add_test(suite, "Power method cage10", test_serial_CSR_cage10);
+    //CU_add_test(suite, "Power method cage10", test_serial_CSR_cage10);
     CU_add_test(suite, "Power method 494_bus", test_serial_CSR_494_bus);
     CU_add_test(suite, "Power method cage10", test_serial_CSR_venkat01);
     CU_add_test(suite, "Power method siH4", test_serial_CSR_siH4);

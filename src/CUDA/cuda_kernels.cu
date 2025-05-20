@@ -17,7 +17,7 @@ __device__ void warpReduce(volatile double *sdata, unsigned int tid) {
 }
 
 template <unsigned int blockSize>
-__global__ void reduce2(double *g_idata, double *g_odata, unsigned int n) {
+__global__ void reduce(double *g_idata, double *g_odata, unsigned int n) {
     extern __shared__ double sdata[];
     unsigned int tid = threadIdx.x;
     unsigned int i = blockIdx.x*(blockSize*2) + tid;
@@ -33,11 +33,12 @@ __global__ void reduce2(double *g_idata, double *g_odata, unsigned int n) {
 }
 
 template <unsigned int blockSize>
-__global__ void reduce1(double *x_idata, double *y_idata, double* result, unsigned int n) {
+__global__ void dotprod(double *x_idata, double *y_idata, double* result, unsigned int n) {
     extern __shared__ double sdata[];
     unsigned int tid = threadIdx.x;
     unsigned int i = blockIdx.x*(blockSize*2) + tid;
     unsigned int gridSize = blockSize*2*gridDim.x;
+
     sdata[tid] = 0;
     while (i < n) { sdata[tid] += x_idata[i] * y_idata[i] + x_idata[i+blockSize] * y_idata[i+blockSize] ; i += gridSize; }
     __syncthreads();
@@ -48,11 +49,11 @@ __global__ void reduce1(double *x_idata, double *y_idata, double* result, unsign
     if (tid == 0) result[blockIdx.x] = sdata[0];
     }
 
-    extern "C" void launch_reduce1_kernel(double* x, double* y, double* result, int n, int numBlocks, int blockSize) {
-        reduce1<BLOCK_SIZE><<<numBlocks, blockSize, blockSize * sizeof(double)>>>(x, y, result, n);
+    extern "C" void launch_dotprod_kernel(double* x, double* y, double* result, int n, int numBlocks) {
+        dotprod<BLOCK_SIZE><<<numBlocks, BLOCK_SIZE>>>(x, y, result, n);
     }
-    extern "C" void launch_reduce2_kernel(double* input, double* output, int currentSize, int nextSize, int blockSize) {
-        reduce2<BLOCK_SIZE><<<nextSize, blockSize, blockSize * sizeof(double)>>>(input, output, currentSize);
+    extern "C" void launch_reduce_kernel(double* input, double* output, int currentSize, int nextSize, int blockSize) {
+        reduce<BLOCK_SIZE><<<nextSize, blockSize>>>(input, output, currentSize);
     }
 
 

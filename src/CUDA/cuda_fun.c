@@ -6,59 +6,49 @@
 #include <stdio.h>
 
 
-#define BLOCK_SIZE 32
-
-
-
-double cuda_dot_product(Vector* x, Vector* y) {
+double cuda_dot_product(const Vector* x, const Vector* y) {
     const int vector_size = x->size;
     if (vector_size != y->size) {
         fprintf(stderr, "Vector size mismatch.\n");
         return 0.0;
     }
 
-    double *d_x, *d_y, *d_result, *d_temp;
+    double *d_x, *d_y, *d_result;
     cudaMalloc((void**)&d_x, sizeof(double) * vector_size);
     cudaMalloc((void**)&d_y, sizeof(double) * vector_size);
 
     // what shall the block size be?
-    int maxBlocks = (vector_size + BLOCK_SIZE * 2 - 1) / (BLOCK_SIZE * 2);
+    //int numBlocks = (vector_size + BLOCK_SIZE * 2 - 1) / (BLOCK_SIZE * 2);
 
-    cudaMalloc((void**)&d_result, sizeof(double) * maxBlocks);
-    cudaMalloc((void**)&d_temp,   sizeof(double) * maxBlocks);  
+    int numBlocks = 64;
+
+    cudaMalloc((void**)&d_result, sizeof(double) * numBlocks);
 
    
     cudaMemcpy(d_x, x->data, sizeof(double) * vector_size, cudaMemcpyHostToDevice);
     cudaMemcpy(d_y, y->data, sizeof(double) * vector_size, cudaMemcpyHostToDevice);
 
     // First reduction kernel: compute x[i] * y[i]
-    int numBlocks = maxBlocks;
-    launch_reduce1_kernel(d_x, d_y, d_result, vector_size, numBlocks, BLOCK_SIZE);
-
-    
-    int currentSize = numBlocks;
-    double* input = d_result;
-    double* output = d_temp;
-
-    while (currentSize > 1) {
-        int nextSize = (currentSize + BLOCK_SIZE * 2 - 1) / (BLOCK_SIZE * 2);
-        launch_reduce2_kernel(input, output, currentSize, nextSize, BLOCK_SIZE);
-
-        double* temp = input;
-        input = output;
-        output = temp;
-
-        currentSize = nextSize;
-    }
+    launch_dotprod_kernel(d_x, d_y, d_result, vector_size, numBlocks);
 
     double result = 0.0;
-    cudaMemcpy(&result, input, sizeof(double), cudaMemcpyDeviceToHost);
+    
+    if (numBlocks > 1){
+        double *h_result = malloc(sizeof(double) * numBlocks);
+        cudaMemcpy(h_result, d_result, sizeof(double) * numBlocks, cudaMemcpyDeviceToHost);
 
+        for(int i = 0; i < numBlocks; i++){
+            result += h_result[i];
+        }
+        free(h_result);
+    }else{
+        cudaMemcpy(&result, d_result, sizeof(double), cudaMemcpyDeviceToHost);
+    }
+   
     // Clean up
     cudaFree(d_x);
     cudaFree(d_y);
     cudaFree(d_result);
-    cudaFree(d_temp);
 
     return result;
 }

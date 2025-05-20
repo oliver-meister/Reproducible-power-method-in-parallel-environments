@@ -79,7 +79,7 @@ void serial_sparse_matvec_mult_CSR(const sparseMatrixCSR* A, Vector* x, Vector* 
     for(int i = 0; i < A->rows; i++){
         aux = 0.0;
         for(int j = A->row_ptr[i]; j < A->row_ptr[i+1]; j++){
-            aux = fmma(x->data[A->col[j]], A->val[j], aux);
+            aux = fma(x->data[A->col[j]], A->val[j], aux);
         }
         y->data[i] = aux;
     }

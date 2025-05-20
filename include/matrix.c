@@ -89,7 +89,7 @@ sparseMatrixCSR* coo_to_csr(sparseMatrixCOO *coo){
     for (int i = 0; i < coo->rows; i++) {
         csr->row_ptr[i + 1] += csr->row_ptr[i];
     }
-
+    printf("number of rows: %d\n", coo->rows);
     int* offset = calloc(coo->rows, sizeof(int));
 
     for (int i = 0; i < coo->nnz; i++) {
