@@ -9,9 +9,11 @@
 #define BIN_COUNT      39
 
 double runExDOT(const double *h_x, const double *h_y, int N){
+    /*
     static int call_count = 0;
     call_count++;
     printf("[DEBUG] runExDOT called %d times\n", call_count);
+    */
 
     double *d_x;
     double *d_y;
@@ -42,7 +44,7 @@ double runExDOT(const double *h_x, const double *h_y, int N){
     launch_FinalReduceAndRound(d_result, d_PartialSuperaccs);
     double h_result;  
     cudaMemcpy(&h_result, d_result, sizeof(double), cudaMemcpyDeviceToHost);
-    printf("ExDOT dot result, not in kernel: %.20e\n", h_result);
+    //printf("ExDOT dot result, not in kernel: %.20e\n", h_result);
 
     cudaFree(d_PartialSuperaccs);
     cudaFree(d_x);

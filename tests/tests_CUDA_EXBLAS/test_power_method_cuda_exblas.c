@@ -337,9 +337,9 @@ int main(){
     CU_add_test(suite, "Power method 494_bus", test_serial_CSR_494_bus);
     //CU_add_test(suite, "Power method venkat01", test_serial_CSR_venkat01);
     CU_add_test(suite, "Power method siH4", test_serial_CSR_siH4);
-    //CU_add_test(suite, "Power method benzene", test_serial_CSR_benzene);
-    //CU_add_test(suite, "Power method SiO", test_serial_CSR_SiO);
-    //CU_add_test(suite, "Power method bcsstk01", test_serial_CSR_bcsstk01);
+    CU_add_test(suite, "Power method benzene", test_serial_CSR_benzene);
+    CU_add_test(suite, "Power method SiO", test_serial_CSR_SiO);
+    CU_add_test(suite, "Power method bcsstk01", test_serial_CSR_bcsstk01);
     //CU_add_test(suite, "Power method pkustk13", test_serial_CSR_pkustk13);
     
     CU_basic_run_tests();

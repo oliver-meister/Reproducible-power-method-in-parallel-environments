@@ -210,7 +210,7 @@ __device__ void Accumulate(volatile long long int *sa, double x) {
 
 __global__ void FinalReduceAndRound(double *d_Res, long long int *d_PartialSuperaccs, int block_count) {
     int tid = threadIdx.x;
-    if (tid == 0) printf("[DEVICE] tid == 0 körs\n");
+    //if (tid == 0) printf("[DEVICE] tid == 0 körs\n");
     if (tid < BIN_COUNT) {
         long long int sum = 0;
         for (int i = 0; i < block_count; ++i) {
@@ -223,16 +223,18 @@ __global__ void FinalReduceAndRound(double *d_Res, long long int *d_PartialSuper
 
     if (tid == 0) {
         d_Res[0] = Round(d_PartialSuperaccs);
-        printf("ExDOT dot result, in kernel: %.20e\n", d_Res[0]);
+        //printf("ExDOT dot result, in kernel: %.20e\n", d_Res[0]);
     }
 }
 
 
 
 __global__ void ExDOTComplete(long long int *d_PartialSuperaccs) {
+    /*
     if(threadIdx.x == 0 && blockIdx.x == 0){
         printf("launched ExDOT complete\n");
     }
+    */
     
     unsigned int tid = threadIdx.x;
    
@@ -258,10 +260,11 @@ __global__ void ExDOTComplete(long long int *d_PartialSuperaccs) {
 
 
 __global__ void ExDOT(long long int *d_PartialSuperaccs, double *d_a, double *d_b, unsigned int NbElements) {
-    
+    /*
     if(threadIdx.x == 0 && blockIdx.x == 0){
         printf("launched ExDOT\n");
     }
+    */
     unsigned int tid = threadIdx.x;
     int gid = blockIdx.x * blockDim.x + threadIdx.x;
 
