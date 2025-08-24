@@ -55,7 +55,7 @@ Res sparse_power_method(const SparseMatrixAny *A){
         sparse_matvec(A,x,y);
         iterations += 1;
         
-    } while(!convergence(lambda_new, lambda_old, 1.0E-13) && iterations < MAX_ITERATIONS);
+    } while(!convergence(lambda_new, lambda_old, 1.0E-15) && iterations < MAX_ITERATIONS);
     double time = timer_stop(start);
     
     Res result;
@@ -67,7 +67,7 @@ Res sparse_power_method(const SparseMatrixAny *A){
         result.lambda = lambda_new;
         result.time = time;
         printf("Number of iterations: %d\n", iterations);
-        printf("Lambda: %f\n", lambda_new);
+        printf("Lambda: %.16f\n", lambda_new);
     }
     delete_vector(x);
     delete_vector(y);

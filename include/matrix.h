@@ -19,7 +19,7 @@ typedef struct {
 } sparseMatrixCOO;
 
 typedef struct {
-    int* row_ptr;  //
+    int* row_ptr; 
     int* col;
     double* val;
     int rows;

@@ -2,7 +2,7 @@
 #include <device_launch_parameters.h>
 #include <stdio.h>
 
-#define WARP_COUNT 8
+#define WARP_COUNT 16
 #define WARP_SIZE 32
 #define BLOCK_SIZE (WARP_COUNT * WARP_SIZE)
 #define MERGE_SUPERACCS_SIZE 128

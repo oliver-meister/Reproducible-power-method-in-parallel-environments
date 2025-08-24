@@ -20,7 +20,7 @@ double cuda_dot_product(const Vector* x, const Vector* y) {
     // what shall the block size be?
     //int numBlocks = (vector_size + BLOCK_SIZE * 2 - 1) / (BLOCK_SIZE * 2);
 
-    int numBlocks = 64;
+    int numBlocks = 1;
 
     cudaMalloc((void**)&d_result, sizeof(double) * numBlocks);
 
