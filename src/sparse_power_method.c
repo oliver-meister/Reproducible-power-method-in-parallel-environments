@@ -18,8 +18,8 @@ extern sparse_matvec_fn sparse_matvec;
 extern start_timer timer_start;
 extern stop_timer timer_stop;
 
-#define MAX_ITERATIONS 10000
-#define NUM_RUNS 10
+#define MAX_ITERATIONS 100000
+#define NUM_RUNS 20
 
 /**
  * @brief Calculates the dominant eigenvalue and its coresponding eigenvector of a matrix.
@@ -48,6 +48,7 @@ Res sparse_power_method(const SparseMatrixAny *A){
     double start = timer_start();
     //y_1
     sparse_matvec(A,x,y);
+
     do{
         lambda_old = lambda_new;
         normalize_vector(y,x);
@@ -55,7 +56,7 @@ Res sparse_power_method(const SparseMatrixAny *A){
         sparse_matvec(A,x,y);
         iterations += 1;
         
-    } while(!convergence(lambda_new, lambda_old, 1.0E-15) && iterations < MAX_ITERATIONS);
+    } while(!convergence(lambda_new, lambda_old, 1.0E-6) && iterations < MAX_ITERATIONS);
     double time = timer_stop(start);
     
     Res result;
@@ -66,8 +67,9 @@ Res sparse_power_method(const SparseMatrixAny *A){
     } else{
         result.lambda = lambda_new;
         result.time = time;
-        printf("Number of iterations: %d\n", iterations);
-        printf("Lambda: %.16f\n", lambda_new);
+        result.iter = iterations;
+        //printf("Number of iterations: %d\n", iterations);
+        //printf("Lambda: %.16f\n", lambda_new);
     }
     delete_vector(x);
     delete_vector(y);
@@ -97,12 +99,17 @@ Res sparse_power_method(const SparseMatrixAny *A){
 void test_sparse_power_method(SparseMatrixAny *A, char* file_name){
     double times[NUM_RUNS];
     double total_time = 0.0;
+    int min_iter = 0;
+    int max_iter = 0;
+    double min_lambda = 0.0;
+    double max_lambda = 0.0;
 
     Res warmup = sparse_power_method(A);
     if (warmup.lambda == -1.0) {
         printf("%s: did not converge\n", file_name);
         return;
     }
+
 
     for (int i = 0; i < NUM_RUNS; i++){
         Res result = sparse_power_method(A);
@@ -113,6 +120,32 @@ void test_sparse_power_method(SparseMatrixAny *A, char* file_name){
         times[i] = result.time;
         total_time += result.time;
 
+        if(i == 0)
+        {
+            min_iter = result.iter;
+            max_iter = result.iter;
+            
+            min_lambda = result.lambda;
+            max_lambda = result.lambda;
+        }
+        else{
+            if(min_iter > result.iter){
+                min_iter = result.iter;
+            }
+            if(max_iter < result.iter)
+            {
+                max_iter = result.iter;
+            }
+            if(min_lambda > result.lambda){
+                min_lambda = result.lambda;
+            }
+            if(max_lambda < result.lambda)
+            {
+                max_lambda = result.lambda;
+            }
+
+        }
+
     }
     double avg = total_time / NUM_RUNS;
     double variance = 0.0;
@@ -122,5 +155,5 @@ void test_sparse_power_method(SparseMatrixAny *A, char* file_name){
     }
 
     double stddev = sqrt(variance / (NUM_RUNS -1));
-    printf("%s: avg time = %.6f s, stddev = %.6f s\n",file_name, avg, stddev);
+    printf("%s: avg time = %.6f s, stddev = %.6f s, max iter = %d, min iter = %d, max lambda = %.16f, min lambda = %.16f \n",file_name, avg, stddev, max_iter, min_iter, max_lambda, min_lambda);
 }

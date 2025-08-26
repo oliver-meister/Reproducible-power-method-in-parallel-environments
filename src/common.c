@@ -116,8 +116,11 @@ void init_backend() {
  * @return True if the difference between the two eigenvalues is less than the threshold, false otherwise.
  */
 bool convergence(double lambda_new, double lambda_old, double threshold){
+    
     double r_norm = fabs(lambda_new - lambda_old) / fabs(lambda_old);
     return r_norm < threshold * lambda_old;
+    
+   //return (fabs(lambda_new - lambda_old) < threshold);
 }
 
 

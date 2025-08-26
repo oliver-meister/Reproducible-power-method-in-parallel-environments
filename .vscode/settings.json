@@ -43,7 +43,8 @@
         "cuda_fun.h": "c",
         "bitset": "c",
         "__locale": "c",
-        "locale": "c"
+        "locale": "c",
+        "chrono": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

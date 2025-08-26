@@ -19,6 +19,7 @@ void init_backend();
 typedef struct {
     double lambda;
     double time;
+    int iter;
 } Res;
 
 
