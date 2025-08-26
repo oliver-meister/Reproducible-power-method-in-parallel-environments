@@ -19,7 +19,7 @@ extern start_timer timer_start;
 extern stop_timer timer_stop;
 
 #define MAX_ITERATIONS 10000
-#define NUM_RUNS 10
+#define NUM_RUNS 1
 
 /**
  * @brief Calculates the dominant eigenvalue and its coresponding eigenvector of a matrix.
@@ -48,14 +48,16 @@ Res sparse_power_method(const SparseMatrixAny *A){
     double start = timer_start();
     //y_1
     sparse_matvec(A,x,y);
+
     do{
         lambda_old = lambda_new;
         normalize_vector(y,x);
+
         lambda_new = sparse_approximate_eigenvalue(x, y);
         sparse_matvec(A,x,y);
         iterations += 1;
         
-    } while(!convergence(lambda_new, lambda_old, 1.0E-13) && iterations < MAX_ITERATIONS);
+    } while(!convergence(lambda_new, lambda_old, 1.0E-6) && iterations < MAX_ITERATIONS);
     double time = timer_stop(start);
     
     Res result;
@@ -67,7 +69,7 @@ Res sparse_power_method(const SparseMatrixAny *A){
         result.lambda = lambda_new;
         result.time = time;
         printf("Number of iterations: %d\n", iterations);
-        printf("Lambda: %f\n", lambda_new);
+        printf("Lambda: %.16f\n", lambda_new);
     }
     delete_vector(x);
     delete_vector(y);

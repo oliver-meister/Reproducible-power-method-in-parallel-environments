@@ -45,15 +45,18 @@ __global__ void dotprod(double *x_idata, double *y_idata, double* result, unsign
     if (blockSize >= 512) { if (tid < 256) { sdata[tid] += sdata[tid + 256]; } __syncthreads(); }
     if (blockSize >= 256) { if (tid < 128) { sdata[tid] += sdata[tid + 128]; } __syncthreads(); }
     if (blockSize >= 128) { if (tid < 64) { sdata[tid] += sdata[tid + 64]; } __syncthreads(); }
-    if (tid < 32) warpReduce<BLOCK_SIZE>(sdata, tid);
+    if (tid < 32) warpReduce<BLOCK_SIZE>(sdata, tid); // error here?
     if (tid == 0) result[blockIdx.x] = sdata[0];
-    }
+
+}
 
     extern "C" void launch_dotprod_kernel(double* x, double* y, double* result, int n, int numBlocks) {
-        dotprod<BLOCK_SIZE><<<numBlocks, BLOCK_SIZE>>>(x, y, result, n);
+        size_t shmem = (BLOCK_SIZE + 1) * sizeof(double);
+        dotprod<BLOCK_SIZE><<<numBlocks, BLOCK_SIZE, shmem>>>(x, y, result, n);
     }
     extern "C" void launch_reduce_kernel(double* input, double* output, int currentSize, int nextSize, int blockSize) {
-        reduce<BLOCK_SIZE><<<nextSize, blockSize>>>(input, output, currentSize);
+        size_t shmem = (BLOCK_SIZE + 1) * sizeof(double);
+        reduce<BLOCK_SIZE><<<nextSize, blockSize, shmem>>>(input, output, currentSize);
     }
 
 
