@@ -41,6 +41,7 @@ Res sparse_power_method(const SparseMatrixAny *A){
     }
 
     // initial vector
+    // IF CUDA/ExBLAS Allocate on GPU // Done
     Vector* x = generate_1_vector(size);
     Vector* y = generate_vector(size);
     int iterations = 0;
