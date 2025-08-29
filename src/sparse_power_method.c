@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
+#include <cuda_runtime.h>
 
 extern dot_fn dotprod;
 extern sparse_matvec_fn sparse_matvec;
@@ -44,6 +45,15 @@ Res sparse_power_method(const SparseMatrixAny *A){
     // IF CUDA/ExBLAS Allocate on GPU // Done
     Vector* x = generate_1_vector(size);
     Vector* y = generate_vector(size);
+
+    // allocate GPU memory for d_result
+    #ifdef USE_CUDA
+        // Number of CUDA Blocks for dotproduct
+        int numBlocks = 1;
+        double *d_result;
+        cudaMalloc((void**)&d_result, sizeof(double) * numBlocks);
+    #endif
+
     int iterations = 0;
 
     double start = timer_start();
@@ -52,13 +62,17 @@ Res sparse_power_method(const SparseMatrixAny *A){
 
     do{
         lambda_old = lambda_new;
-        normalize_vector(y,x);
-
-        lambda_new = sparse_approximate_eigenvalue(x, y);
+        #ifdef USE_CUDA
+            normalize_vector_CUDA(y,x,d_result,numBlocks);
+            lambda_new = sparse_approximate_eigenvalue_CUDA(x, y, d_result, numBlocks);
+        #else 
+            normalize_vector(y,x);
+            lambda_new = sparse_approximate_eigenvalue(x, y);
+        #endif
         sparse_matvec(A,x,y);
         iterations += 1;
         
-    } while(!convergence(lambda_new, lambda_old, 1.0E-6) && iterations < MAX_ITERATIONS);
+    } while(!convergence(lambda_new, lambda_old, 1.0E-9) && iterations < MAX_ITERATIONS);
     double time = timer_stop(start);
     
     Res result;
@@ -75,6 +89,9 @@ Res sparse_power_method(const SparseMatrixAny *A){
     }
     delete_vector(x);
     delete_vector(y);
+    #ifdef USE_CUDA
+        cudaFree(d_result);
+    #endif
     return result;
 }
 
@@ -93,6 +110,25 @@ Res sparse_power_method(const SparseMatrixAny *A){
     //sparse_matvec(A, x, y);
     //printf("call from approx \n");
     double lambda = dotprod(x, y);
+    //printf("ExDOT dot result, approx: %.20e\n", lambda);
+    return lambda;
+}
+
+
+/**
+ * @brief  Approximates the dominant eigenvalue.
+ * 
+ * @param A The input matrix.
+ * @param x The normalized input vector.
+ * 
+ * @return The approximated dominant eigenvalue.
+ */
+
+ double sparse_approximate_eigenvalue_CUDA(Vector* x, Vector *y, double* d_result, int numBlocks){
+    
+    //sparse_matvec(A, x, y);
+    //printf("call from approx \n");
+    double lambda = cuda_dot_product(x, y, d_result, numBlocks);
     //printf("ExDOT dot result, approx: %.20e\n", lambda);
     return lambda;
 }

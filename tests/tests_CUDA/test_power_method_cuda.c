@@ -13,7 +13,7 @@
 #include "../../external/mmio.h"
 
 
-
+/*
 void test_dot(){
     Vector x;
     x.size = 1000;
@@ -110,6 +110,7 @@ free(my_csr);
 delete_vector(y);
 
 }
+*/
 
 /*
 void test_dense_CUDA_matvec_mult(){
@@ -232,16 +233,8 @@ void test_serial_CSR_cage10(){
 
     test_sparse_power_method(A, "cage10");
 
-    free(my_coo->row);
-    free(my_coo->col);
-    free(my_coo->val);
-    free(my_coo);
-    
-    free(my_csr->row_ptr);
-    free(my_csr->col);
-    free(my_csr->val);
-    free(my_csr);
-    
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
     free(A);
 
 

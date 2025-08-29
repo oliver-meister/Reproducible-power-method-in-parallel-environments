@@ -144,3 +144,26 @@ void normalize_vector(Vector* x, Vector *y){
 
 }
 
+
+/**
+ * @brief Normalize the vector into a unit vector.
+ * 
+ * @param x The input/output vector. It is overwritten by the unit vector.
+ * 
+ * @return Nothing. The result is stored directly in the vector x.
+ */
+void normalize_vector_CUDA(Vector* x, Vector *y, double* d_result, int numBlocks){
+
+    //printf("call from norm\n");
+   double dot = cuda_dot_product(x, x, d_result, numBlocks);
+
+    if (dot <= 1.0e-20 || isnan(dot)) {
+        fprintf(stderr, "Warning: norm is too small or invalid, skipping normalization.\n");
+        return;
+    }
+
+    double norm = sqrt(dot);
+    vector_norm_div(x, y, norm);
+
+}
+

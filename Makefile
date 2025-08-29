@@ -22,14 +22,18 @@ OFFLOAD_FLAGS = -mp=gpu -lcudart $(OFFLOADDEBUG)
 CUDA_LIBS = -L/usr/lib/x86_64-linux-gnu -lcudart
 
 # CUDA architecture flag optimized for NVIDIA RTX 4060 (Ada / sm_89)
-CUDA_ARCH_FLAGS = -gencode=arch=compute_90,code=sm_90
+CUDA_ARCH_FLAGS = -gencode=arch=compute_70,code=sm_70
 CUDA_WARN_FLAGS = -Wno-deprecated-gpu-targets
 CUDA_FLAGS = $(CUDA_ARCH_FLAGS) $(CUDA_WARN_FLAGS) $(CUDA_LIBS) -Xcompiler="-Wall -Wextra -fopenmp" $(CUDADEBUG)
 
 CUNIT = -I/home/o/olla5642/CUnit-2.1-3/install/include -L/home/o/olla5642/CUnit-2.1-3/install/lib -lcunit
 
 # === Object Files ===
-GENERAL_OBJ = include/vector.o include/matrix.o external/mmio.o
+IMPORT_OBJ_SERIAL = include/vector_serial.o include/matrix_serial.o external/mmio.o
+IMPORT_OBJ_OMP = include/vector_omp.o include/matrix_omp.o external/mmio.o
+IMPORT_OBJ_OFF = include/vector_off.o include/matrix_off.o external/mmio.o
+IMPORT_OBJ_CUDA = include/vector_cuda.o include/matrix_cuda.o external/mmio.o
+IMPORT_OBJ_EXBLAS = include/vector_exblas.o include/matrix_exblas.o external/mmio.o
 
 COMMON_OBJ_SERIAL = src/common_serial.o
 COMMON_OBJS_OPENMP = src/common_openmp.o
@@ -43,7 +47,12 @@ OFFLOAD_OBJS = src/OMP_Offload/off_fun.o
 CUDA_OBJS = src/CUDA/cuda_fun.o src/CUDA/cuda_kernels.o
 CUDA_EXBLAS = src/CUDA_ExBLAS/cuda_exblas_fun.o src/CUDA_ExBLAS/cuda_exblas_kernels.o
 
-SPARSE_OBJS = src/sparse_power_method.o
+SPARSE_OBJS_SERIAL = src/sparse_power_method_serial.o
+SPARSE_OBJS_OMP = src/sparse_power_method_omp.o
+SPARSE_OBJS_OFF = src/sparse_power_method_off.o
+SPARSE_OBJS_CUDA = src/sparse_power_method_cuda.o
+SPARSE_OBJS_EXBLAS = src/sparse_power_method_exblas.o
+
 DENSE_OBJS = src/dense_power_method.o
 
 # === Test Files ===
@@ -55,11 +64,28 @@ TEST_EXBLAS = tests/tests_CUDA_EXBLAS/test_power_method_cuda_exblas.c
 
 # === Build Rules ===
 
-include/vector.o: include/vector.c include/vector.h
-	$(CC) -c $< -o $@ $(CFLAGS)
+include/vector_serial.o: include/vector.c include/vector.h
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_SERIAL
+include/vector_omp.o: include/vector.c include/vector.h
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_OMP
+include/vector_off.o: include/vector.c include/vector.h
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_OFF
+include/vector_cuda.o: include/vector.c include/vector.h
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_CUDA
+include/vector_exblas.o: include/vector.c include/vector.h
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_EXBLAS
 
-include/matrix.o: include/matrix.c include/matrix.h
-	$(CC) -c $< -o $@ $(CFLAGS)
+include/matrix_serial.o: include/matrix.c include/matrix.h
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_SERIAL
+include/matrix_omp.o: include/matrix.c include/matrix.h
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_OMP
+include/matrix_off.o: include/matrix.c include/matrix.h
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_OFF
+include/matrix_cuda.o: include/matrix.c include/matrix.h
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_CUDA
+include/matrix_exblas.o: include/matrix.c include/matrix.h
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_EXBLAS
+
 
 external/mmio.o: external/mmio.c external/mmio.h
 	$(CC) -c $< -o $@ $(CFLAGS)
@@ -100,29 +126,35 @@ src/CUDA_ExBLAS/cuda_exblas_fun.o: src/CUDA_ExBLAS/cuda_exblas_fun.c src/CUDA_Ex
 src/CUDA_ExBLAS/cuda_exblas_kernels.o: src/CUDA_ExBLAS/cuda_exblas_kernels.cu
 	$(NVCC) -c $< -o $@ $(CUDA_FLAGS)
 
-src/sparse_power_method.o: src/sparse_power_method.c src/sparse_power_method.h 
-	$(CC) -c $< -o $@ $(CFLAGS)
+src/sparse_power_method_serial.o: src/sparse_power_method.c src/sparse_power_method.h 
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_SERIAL
+src/sparse_power_method_omp.o: src/sparse_power_method.c src/sparse_power_method.h 
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_OMP
+src/sparse_power_method_off.o: src/sparse_power_method.c src/sparse_power_method.h 
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_OFF
+src/sparse_power_method_cuda.o: src/sparse_power_method.c src/sparse_power_method.h 
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_CUDA
+src/sparse_power_method_exblas.o: src/sparse_power_method.c src/sparse_power_method.h 
+	$(CC) -c $< -o $@ $(CFLAGS) -DUSE_EXBLAS
 
 src/dense_power_method.o: src/dense_power_method.c src/dense_power_method.h 
 	$(CC) -c $< -o $@ $(CFLAGS)
 
 # === Final Executables ===
-
-test_serial: $(DENSE_OBJS) $(SPARSE_OBJS) $(COMMON_OBJ_SERIAL) $(GENERAL_OBJ) $(SERIAL_OBJS)
+test_serial: $(DENSE_OBJS) $(SPARSE_OBJS_SERIAL) $(COMMON_OBJ_SERIAL) $(IMPORT_OBJ_SERIAL) $(SERIAL_OBJS)
 	$(CC) -o test_serial $(TEST_SERIAL) $^ $(CFLAGS) $(CUNIT)
 
-test_openmp: $(DENSE_OBJS) $(SPARSE_OBJS) $(COMMON_OBJS_OPENMP) $(GENERAL_OBJ) $(OMP_OBJS)
+test_openmp: $(DENSE_OBJS) $(SPARSE_OBJS_OMP) $(COMMON_OBJS_OPENMP) $(IMPORT_OBJ_OMP) $(OMP_OBJS)
 	$(CC) -o test_openmp $(TEST_OMP) $^ $(CFLAGS) $(CUNIT)
 
-test_offload: $(DENSE_OBJS) $(SPARSE_OBJS) $(COMMON_OBJS_OFFLOAD) $(GENERAL_OBJ) $(OFFLOAD_OBJS)
+test_offload: $(DENSE_OBJS) $(SPARSE_OBJS_OFF) $(COMMON_OBJS_OFFLOAD) $(IMPORT_OBJ_OFF) $(OFFLOAD_OBJS)
 	$(OFFLOAD_CC) -o test_offload $(TEST_OFF) $^ $(OFFLOAD_FLAGS) $(CUNIT)
 
-test_cuda: $(DENSE_OBJS) $(SPARSE_OBJS) $(COMMON_OBJS_CUDA) $(GENERAL_OBJ) $(CUDA_OBJS)
+test_cuda: $(DENSE_OBJS) $(SPARSE_OBJS_CUDA) $(COMMON_OBJS_CUDA) $(IMPORT_OBJ_CUDA) $(CUDA_OBJS)
 	$(NVCC) -o test_cuda $(TEST_CUDA) $^ $(CUDA_FLAGS) $(CUNIT)
 
-test_cuda_exblas: $(DENSE_OBJS) $(SPARSE_OBJS) $(COMMON_OBJS_EXBLAS) $(GENERAL_OBJ) $(CUDA_EXBLAS) $(CUDA_OBJS)
+test_cuda_exblas: $(DENSE_OBJS) $(SPARSE_OBJS_EXBLAS) $(COMMON_OBJS_EXBLAS) $(IMPORT_OBJ_EXBLAS) $(CUDA_EXBLAS) $(CUDA_OBJS)
 	$(NVCC) -o test_cuda_exblas $(TEST_EXBLAS) $^ $(CUDA_FLAGS) $(CUNIT)
-
 # === Cleanup ===
 
 clean:

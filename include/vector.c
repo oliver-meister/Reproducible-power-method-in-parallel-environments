@@ -1,6 +1,7 @@
 #include "vector.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <cuda_runtime.h>
 
 /**
  * @brief Calculates the dot product of two Vectors.
@@ -68,6 +69,9 @@ Vector* generate_vector(int size){
 
 void delete_vector(Vector *x){
     free(x->data);
+    #if defined(USE_CUDA) || defined(USE_EXBLAS)
+    cudaFree(x->d_data);
+    #endif
     free(x);
 }
 

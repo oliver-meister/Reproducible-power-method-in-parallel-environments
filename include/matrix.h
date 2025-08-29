@@ -16,11 +16,9 @@ typedef struct {
     int rows; // Total number of rows
     int cols; // Total number of columns
     int nnz; // Number of non-zero values
-#if defined(USE_CUDA) || defined(USE_EXBLAS)
     int* d_row;
     int* d_col;
-    double* d_val
-#endif
+    double* d_val;
 } sparseMatrixCOO;
 
 typedef struct {
@@ -30,11 +28,9 @@ typedef struct {
     int rows;
     int cols; 
     int nnz;
-#if defined(USE_CUDA) || defined(USE_EXBLAS)
     int* d_row_ptr;
     int* d_col;
     double* d_val;
-#endif
 } sparseMatrixCSR;
 
 typedef enum {
@@ -54,5 +50,8 @@ typedef struct {
 
 sparseMatrixCOO* createSparseMatrixCOO(char*);
 sparseMatrixCSR* coo_to_csr(sparseMatrixCOO*);
+
+void delete_COO(sparseMatrixCOO* coo);
+void delete_CSR(sparseMatrixCSR* csr);
 
 #endif

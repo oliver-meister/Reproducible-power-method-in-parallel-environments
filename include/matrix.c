@@ -5,6 +5,7 @@
 #include "matrix.h"
 #include <stdbool.h>
 #include "../external/mmio.h"
+#include <cuda_runtime.h>
 
 
 sparseMatrixCOO* createSparseMatrixCOO(char* file) {
@@ -65,11 +66,11 @@ sparseMatrixCOO* createSparseMatrixCOO(char* file) {
     A->rows = rows;
     A->cols = cols;
     A->nnz = current_nnz;  // Actual nnz used
+    A->d_row = NULL; 
+    A->d_col = NULL; 
+    A->d_val = NULL;
 
     #if defined(USE_CUDA) || defined(USE_EXBLAS)
-        A->d_row = NULL; 
-        A->d_col = NULL; 
-        A->d_val = NULL;
 
         cudaMalloc((void**)&A->d_row, sizeof(int) * A->nnz);
         cudaMalloc((void**)&A->d_col, sizeof(int) * A->nnz);
@@ -114,11 +115,11 @@ sparseMatrixCSR* coo_to_csr(sparseMatrixCOO *coo){
     }
 
     free(offset);
+    csr->d_row_ptr = NULL; 
+    csr->d_col = NULL; 
+    csr->d_val = NULL;
 
-        #if defined(USE_CUDA) || defined(USE_EXBLAS)
-        csr->d_row_ptr = NULL; 
-        csr->d_col = NULL; 
-        csr->d_val = NULL;
+    #if defined(USE_CUDA) || defined(USE_EXBLAS)
 
         cudaMalloc((void**)&csr->d_row_ptr, sizeof(int) * (coo->rows + 1));
         cudaMalloc((void**)&csr->d_col, sizeof(int) * coo->nnz);
@@ -131,5 +132,32 @@ sparseMatrixCSR* coo_to_csr(sparseMatrixCOO *coo){
 
     return csr;
 
+}
+
+
+void delete_COO(sparseMatrixCOO* coo)
+{
+    free(coo->row);
+    free(coo->col);
+    free(coo->val);
+    #if defined(USE_CUDA) || defined(USE_EXBLAS)
+        cudaFree(coo->d_row);
+        cudaFree(coo->d_col);
+        cudaFree(coo->d_val);
+    #endif
+    free(coo);
+}
+
+void delete_CSR(sparseMatrixCSR* csr)
+{
+    free(csr->row_ptr);
+    free(csr->col);
+    free(csr->val);
+    #if defined(USE_CUDA) || defined(USE_EXBLAS)
+        cudaFree(csr->d_row_ptr);
+        cudaFree(csr->d_col);
+        cudaFree(csr->d_val);
+    #endif
+    free(csr);
 }
 

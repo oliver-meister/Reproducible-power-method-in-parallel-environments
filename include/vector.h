@@ -5,11 +5,8 @@
 typedef struct {
     double* data;
     int size;
-#if defined(USE_CUDA) || defined(USE_EXBLAS)
     double *d_data;
-#endif
 } Vector;
-
 
 double generate_random_double(double, double);
 Vector* generate_random_vector(int size);
