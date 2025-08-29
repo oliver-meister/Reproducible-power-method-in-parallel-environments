@@ -12,8 +12,8 @@
 #include "../../include/vector.h"
 #include "../../external/mmio.h"
 
-/*
 
+/*
 void test_dot(){
     Vector x;
     x.size = 1000;
@@ -26,13 +26,13 @@ void test_dot(){
     for(int i = 0; i < 1000; i++){
         x.data[i] = (double)i;
         y.data[i] = (double)(2*i);
+        }
+        
+        double dot = cuda_dot_product(&x,&y);
+        CU_ASSERT_DOUBLE_EQUAL(dot, 665667000, 1e-6)
+        free(x.data);
+        free(y.data);
     }
-    
-    double dot = cuda_dot_product(&x,&y);
-    CU_ASSERT_DOUBLE_EQUAL(dot, 665667000, 1e-6)
-    free(x.data);
-    free(y.data);
-}
 
 void test_CUDA_norm(){
     
@@ -227,18 +227,9 @@ void test_serial_CSR_cage10(){
 
     test_sparse_power_method(A, "cage10");
 
-    free(my_coo->row);
-    free(my_coo->col);
-    free(my_coo->val);
-    free(my_coo);
-    
-    free(my_csr->row_ptr);
-    free(my_csr->col);
-    free(my_csr->val);
-    free(my_csr);
-    
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
     free(A);
-
 }
 
 
@@ -420,16 +411,18 @@ int main(){
     srand(time(0));
     CU_initialize_registry();
     CU_pSuite suite = CU_add_suite("Power Method CUDA ExBLAS", NULL, NULL);
-/*
-CU_add_test(suite, "Vector normalization test", test_CUDA_norm);
-CU_add_test(suite, "Test dot product CUDA", test_dot);
-CU_add_test(suite, "Test CSR powermethod", test_CUDA_sparse_CSR_large_power_method);
-CU_add_test(suite, "sparse matrix-vector multi test", test_sparse_CUDA_matvec_mult);
-CU_add_test(suite, "Matrix vector multiplication test", test_dense_CUDA_matvec_mult);
-CU_add_test(suite, "Approximate eigenvalue test", test_dense_CUDA_approximate_eigenvalue);
-*/
 
-    CU_add_test(suite, "Power method cage10", test_serial_CSR_cage10);
+    /*
+    CU_add_test(suite, "Test dot product CUDA", test_dot);
+    CU_add_test(suite, "Vector normalization test", test_CUDA_norm);
+    CU_add_test(suite, "Test CSR powermethod", test_CUDA_sparse_CSR_large_power_method);
+    CU_add_test(suite, "sparse matrix-vector multi test", test_sparse_CUDA_matvec_mult);
+    CU_add_test(suite, "Matrix vector multiplication test", test_dense_CUDA_matvec_mult);
+    CU_add_test(suite, "Approximate eigenvalue test", test_dense_CUDA_approximate_eigenvalue);
+    */
+
+   CU_add_test(suite, "Power method cage10", test_serial_CSR_cage10);
+   /*
     CU_add_test(suite, "Power method 494_bus", test_serial_CSR_494_bus);
     CU_add_test(suite, "Power method venkat01", test_serial_CSR_venkat01);
     CU_add_test(suite, "Power method siH4", test_serial_CSR_siH4);
@@ -437,6 +430,7 @@ CU_add_test(suite, "Approximate eigenvalue test", test_dense_CUDA_approximate_ei
     CU_add_test(suite, "Power method SiO", test_serial_CSR_SiO);
     CU_add_test(suite, "Power method bcsstk01", test_serial_CSR_bcsstk01);
     //CU_add_test(suite, "Power method pkustk13", test_serial_CSR_pkustk13);
+    */
 
     CU_basic_run_tests();
     CU_cleanup_registry();

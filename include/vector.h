@@ -5,6 +5,8 @@
 typedef struct {
     double* data;
     int size;
+    double *d_data;
+
 } Vector;
 
 double generate_random_double(double, double);

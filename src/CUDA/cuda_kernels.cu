@@ -50,10 +50,12 @@ __global__ void dotprod(double *x_idata, double *y_idata, double* result, unsign
     }
 
     extern "C" void launch_dotprod_kernel(double* x, double* y, double* result, int n, int numBlocks) {
-        dotprod<BLOCK_SIZE><<<numBlocks, BLOCK_SIZE>>>(x, y, result, n);
+        size_t shmem = (BLOCK_SIZE + 1) * sizeof(double);
+        dotprod<BLOCK_SIZE><<<numBlocks, BLOCK_SIZE, shmem>>>(x, y, result, n);
     }
     extern "C" void launch_reduce_kernel(double* input, double* output, int currentSize, int nextSize, int blockSize) {
-        reduce<BLOCK_SIZE><<<nextSize, blockSize>>>(input, output, currentSize);
+        size_t shmem = (BLOCK_SIZE + 1) * sizeof(double);
+        reduce<BLOCK_SIZE><<<nextSize, blockSize, shmem>>>(input, output, currentSize);
     }
 
 

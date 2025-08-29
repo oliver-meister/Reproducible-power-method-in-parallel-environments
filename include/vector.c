@@ -1,6 +1,7 @@
 #include "vector.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <cuda_runtime.h>
 
 /**
  * @brief Calculates the dot product of two Vectors.
@@ -58,6 +59,10 @@ Vector* generate_vector(int size){
     Vector *x = malloc(sizeof(Vector));
     x->data = vector_data;
     x->size = size;
+    #if defined(USE_CUDA) || defined(USE_EXBLAS)
+        cudaMalloc((void**)&x->d_data, sizeof(double) * size);
+    #endif
+
     return x;
 }
 
@@ -129,5 +134,10 @@ Vector* generate_1_vector(int size){
     for(int i = 0; i < size; i++){
         x->data[i] = 1.0;
     }
-    return x;
+    // Allocate on the GPU once
+    #if defined(USE_CUDA) || defined(USE_EXBLAS)
+        cudaMalloc((void**)&x->d_data, sizeof(double) * size);
+        cudaMemcpy(x->d_data, x->data, sizeof(double) * size, cudaMemcpyHostToDevice);
+    #endif
+        return x;
 }

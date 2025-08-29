@@ -13,7 +13,7 @@ extern "C" {
 
 
 // Function implemented in a C file
-double cuda_dot_product(const Vector* x, const Vector* y);
+double cuda_dot_product(const Vector* x, const Vector* y, double *d_result, int numBlocks);
 
 void cuda_sparse_matvec_mult(const SparseMatrixAny *A, Vector *x, Vector *y);
 void cuda_sparse_matvec_mult_CSR(const sparseMatrixCSR *A, Vector *x, Vector *y);
