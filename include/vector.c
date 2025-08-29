@@ -68,6 +68,9 @@ Vector* generate_vector(int size){
 
 void delete_vector(Vector *x){
     free(x->data);
+    #if defined(USE_CUDA) || defined(USE_EXBLAS)
+    cudaFree(x->d_data);
+    #endif
     free(x);
 }
 
