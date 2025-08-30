@@ -298,6 +298,134 @@ void test_serial_CSR_benzene(){
     free(A);
 }
 
+void test_serial_CSR_rdb3200l(){
+ 
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/rdb3200l/rdb3200l.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+
+    test_sparse_power_method(A, "rdb3200l");
+
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
+    free(A);
+}
+
+void test_serial_CSR_jpwh_991(){
+ 
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/jpwh_991/jpwh_991.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+
+    test_sparse_power_method(A, "jpwh_991");
+
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
+    free(A);
+}
+
+void test_serial_CSR_bfwa782(){
+ 
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/bfwa782/bfwa782.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+
+    test_sparse_power_method(A, "bfwa782");
+
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
+    free(A);
+}
+
+void test_serial_CSR_cage8(){
+ 
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/cage8/cage8.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+
+    test_sparse_power_method(A, "cage8");
+
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
+    free(A);
+}
+
+void test_serial_CSR_tub100(){
+ 
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/tub100/tub100.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+
+    test_sparse_power_method(A, "tub100");
+
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
+    free(A);
+}
+
+void test_serial_CSR_cdde2(){
+ 
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/cdde2/cdde2.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+
+    test_sparse_power_method(A, "cdde2");
+
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
+    free(A);
+}
+
+void test_serial_CSR_str_0(){
+ 
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/str_0/str_0.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+
+    test_sparse_power_method(A, "str_0");
+
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
+    free(A);
+}
+
+void test_serial_CSR_494_bus(){
+ 
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/494_bus/494_bus.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+
+   test_sparse_power_method(A, "494_bus");
+
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
+    free(A);
+}
+
 void test_serial_CSR_SiO(){
  
     sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/SiO/SiO.mtx");
@@ -313,6 +441,7 @@ void test_serial_CSR_SiO(){
     delete_CSR(my_csr);
     free(A);
 }
+
 
 void test_serial_CSR_bcsstk01(){
  
@@ -367,6 +496,13 @@ int main(){
     CU_add_test(suite, "Power method venkat01", test_serial_CSR_venkat01);
     CU_add_test(suite, "Power method siH4", test_serial_CSR_siH4);
     CU_add_test(suite, "Power method benzene", test_serial_CSR_benzene);
+    CU_add_test(suite, "Power method rdb3200l", test_serial_CSR_rdb3200l);
+    CU_add_test(suite, "Power method jpwh_991", test_serial_CSR_jpwh_991);
+    CU_add_test(suite, "Power method bfwa782", test_serial_CSR_bfwa782);
+    CU_add_test(suite, "Power method cage8", test_serial_CSR_cage8);
+    CU_add_test(suite, "Power method tub100", test_serial_CSR_tub100);
+    CU_add_test(suite, "Power method cdde2", test_serial_CSR_cdde2);
+    CU_add_test(suite, "Power method str_0", test_serial_CSR_str_0);
     
     //CU_add_test(suite, "Power method 494_bus", test_serial_CSR_494_bus);
     //CU_add_test(suite, "Power method SiO", test_serial_CSR_SiO);
