@@ -242,21 +242,11 @@ void test_serial_CSR_494_bus(){
     A->type = CSR;
     A->mat.csr = my_csr;
 
-   test_sparse_power_method(A, "494_bus");
+    test_sparse_power_method(A, "494_bus");
 
-    free(my_coo->row);
-    free(my_coo->col);
-    free(my_coo->val);
-    free(my_coo);
-    
-    free(my_csr->row_ptr);
-    free(my_csr->col);
-    free(my_csr->val);
-    free(my_csr);
-    
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
     free(A);
-
-
 }
 
 
@@ -271,22 +261,14 @@ void test_serial_CSR_venkat01(){
 
     test_sparse_power_method(A, "venkat01");
 
-    free(my_coo->row);
-    free(my_coo->col);
-    free(my_coo->val);
-    free(my_coo);
-    
-    free(my_csr->row_ptr);
-    free(my_csr->col);
-    free(my_csr->val);
-    free(my_csr);
-    
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
     free(A);
 }
 
 void test_serial_CSR_siH4(){
  
-    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/siH4/siH4.mtx");
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/SiH4/SiH4.mtx");
     sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
 
     SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
@@ -295,16 +277,8 @@ void test_serial_CSR_siH4(){
 
     test_sparse_power_method(A, "siH4");
 
-    free(my_coo->row);
-    free(my_coo->col);
-    free(my_coo->val);
-    free(my_coo);
-    
-    free(my_csr->row_ptr);
-    free(my_csr->col);
-    free(my_csr->val);
-    free(my_csr);
-    
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
     free(A);
 }
 
@@ -319,16 +293,8 @@ void test_serial_CSR_benzene(){
 
     test_sparse_power_method(A, "benzene");
 
-    free(my_coo->row);
-    free(my_coo->col);
-    free(my_coo->val);
-    free(my_coo);
-    
-    free(my_csr->row_ptr);
-    free(my_csr->col);
-    free(my_csr->val);
-    free(my_csr);
-    
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
     free(A);
 }
 
@@ -343,16 +309,8 @@ void test_serial_CSR_SiO(){
 
    test_sparse_power_method(A, "SiO");
 
-    free(my_coo->row);
-    free(my_coo->col);
-    free(my_coo->val);
-    free(my_coo);
-    
-    free(my_csr->row_ptr);
-    free(my_csr->col);
-    free(my_csr->val);
-    free(my_csr);
-    
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
     free(A);
 }
 
@@ -367,16 +325,8 @@ void test_serial_CSR_bcsstk01(){
 
    test_sparse_power_method(A, "bcsstk01");
 
-    free(my_coo->row);
-    free(my_coo->col);
-    free(my_coo->val);
-    free(my_coo);
-    
-    free(my_csr->row_ptr);
-    free(my_csr->col);
-    free(my_csr->val);
-    free(my_csr);
-    
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
     free(A);
 }
 
@@ -391,16 +341,8 @@ void test_serial_CSR_pkustk13(){
 
     test_sparse_power_method(A, "pkustk13");
 
-    free(my_coo->row);
-    free(my_coo->col);
-    free(my_coo->val);
-    free(my_coo);
-    
-    free(my_csr->row_ptr);
-    free(my_csr->col);
-    free(my_csr->val);
-    free(my_csr);
-    
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
     free(A);
 }
 
@@ -421,16 +363,16 @@ int main(){
     CU_add_test(suite, "Approximate eigenvalue test", test_dense_CUDA_approximate_eigenvalue);
     */
 
-   CU_add_test(suite, "Power method cage10", test_serial_CSR_cage10);
-   /*
-    CU_add_test(suite, "Power method 494_bus", test_serial_CSR_494_bus);
+    CU_add_test(suite, "Power method cage10", test_serial_CSR_cage10);
     CU_add_test(suite, "Power method venkat01", test_serial_CSR_venkat01);
     CU_add_test(suite, "Power method siH4", test_serial_CSR_siH4);
     CU_add_test(suite, "Power method benzene", test_serial_CSR_benzene);
-    CU_add_test(suite, "Power method SiO", test_serial_CSR_SiO);
-    CU_add_test(suite, "Power method bcsstk01", test_serial_CSR_bcsstk01);
+    
+    //CU_add_test(suite, "Power method 494_bus", test_serial_CSR_494_bus);
+    //CU_add_test(suite, "Power method SiO", test_serial_CSR_SiO);
+    //CU_add_test(suite, "Power method bcsstk01", test_serial_CSR_bcsstk01);
     //CU_add_test(suite, "Power method pkustk13", test_serial_CSR_pkustk13);
-    */
+
 
     CU_basic_run_tests();
     CU_cleanup_registry();

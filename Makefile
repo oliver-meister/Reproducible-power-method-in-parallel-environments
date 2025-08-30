@@ -4,16 +4,16 @@ NVCC = nvcc
 OFFLOAD_CC = nvc
 
 # === Flags ===
-CFLAGS = -Wall -Wextra -O2 -fopenmp -I/usr/include -L/usr/lib/x86_64-linux-gnu -lm
+CFLAGS = -Wall -Wextra -fopenmp -I/usr/include -L/usr/lib/x86_64-linux-gnu -lm -I/home/o/olla5642/CUnit-2.1-3/install/include -L/home/o/olla5642/CUnit-2.1-3/install/lib
 OFFLOAD_FLAGS = -mp=gpu -O2 -Minfo=accel -lcudart
 CUDA_LIBS = -L/usr/lib/x86_64-linux-gnu -lcudart
 
 # CUDA architecture flag optimized for NVIDIA RTX 4060 (Ada / sm_89)
-CUDA_ARCH_FLAGS = -gencode=arch=compute_89,code=sm_89
+CUDA_ARCH_FLAGS = -gencode=arch=compute_70,code=sm_70
 CUDA_WARN_FLAGS = -Wno-deprecated-gpu-targets
 CUDA_FLAGS = $(CUDA_ARCH_FLAGS) $(CUDA_WARN_FLAGS) $(CUDA_LIBS) -Xcompiler="-Wall -Wextra -fopenmp" 
 
-CUNIT = -lcunit
+CUNIT = -I/home/o/olla5642/CUnit-2.1-3/install/include -L/home/o/olla5642/CUnit-2.1-3/install/lib -lcunit
 
 # === Object Files ===
 IMPORT_OBJ_SERIAL = include/vector_serial.o include/matrix_serial.o external/mmio.o
