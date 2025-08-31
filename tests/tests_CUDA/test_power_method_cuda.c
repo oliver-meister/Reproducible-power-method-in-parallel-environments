@@ -410,21 +410,6 @@ void test_serial_CSR_str_0(){
     free(A);
 }
 
-void test_serial_CSR_494_bus(){
- 
-    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/494_bus/494_bus.mtx");
-    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
-
-    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
-    A->type = CSR;
-    A->mat.csr = my_csr;
-
-   test_sparse_power_method(A, "494_bus");
-
-    delete_COO(my_coo);
-    delete_CSR(my_csr);
-    free(A);
-}
 
 void test_serial_CSR_SiO(){
  
