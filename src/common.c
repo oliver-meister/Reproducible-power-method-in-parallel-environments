@@ -176,10 +176,10 @@ void normalize_vector_CUDA(Vector* x, Vector *y, double* d_result, int numBlocks
  * 
  * @return Nothing. The result is stored directly in the vector x.
  */
-void normalize_vector_EXBLAS(Vector* x, Vector *y, long long int* d_PartialSuperaccs, size_t size){
+void normalize_vector_EXBLAS(Vector* x, Vector *y, long long int* d_PartialSuperaccs, double * d_result ,size_t size){
     
     //printf("call from norm\n");
-    double dot = cuda_ExBLAS_dot_product(x, x, d_PartialSuperaccs, size);
+    double dot = cuda_ExBLAS_dot_product(x, x, d_PartialSuperaccs, d_result ,size);
     
     if (dot <= 1.0e-20 || isnan(dot)) {
         fprintf(stderr, "Warning: norm is too small or invalid, skipping normalization.\n");

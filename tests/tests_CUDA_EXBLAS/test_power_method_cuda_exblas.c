@@ -7,7 +7,7 @@
 #include "../../src/sparse_power_method.h"
 #include "../../src/dense_power_method.h"
 #include "../../src/common.h"
-#include "../../src/CUDA_EXBLAS/cuda_exblas_fun.h"
+#include "../../src/CUDA_ExBLAS/cuda_exblas_fun.h"
 #include "../../include/matrix.h"
 #include "../../include/vector.h"
 #include "../../external/mmio.h"

@@ -59,8 +59,11 @@ Res sparse_power_method(const SparseMatrixAny *A){
 
     #elif defined(USE_EXBLAS)
         long long int* d_PartialSuperaccs;
-        size_t size = PARTIAL_SUPERACCS_COUNT * BIN_COUNT * sizeof(long long int);
-        cudaMalloc((void**)&d_PartialSuperaccs, size);
+        double* d_result;
+        size_t superaccsSize = PARTIAL_SUPERACCS_COUNT * BIN_COUNT * sizeof(long long int);
+        cudaMalloc((void**)&d_PartialSuperaccs, superaccsSize);
+
+        cudaMalloc((void**)&d_result, sizeof(double));
     #endif
 
     // allocate GPU memory for d_result
@@ -76,8 +79,8 @@ Res sparse_power_method(const SparseMatrixAny *A){
             normalize_vector_CUDA(y,x,d_result,numBlocks);
             lambda_new = sparse_approximate_eigenvalue_CUDA(x, y, d_result, numBlocks);
         #elif defined(USE_EXBLAS)
-            normalize_vector_EXBLAS(y,x,d_PartialSuperaccs, size);
-            lambda_new = sparse_approximate_eigenvalue_EXBLAS(x, y, d_PartialSuperaccs, size);
+            normalize_vector_EXBLAS(y,x,d_PartialSuperaccs, d_result, superaccsSize);
+            lambda_new = sparse_approximate_eigenvalue_EXBLAS(x, y, d_PartialSuperaccs, d_result, superaccsSize);
         #else 
             normalize_vector(y,x);
             lambda_new = sparse_approximate_eigenvalue(x, y);
@@ -85,7 +88,7 @@ Res sparse_power_method(const SparseMatrixAny *A){
         sparse_matvec(A,x,y);
         iterations += 1;
         
-    } while(!convergence(lambda_new, lambda_old, 1.0E-15) && iterations < MAX_ITERATIONS);
+    } while(!convergence(lambda_new, lambda_old, 1.0E-6) && iterations < MAX_ITERATIONS);
     double time = timer_stop(start);
     
     Res result;
@@ -106,6 +109,7 @@ Res sparse_power_method(const SparseMatrixAny *A){
         cudaFree(d_result);
     #elif defined(USE_EXBLAS)
         cudaFree(d_PartialSuperaccs);
+        cudaFree(d_result);
     #endif
     return result;
 }
@@ -157,8 +161,8 @@ Res sparse_power_method(const SparseMatrixAny *A){
  * @return The approximated dominant eigenvalue.
  */
 
- double sparse_approximate_eigenvalue_EXBLAS(Vector* x, Vector *y, long long int* d_PartialSuperaccs, size_t size){
-    double lambda = cuda_ExBLAS_dot_product(x, y, d_PartialSuperaccs, size);
+ double sparse_approximate_eigenvalue_EXBLAS(Vector* x, Vector *y, long long int* d_PartialSuperaccs, double* d_result ,size_t size){
+    double lambda = cuda_ExBLAS_dot_product(x, y, d_PartialSuperaccs, d_result, size);
     return lambda;
 }
 
