@@ -22,6 +22,11 @@ extern stop_timer timer_stop;
 #define MAX_ITERATIONS 100000
 #define NUM_RUNS 20
 
+#ifdef USE_EXBLAS
+    #define PARTIAL_SUPERACCS_COUNT 512
+    #define BIN_COUNT 39
+#endif
+
 /**
  * @brief Calculates the dominant eigenvalue and its coresponding eigenvector of a matrix.
  * 
@@ -51,6 +56,11 @@ Res sparse_power_method(const SparseMatrixAny *A){
         int numBlocks = 1;
         double *d_result;
         cudaMalloc((void**)&d_result, sizeof(double) * numBlocks);
+
+    #elif defined(USE_EXBLAS)
+        long long int* d_PartialSuperaccs;
+        size_t size = PARTIAL_SUPERACCS_COUNT * BIN_COUNT * sizeof(long long int);
+        cudaMalloc((void**)&d_PartialSuperaccs, size);
     #endif
 
     // allocate GPU memory for d_result
@@ -65,6 +75,9 @@ Res sparse_power_method(const SparseMatrixAny *A){
         #ifdef USE_CUDA
             normalize_vector_CUDA(y,x,d_result,numBlocks);
             lambda_new = sparse_approximate_eigenvalue_CUDA(x, y, d_result, numBlocks);
+        #elif defined(USE_EXBLAS)
+            normalize_vector_EXBLAS(y,x,d_PartialSuperaccs, size);
+            lambda_new = sparse_approximate_eigenvalue_EXBLAS(x, y, d_PartialSuperaccs, size);
         #else 
             normalize_vector(y,x);
             lambda_new = sparse_approximate_eigenvalue(x, y);
@@ -91,6 +104,8 @@ Res sparse_power_method(const SparseMatrixAny *A){
     delete_vector(y);
     #ifdef USE_CUDA
         cudaFree(d_result);
+    #elif defined(USE_EXBLAS)
+        cudaFree(d_PartialSuperaccs);
     #endif
     return result;
 }
@@ -130,6 +145,20 @@ Res sparse_power_method(const SparseMatrixAny *A){
     //printf("call from approx \n");
     double lambda = cuda_dot_product(x, y, d_result, numBlocks);
     //printf("ExDOT dot result, approx: %.20e\n", lambda);
+    return lambda;
+}
+
+/**
+ * @brief  Approximates the dominant eigenvalue.
+ * 
+ * @param A The input matrix.
+ * @param x The normalized input vector.
+ * 
+ * @return The approximated dominant eigenvalue.
+ */
+
+ double sparse_approximate_eigenvalue_EXBLAS(Vector* x, Vector *y, long long int* d_PartialSuperaccs, size_t size){
+    double lambda = cuda_ExBLAS_dot_product(x, y, d_PartialSuperaccs, size);
     return lambda;
 }
 

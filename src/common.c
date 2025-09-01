@@ -169,4 +169,26 @@ void normalize_vector_CUDA(Vector* x, Vector *y, double* d_result, int numBlocks
     
 }
 
+/**
+ * @brief Normalize the vector into a unit vector.
+ * 
+ * @param x The input/output vector. It is overwritten by the unit vector.
+ * 
+ * @return Nothing. The result is stored directly in the vector x.
+ */
+void normalize_vector_EXBLAS(Vector* x, Vector *y, long long int* d_PartialSuperaccs, size_t size){
+    
+    //printf("call from norm\n");
+    double dot = cuda_ExBLAS_dot_product(x, x, d_PartialSuperaccs, size);
+    
+    if (dot <= 1.0e-20 || isnan(dot)) {
+        fprintf(stderr, "Warning: norm is too small or invalid, skipping normalization.\n");
+        return;
+    }
+    
+    double norm = sqrt(dot);
+    vector_norm_div(x, y, norm);
+    
+}
+
 

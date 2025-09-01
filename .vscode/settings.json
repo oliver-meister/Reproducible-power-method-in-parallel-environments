@@ -44,7 +44,18 @@
         "bitset": "c",
         "__locale": "c",
         "locale": "c",
-        "chrono": "c"
+        "chrono": "c",
+        "cuda_exblas_fun.h": "c",
+        "cuda_runtime.h": "c",
+        "format": "c",
+        "__hash_table": "c",
+        "__split_buffer": "c",
+        "__tree": "c",
+        "deque": "c",
+        "iterator": "c",
+        "map": "c",
+        "queue": "c",
+        "set": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }
