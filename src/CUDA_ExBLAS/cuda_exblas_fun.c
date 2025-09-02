@@ -11,8 +11,6 @@ double runExDOT(const double *d_x, const double *d_y, long long int* d_PartialSu
     call_count++;
     printf("[DEBUG] runExDOT called %d times\n", call_count);
     */
-
-
     // Running CUDA ExDOT
     cudaMemset(d_PartialSuperaccs, 0, size);
     launch_ExDOT(d_PartialSuperaccs, d_x, d_y, N);

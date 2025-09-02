@@ -62,7 +62,6 @@ Res sparse_power_method(const SparseMatrixAny *A){
         double* d_result;
         size_t superaccsSize = PARTIAL_SUPERACCS_COUNT * BIN_COUNT * sizeof(long long int);
         cudaMalloc((void**)&d_PartialSuperaccs, superaccsSize);
-
         cudaMalloc((void**)&d_result, sizeof(double));
     #endif
 
