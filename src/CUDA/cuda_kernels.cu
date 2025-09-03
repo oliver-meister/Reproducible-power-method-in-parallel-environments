@@ -3,8 +3,7 @@
 #include <stdio.h>
 
 
-#define BLOCK_SIZE 32
-
+#define BLOCK_SIZE 256
 
 template <unsigned int blockSize>
 __device__ void warpReduce(volatile double *sdata, unsigned int tid) {

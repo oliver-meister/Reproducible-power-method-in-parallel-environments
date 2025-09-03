@@ -53,7 +53,7 @@ Res sparse_power_method(const SparseMatrixAny *A){
 
     #ifdef USE_CUDA
         // Number of CUDA Blocks for dotproduct
-        int numBlocks = 1;
+        int numBlocks = 512;
         double *d_result;
         cudaMalloc((void**)&d_result, sizeof(double) * numBlocks);
 
@@ -141,15 +141,16 @@ Res sparse_power_method(const SparseMatrixAny *A){
  * 
  * @return The approximated dominant eigenvalue.
  */
-
- double sparse_approximate_eigenvalue_CUDA(Vector* x, Vector *y, double* d_result, int numBlocks){
-    
-    //sparse_matvec(A, x, y);
-    //printf("call from approx \n");
-    double lambda = cuda_dot_product(x, y, d_result, numBlocks);
-    //printf("ExDOT dot result, approx: %.20e\n", lambda);
-    return lambda;
-}
+#ifdef USE_CUDA
+    double sparse_approximate_eigenvalue_CUDA(Vector* x, Vector *y, double* d_result, int numBlocks){
+        
+        //sparse_matvec(A, x, y);
+        //printf("call from approx \n");
+        double lambda = cuda_dot_product(x, y, d_result, numBlocks);
+        //printf("ExDOT dot result, approx: %.20e\n", lambda);
+        return lambda;
+    }
+#endif
 
 /**
  * @brief  Approximates the dominant eigenvalue.
@@ -159,11 +160,12 @@ Res sparse_power_method(const SparseMatrixAny *A){
  * 
  * @return The approximated dominant eigenvalue.
  */
-
- double sparse_approximate_eigenvalue_EXBLAS(Vector* x, Vector *y, long long int* d_PartialSuperaccs, double* d_result ,size_t size){
+#ifdef USE_EXBLAS
+double sparse_approximate_eigenvalue_EXBLAS(Vector* x, Vector *y, long long int* d_PartialSuperaccs, double* d_result ,size_t size){
     double lambda = cuda_ExBLAS_dot_product(x, y, d_PartialSuperaccs, d_result, size);
     return lambda;
 }
+#endif
 
 void test_sparse_power_method(SparseMatrixAny *A, char* file_name){
     double times[NUM_RUNS];

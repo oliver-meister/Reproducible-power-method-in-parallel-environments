@@ -216,6 +216,7 @@ void test_dense_CUDA_power_method(){
 }
 */
 
+
 void test_serial_CSR_cage10(){
  
     sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/cage10/cage10.mtx");
@@ -232,24 +233,6 @@ void test_serial_CSR_cage10(){
     free(A);
 }
 
-
-void test_serial_CSR_494_bus(){
- 
-    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/494_bus/494_bus.mtx");
-    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
-
-    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
-    A->type = CSR;
-    A->mat.csr = my_csr;
-
-    test_sparse_power_method(A, "494_bus");
-
-    delete_COO(my_coo);
-    delete_CSR(my_csr);
-    free(A);
-}
-
-
 void test_serial_CSR_venkat01(){
  
     sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/venkat01/venkat01.mtx");
@@ -265,6 +248,7 @@ void test_serial_CSR_venkat01(){
     delete_CSR(my_csr);
     free(A);
 }
+
 
 void test_serial_CSR_siH4(){
  
@@ -411,6 +395,72 @@ void test_serial_CSR_str_0(){
 }
 
 
+
+void test_serial_CSR_494_bus(){
+    
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/494_bus/494_bus.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+    
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+    
+    test_sparse_power_method(A, "494_bus");
+    
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
+    free(A);
+}
+
+void test_serial_CSR_cit_HepTh(){
+    
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/cit-HepTh/cit-HepTh.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+    
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+    
+    test_sparse_power_method(A, "cit-HepTh");
+    
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
+    free(A);
+}
+
+void test_serial_CSR_ca_GrQc(){
+    
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/ca-GrQc/ca-GrQc.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+    
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+    
+    test_sparse_power_method(A, "ca-GrQc");
+    
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
+    free(A);
+}
+
+void test_serial_CSR_web_Stanford(){
+    
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/web-Stanford/web-Stanford.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+    
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+    
+    test_sparse_power_method(A, "web-Stanford");
+    
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
+    free(A);
+}
+
+
 void test_serial_CSR_SiO(){
  
     sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/SiO/SiO.mtx");
@@ -428,6 +478,22 @@ void test_serial_CSR_SiO(){
 }
 
 
+void test_serial_CSR_pkustk13(){
+    
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/pkustk13/pkustk13.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+    
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+    
+    test_sparse_power_method(A, "pkustk13");
+    
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
+    free(A);
+}
+
 void test_serial_CSR_bcsstk01(){
  
     sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/bcsstk01/bcsstk01.mtx");
@@ -443,23 +509,6 @@ void test_serial_CSR_bcsstk01(){
     delete_CSR(my_csr);
     free(A);
 }
-
-void test_serial_CSR_pkustk13(){
- 
-    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/pkustk13/pkustk13.mtx");
-    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
-
-    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
-    A->type = CSR;
-    A->mat.csr = my_csr;
-
-    test_sparse_power_method(A, "pkustk13");
-
-    delete_COO(my_coo);
-    delete_CSR(my_csr);
-    free(A);
-}
-
 
 
 int main(){
@@ -488,11 +537,13 @@ int main(){
     CU_add_test(suite, "Power method tub100", test_serial_CSR_tub100);
     CU_add_test(suite, "Power method cdde2", test_serial_CSR_cdde2);
     CU_add_test(suite, "Power method str_0", test_serial_CSR_str_0);
-    
-    //CU_add_test(suite, "Power method 494_bus", test_serial_CSR_494_bus);
-    //CU_add_test(suite, "Power method SiO", test_serial_CSR_SiO);
-    //CU_add_test(suite, "Power method bcsstk01", test_serial_CSR_bcsstk01);
-    //CU_add_test(suite, "Power method pkustk13", test_serial_CSR_pkustk13);
+    CU_add_test(suite, "Power method 494_bus", test_serial_CSR_494_bus);
+    CU_add_test(suite, "Power method cit-HepTh ", test_serial_CSR_cit_HepTh);
+    CU_add_test(suite, "Power method ca-GrQc ", test_serial_CSR_ca_GrQc);
+    CU_add_test(suite, "Power method web-Stanford ", test_serial_CSR_web_Stanford);
+    CU_add_test(suite, "Power method SiO", test_serial_CSR_SiO);
+    CU_add_test(suite, "Power method pkustk13", test_serial_CSR_pkustk13);
+    CU_add_test(suite, "Power method bcsstk01", test_serial_CSR_bcsstk01);
 
 
     CU_basic_run_tests();

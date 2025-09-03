@@ -79,7 +79,6 @@ void init_backend() {
         timer_stop = timer_omp_stop;    
     #elif defined(USE_CUDA)
         printf("Backend: CUDA\n");
-        dotprod = cuda_dot_product;
         vector_norm_div = cuda_vector_norm_div;
         dense_matvec = cuda_dense_matvec_mult;
         sparse_matvec = cuda_sparse_matvec_mult;
@@ -87,7 +86,6 @@ void init_backend() {
         timer_stop = timer_cuda_stop;
     #elif defined(USE_EXBLAS)
         printf("Backend: CUDA + ExBLAS\n");
-        dotprod = cuda_ExBLAS_dot_product;
         vector_norm_div = cuda_vector_norm_div;
         dense_matvec = cuda_dense_matvec_mult;
         sparse_matvec = cuda_sparse_matvec_mult;
@@ -119,8 +117,6 @@ bool convergence(double lambda_new, double lambda_old, double threshold){
     
     double r_norm = fabs(lambda_new - lambda_old) / fabs(lambda_old);
     return r_norm < threshold * lambda_old;
-    
-   //return (fabs(lambda_new - lambda_old) < threshold);
 }
 
 
@@ -144,7 +140,6 @@ void normalize_vector(Vector* x, Vector *y){
 
     double norm = sqrt(dot);
     vector_norm_div(x, y, norm);
-
 }
 
 /**
@@ -154,20 +149,21 @@ void normalize_vector(Vector* x, Vector *y){
  * 
  * @return Nothing. The result is stored directly in the vector x.
  */
-void normalize_vector_CUDA(Vector* x, Vector *y, double* d_result, int numBlocks){
-    
-    //printf("call from norm\n");
-    double dot = cuda_dot_product(x, x, d_result, numBlocks);
-    
-    if (dot <= 1.0e-20 || isnan(dot)) {
-        fprintf(stderr, "Warning: norm is too small or invalid, skipping normalization.\n");
-        return;
+#ifdef USE_CUDA
+    void normalize_vector_CUDA(Vector* x, Vector *y, double* d_result, int numBlocks){
+        
+        //printf("call from norm\n");
+        double dot = cuda_dot_product(x, x, d_result, numBlocks);
+        
+        if (dot <= 1.0e-20 || isnan(dot)) {
+            fprintf(stderr, "Warning: norm is too small or invalid, skipping normalization.\n");
+            return;
+        }
+        
+        double norm = sqrt(dot);
+        vector_norm_div(x, y, norm);
     }
-    
-    double norm = sqrt(dot);
-    vector_norm_div(x, y, norm);
-    
-}
+#endif
 
 /**
  * @brief Normalize the vector into a unit vector.
@@ -176,19 +172,22 @@ void normalize_vector_CUDA(Vector* x, Vector *y, double* d_result, int numBlocks
  * 
  * @return Nothing. The result is stored directly in the vector x.
  */
-void normalize_vector_EXBLAS(Vector* x, Vector *y, long long int* d_PartialSuperaccs, double * d_result ,size_t size){
-    
+#ifdef USE_EXBLAS
+    void normalize_vector_EXBLAS(Vector* x, Vector *y, long long int* d_PartialSuperaccs, double * d_result ,size_t size){
+        
     //printf("call from norm\n");
     double dot = cuda_ExBLAS_dot_product(x, x, d_PartialSuperaccs, d_result ,size);
-    
+
     if (dot <= 1.0e-20 || isnan(dot)) {
         fprintf(stderr, "Warning: norm is too small or invalid, skipping normalization.\n");
         return;
     }
-    
+
     double norm = sqrt(dot);
     vector_norm_div(x, y, norm);
-    
-}
+    }
+#endif
+
+
 
 

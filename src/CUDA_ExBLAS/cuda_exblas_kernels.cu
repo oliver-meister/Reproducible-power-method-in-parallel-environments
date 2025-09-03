@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 #define WARP_COUNT 16
-#define WARP_SIZE 32
+#define WARP_SIZE 16
 #define BLOCK_SIZE (WARP_COUNT * WARP_SIZE)
 #define MERGE_SUPERACCS_SIZE 128
 #define PARTIAL_SUPERACCS_COUNT 512
