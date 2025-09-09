@@ -9,7 +9,7 @@ OFFLOAD_FLAGS = -mp=gpu -O2 -Minfo=accel -lcudart
 CUDA_LIBS = -L/usr/lib/x86_64-linux-gnu -lcudart
 
 # CUDA architecture flag optimized for NVIDIA RTX 4060 (Ada / sm_89)
-CUDA_ARCH_FLAGS = -gencode=arch=compute_89,code=sm_89
+CUDA_ARCH_FLAGS = -gencode=arch=compute_70,code=sm_70
 CUDA_WARN_FLAGS = -Wno-deprecated-gpu-targets
 CUDA_FLAGS = $(CUDA_ARCH_FLAGS) $(CUDA_WARN_FLAGS) $(CUDA_LIBS) -Xcompiler="-Wall -Wextra -fopenmp" 
 

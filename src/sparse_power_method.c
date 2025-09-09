@@ -19,7 +19,7 @@ extern sparse_matvec_fn sparse_matvec;
 extern start_timer timer_start;
 extern stop_timer timer_stop;
 
-#define MAX_ITERATIONS 100000
+//#define MAX_ITERATIONS 100000
 #define NUM_RUNS 20
 
 #ifdef USE_EXBLAS
@@ -34,7 +34,7 @@ extern stop_timer timer_stop;
  * 
  * @return The dominant eigenvalue of matrix A.
  */
-Res sparse_power_method(const SparseMatrixAny *A){
+Res sparse_power_method(const SparseMatrixAny *A, double threshold){
     
     double lambda_old = 0;
     double lambda_new = 0;
@@ -66,6 +66,7 @@ Res sparse_power_method(const SparseMatrixAny *A){
     #endif
 
     // allocate GPU memory for d_result
+    int MAX_ITERATIONS = min(20*size, 100000);
     int iterations = 0;
 
     double start = timer_start();
@@ -87,7 +88,7 @@ Res sparse_power_method(const SparseMatrixAny *A){
         sparse_matvec(A,x,y);
         iterations += 1;
         
-    } while(!convergence(lambda_new, lambda_old, 1.0E-6) && iterations < MAX_ITERATIONS);
+    } while(!convergence(lambda_new, lambda_old, threshold) && iterations < MAX_ITERATIONS);
     double time = timer_stop(start);
     
     Res result;
@@ -167,7 +168,7 @@ double sparse_approximate_eigenvalue_EXBLAS(Vector* x, Vector *y, long long int*
 }
 #endif
 
-void test_sparse_power_method(SparseMatrixAny *A, char* file_name){
+void test_sparse_power_method(SparseMatrixAny *A, char* file_name, double threshold){
     double times[NUM_RUNS];
     double total_time = 0.0;
     int min_iter = 0;
@@ -175,7 +176,7 @@ void test_sparse_power_method(SparseMatrixAny *A, char* file_name){
     double min_lambda = 0.0;
     double max_lambda = 0.0;
 
-    Res warmup = sparse_power_method(A);
+    Res warmup = sparse_power_method(A, threshold);
     if (warmup.lambda == -1.0) {
         printf("%s: did not converge\n", file_name);
         return;
@@ -183,7 +184,7 @@ void test_sparse_power_method(SparseMatrixAny *A, char* file_name){
 
 
     for (int i = 0; i < NUM_RUNS; i++){
-        Res result = sparse_power_method(A);
+        Res result = sparse_power_method(A, threshold);
         if(result.lambda == -1.0){
             printf("%s: did not converge\n", file_name);
             return;
@@ -226,5 +227,5 @@ void test_sparse_power_method(SparseMatrixAny *A, char* file_name){
     }
 
     double stddev = sqrt(variance / (NUM_RUNS -1));
-    printf("%s: avg time = %.6f s, stddev = %.6f s, max iter = %d, min iter = %d, max lambda = %.16f, min lambda = %.16f \n",file_name, avg, stddev, max_iter, min_iter, max_lambda, min_lambda);
+    printf("%s: threshold = %.16f, avg time = %.6f s, stddev = %.6f s, max iter = %d, min iter = %d, max lambda = %.16f, min lambda = %.16f \n",file_name, threshold, avg, stddev, max_iter, min_iter, max_lambda, min_lambda);
 }

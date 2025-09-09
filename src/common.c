@@ -114,9 +114,7 @@ void init_backend() {
  * @return True if the difference between the two eigenvalues is less than the threshold, false otherwise.
  */
 bool convergence(double lambda_new, double lambda_old, double threshold){
-    
-    double r_norm = fabs(lambda_new - lambda_old) / fabs(lambda_old);
-    return r_norm < threshold * lambda_old;
+    return fabs(lambda_new - lambda_old) < threshold * fabs(lambda_old);
 }
 
 
@@ -154,12 +152,6 @@ void normalize_vector(Vector* x, Vector *y){
         
         //printf("call from norm\n");
         double dot = cuda_dot_product(x, x, d_result, numBlocks);
-        
-        if (dot <= 1.0e-20 || isnan(dot)) {
-            fprintf(stderr, "Warning: norm is too small or invalid, skipping normalization.\n");
-            return;
-        }
-        
         double norm = sqrt(dot);
         vector_norm_div(x, y, norm);
     }
@@ -177,17 +169,7 @@ void normalize_vector(Vector* x, Vector *y){
         
     //printf("call from norm\n");
     double dot = cuda_ExBLAS_dot_product(x, x, d_PartialSuperaccs, d_result ,size);
-
-    if (dot <= 1.0e-20 || isnan(dot)) {
-        fprintf(stderr, "Warning: norm is too small or invalid, skipping normalization.\n");
-        return;
-    }
-
     double norm = sqrt(dot);
     vector_norm_div(x, y, norm);
     }
 #endif
-
-
-
-
