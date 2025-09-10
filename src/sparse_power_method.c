@@ -20,7 +20,7 @@ extern start_timer timer_start;
 extern stop_timer timer_stop;
 
 //#define MAX_ITERATIONS 100000
-#define NUM_RUNS 20
+#define NUM_RUNS 1
 
 #ifdef USE_EXBLAS
     #define PARTIAL_SUPERACCS_COUNT 512
@@ -66,7 +66,7 @@ Res sparse_power_method(const SparseMatrixAny *A, double threshold){
     #endif
 
     // allocate GPU memory for d_result
-    int MAX_ITERATIONS = min(20*size, 100000);
+    int MAX_ITERATIONS = 100000;
     int iterations = 0;
 
     double start = timer_start();
@@ -74,6 +74,7 @@ Res sparse_power_method(const SparseMatrixAny *A, double threshold){
     sparse_matvec(A,x,y);
 
     do{
+        iterations += 1;
         lambda_old = lambda_new;
         #ifdef USE_CUDA
             normalize_vector_CUDA(y,x,d_result,numBlocks);
@@ -81,12 +82,13 @@ Res sparse_power_method(const SparseMatrixAny *A, double threshold){
         #elif defined(USE_EXBLAS)
             normalize_vector_EXBLAS(y,x,d_PartialSuperaccs, d_result, superaccsSize);
             lambda_new = sparse_approximate_eigenvalue_EXBLAS(x, y, d_PartialSuperaccs, d_result, superaccsSize);
+            printf("%d: lambda = %.6f\n", iterations, lambda_new);
+
         #else 
             normalize_vector(y,x);
             lambda_new = sparse_approximate_eigenvalue(x, y);
         #endif
         sparse_matvec(A,x,y);
-        iterations += 1;
         
     } while(!convergence(lambda_new, lambda_old, threshold) && iterations < MAX_ITERATIONS);
     double time = timer_stop(start);
