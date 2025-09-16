@@ -16,7 +16,7 @@ typedef double (*stop_timer)(double start);
 bool convergence(double prev, double curr, double tolerance);
 void normalize_vector(Vector* x, Vector* y);
 void normalize_vector_CUDA(Vector* x, Vector *y, double* d_result, int numBlocks);
-void normalize_vector_EXBLAS(Vector* x, Vector *y, long long int* d_PartialSuperaccs, double* d_result ,size_t size);
+void normalize_vector_EXBLAS(Vector* x, Vector *y, long long int* d_PartialSuperaccs, double* d_result ,size_t size, int iter);
 void init_backend();
 
 typedef struct {

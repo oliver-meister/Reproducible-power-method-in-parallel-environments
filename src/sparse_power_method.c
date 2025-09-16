@@ -20,7 +20,7 @@ extern start_timer timer_start;
 extern stop_timer timer_stop;
 
 //#define MAX_ITERATIONS 100000
-#define NUM_RUNS 1
+#define NUM_RUNS 10
 
 #ifdef USE_EXBLAS
     #define PARTIAL_SUPERACCS_COUNT 512
@@ -80,10 +80,8 @@ Res sparse_power_method(const SparseMatrixAny *A, double threshold){
             normalize_vector_CUDA(y,x,d_result,numBlocks);
             lambda_new = sparse_approximate_eigenvalue_CUDA(x, y, d_result, numBlocks);
         #elif defined(USE_EXBLAS)
-            normalize_vector_EXBLAS(y,x,d_PartialSuperaccs, d_result, superaccsSize);
+            normalize_vector_EXBLAS(y,x,d_PartialSuperaccs, d_result, superaccsSize, iterations);
             lambda_new = sparse_approximate_eigenvalue_EXBLAS(x, y, d_PartialSuperaccs, d_result, superaccsSize);
-            printf("%d: lambda = %.6f\n", iterations, lambda_new);
-
         #else 
             normalize_vector(y,x);
             lambda_new = sparse_approximate_eigenvalue(x, y);

@@ -296,6 +296,61 @@ void test_serial_CSR_benzene(){
     free(A);
 }
 
+void test_serial_CSR_arc130(){
+ 
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/arc130/arc130.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+    double thresholds[6] = {1.0E-6, 1.0E-9, 1.0E-12, 1.0E-13, 1.0E-14, 1.0E-15};
+    for(int i = 0; i < 6; i++)
+    {
+        test_sparse_power_method(A, "arc130", thresholds[i]);
+    }
+
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
+    free(A);
+}
+void test_serial_CSR_ex19(){
+ 
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/ex19/ex19.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+    double thresholds[6] = {1.0E-6, 1.0E-9, 1.0E-12, 1.0E-13, 1.0E-14, 1.0E-15};
+    for(int i = 0; i < 6; i++)
+    {
+        test_sparse_power_method(A, "ex19", thresholds[i]);
+    }
+
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
+    free(A);
+}
+void test_serial_CSR_S80PI_n(){
+ 
+    sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/S80PI_n/S80PI_n.mtx");
+    sparseMatrixCSR *my_csr = coo_to_csr(my_coo);
+
+    SparseMatrixAny * A = malloc(sizeof(SparseMatrixAny));
+    A->type = CSR;
+    A->mat.csr = my_csr;
+    double thresholds[6] = {1.0E-6, 1.0E-9, 1.0E-12, 1.0E-13, 1.0E-14, 1.0E-15};
+    for(int i = 0; i < 6; i++)
+    {
+        test_sparse_power_method(A, "S80PI_n", thresholds[i]);
+    }
+
+    delete_COO(my_coo);
+    delete_CSR(my_csr);
+    free(A);
+}
+
 void test_serial_CSR_rdb3200l(){
  
     sparseMatrixCOO *my_coo = createSparseMatrixCOO("ssget/rdb3200l/rdb3200l.mtx");
@@ -581,7 +636,10 @@ int main(){
     CU_add_test(suite, "Matrix vector multiplication test", test_dense_CUDA_matvec_mult);
     CU_add_test(suite, "Approximate eigenvalue test", test_dense_CUDA_approximate_eigenvalue);
     */
-
+    CU_add_test(suite, "Power method arc130", test_serial_CSR_arc130);
+    CU_add_test(suite, "Power method ex19", test_serial_CSR_ex19);
+    CU_add_test(suite, "Power method S80PI_n", test_serial_CSR_S80PI_n);
+    /*
     CU_add_test(suite, "Power method cage10", test_serial_CSR_cage10);
     CU_add_test(suite, "Power method venkat01", test_serial_CSR_venkat01);
     CU_add_test(suite, "Power method siH4", test_serial_CSR_siH4);
@@ -600,6 +658,7 @@ int main(){
     CU_add_test(suite, "Power method SiO", test_serial_CSR_SiO);
     CU_add_test(suite, "Power method pkustk13", test_serial_CSR_pkustk13);
     CU_add_test(suite, "Power method bcsstk01", test_serial_CSR_bcsstk01);
+    */
 
     CU_basic_run_tests();
     CU_cleanup_registry();

@@ -165,7 +165,7 @@ void normalize_vector(Vector* x, Vector *y){
  * @return Nothing. The result is stored directly in the vector x.
  */
 #ifdef USE_EXBLAS
-    void normalize_vector_EXBLAS(Vector* x, Vector *y, long long int* d_PartialSuperaccs, double * d_result ,size_t size){
+    void normalize_vector_EXBLAS(Vector* x, Vector *y, long long int* d_PartialSuperaccs, double * d_result ,size_t size, int iter){
         
     //printf("call from norm\n");
     double dot = cuda_ExBLAS_dot_product(x, x, d_PartialSuperaccs, d_result ,size);

@@ -185,28 +185,46 @@ __device__ void AccumulateWord(volatile long long int *sa, int i, long long int 
     }
 }
 
+// Hjälpfunktion: heltalsdivision med floor, även för negativa tal.
+__device__ __forceinline__ int floor_div_int(int num, int den) {
+    // den > 0 antas (digits = 52)
+    return (num >= 0) ? (num / den) : - ((-num + den - 1) / den);
+}
+
 __device__ void Accumulate(volatile long long int *sa, double x) {
-    if (x == 0)
+    if (x == 0.0 || isnan(x) || isinf(x))
         return;
 
     int e;
     frexp(x, &e);
-    int exp_word = e / digits;  // Word containing MSbit
-    int iup = exp_word + f_words;
 
+    // Använd floor-division i stället för trunkering mot noll.
+    int exp_word = floor_div_int(e, digits);   // digits = 52
+    int iup      = exp_word + f_words;         // f_words = 20
+
+    // Skala enligt samma exp_word
     double xscaled = ldexp(x, -digits * exp_word);
 
-    int i;
-    for (i = iup; xscaled != 0; --i) {
+    // Loop med gränskontroll: kalla endast AccumulateWord när i är inom [0, BIN_COUNT)
+    for (int i = iup; xscaled != 0.0; --i) {
         double xrounded = rint(xscaled);
         long long int xint = (long long int) xrounded;
 
-        AccumulateWord(sa, i, xint);
-
+        if (i >= 0 && i < BIN_COUNT) {
+            AccumulateWord(sa, i, xint);
+        }
+        // Även om i ligger utanför intervallet måste vi uppdatera xscaled
+        // så att serien fortskrider korrekt.
         xscaled -= xrounded;
         xscaled *= deltaScale;
+
+        // Tidig brytning: om i < 0 och xscaled minskar snabbt mot 0 kan vi
+        // komma ur tidigare, men detta är valfritt. Vi låter xscaled-stoppet styra.
+        if (i < - (BIN_COUNT + 8) && fabs(xscaled) == 0.0)
+            break;
     }
 }
+
 
 __global__ void FinalReduceAndRound(double *d_Res, long long int *d_PartialSuperaccs, int block_count) {
     int tid = threadIdx.x;
@@ -376,7 +394,6 @@ __global__ void ExDOT(long long int *d_PartialSuperaccs, double *d_a, double *d_
 
 }
     
-
 
 extern "C" void launch_ExDOT(
    long long int *d_PartialSuperaccs, double *d_a, double *d_b, unsigned int NbElements){
