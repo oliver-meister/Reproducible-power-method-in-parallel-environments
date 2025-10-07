@@ -21,18 +21,9 @@ double cuda_dot_product(const Vector* x, const Vector* y, double *d_result, int 
     double result = 0.0;
     
     if (numBlocks > 1){
-        double *h_result = malloc(sizeof(double) * numBlocks);
-        cudaMemcpy(h_result, d_result, sizeof(double) * numBlocks, cudaMemcpyDeviceToHost);
-
-        for(int i = 0; i < numBlocks; i++){
-            result += h_result[i];
-        }
-        free(h_result);
-    }else{
-        cudaMemcpy(&result, d_result, sizeof(double), cudaMemcpyDeviceToHost);
+        launch_dot_complete_kernel(d_result, d_result, numBlocks);
     }
-   
-    // Clean up
+    cudaMemcpy(&result, d_result, sizeof(double), cudaMemcpyDeviceToHost);
     return result;
 }
 
@@ -74,4 +65,9 @@ void cuda_dense_matvec_mult(const denseMatrix *A, Vector *x, Vector *y){
 
 void cuda_vector_norm_div(const Vector *x, Vector *y, double norm){
     launch_vector_norm_div(x->d_data, y->d_data, norm, x->size);
+}
+
+void copy_vector_from_device_to_host(Vector* v)
+{
+    cudaMemcpy(v->data, v->d_data, sizeof(double) * v->size, cudaMemcpyDeviceToHost);
 }

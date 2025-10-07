@@ -16,7 +16,7 @@ __device__ void warpReduce(volatile double *sdata, unsigned int tid) {
 }
 
 template <unsigned int blockSize>
-__global__ void reduce(double *g_idata, double *g_odata, unsigned int n) {
+__global__ void dot_complete(double *g_idata, double *g_odata, unsigned int n) {
     extern __shared__ double sdata[];
     unsigned int tid = threadIdx.x;
     unsigned int i = blockIdx.x*(blockSize*2) + tid;
@@ -48,13 +48,15 @@ __global__ void dotprod(double *x_idata, double *y_idata, double* result, unsign
     if (tid == 0) result[blockIdx.x] = sdata[0];
     }
 
+
+
     extern "C" void launch_dotprod_kernel(double* x, double* y, double* result, int n, int numBlocks) {
         size_t shmem = (BLOCK_SIZE + 1) * sizeof(double);
         dotprod<BLOCK_SIZE><<<numBlocks, BLOCK_SIZE, shmem>>>(x, y, result, n);
     }
-    extern "C" void launch_reduce_kernel(double* input, double* output, int currentSize, int nextSize, int blockSize) {
+    extern "C" void launch_dot_complete_kernel(double* input, double* output, int n) {
         size_t shmem = (BLOCK_SIZE + 1) * sizeof(double);
-        reduce<BLOCK_SIZE><<<nextSize, blockSize, shmem>>>(input, output, currentSize);
+        dot_complete<BLOCK_SIZE><<<1, BLOCK_SIZE, shmem>>>(input, output, n);
     }
 
 

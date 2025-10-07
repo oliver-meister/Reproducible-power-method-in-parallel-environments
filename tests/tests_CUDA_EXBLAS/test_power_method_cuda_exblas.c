@@ -420,13 +420,10 @@ void test_serial_CSR_494_bus(){
     A->type = CSR;
     A->mat.csr = my_csr;
     double thresholds[6] = {1.0E-6, 1.0E-9, 1.0E-12, 1.0E-13, 1.0E-14, 1.0E-15};
-    /*
     for(int i = 0; i < 6; i++)
     {
         test_sparse_power_method(A, "494_bus", thresholds[i]);
     }
-    */
-    test_sparse_power_method(A, "494_bus", 1.0E-12 );
     delete_COO(my_coo);
     delete_CSR(my_csr);
     free(A);
@@ -441,13 +438,11 @@ void test_serial_CSR_cit_HepTh(){
     A->type = CSR;
     A->mat.csr = my_csr;
     double thresholds[6] = {1.0E-6, 1.0E-9, 1.0E-12, 1.0E-13, 1.0E-14, 1.0E-15};
-    /*
     for(int i = 0; i < 6; i++)
     {
         test_sparse_power_method(A, "cit-HepTh", thresholds[i]);
     }    
-    */
-    test_sparse_power_method(A, "cit-HepTh", 1.0E-12);
+
     
     delete_COO(my_coo);
     delete_CSR(my_csr);
@@ -541,10 +536,13 @@ void test_serial_CSR_bcsstk01(){
     A->type = CSR;
     A->mat.csr = my_csr;
     double thresholds[6] = {1.0E-6, 1.0E-9, 1.0E-12, 1.0E-13, 1.0E-14, 1.0E-15};
+    /*
     for(int i = 0; i < 6; i++)
     {
         test_sparse_power_method(A, "bcsstk01", thresholds[i]);
     }
+    */
+    test_sparse_power_method(A, "bcsstk01", 1.0E-12);
 
     delete_COO(my_coo);
     delete_CSR(my_csr);
@@ -557,27 +555,26 @@ int main(){
     srand(time(0));
     CU_initialize_registry();
     CU_pSuite suite = CU_add_suite("Power Method CUDA", NULL, NULL);
-
     /*
-    CU_add_test(suite, "Power method venkat01", test_serial_CSR_venkat01);
     CU_add_test(suite, "Vector normalization test", test_EXBLAS_norm);
     CU_add_test(suite, "Test dot product CUDA", test_dot);
     CU_add_test(suite, "Test CSR powermethod", test_EXBLAS_sparse_CSR_large_power_method);
     CU_add_test(suite, "Approximate eigenvalue test", test_dense_EXBLAS_approximate_eigenvalue);  
-    CU_add_test(suite, "Power method benzene", test_serial_CSR_benzene);
     */
+    CU_add_test(suite, "Power method 1138_bus", test_serial_CSR_1138_bus);
+    CU_add_test(suite, "Power method SiO", test_serial_CSR_SiO);
+    /*
+    CU_add_test(suite, "Power method bcsstk01", test_serial_CSR_bcsstk01);
+    CU_add_test(suite, "Power method benzene", test_serial_CSR_benzene);
+    CU_add_test(suite, "Power method cage10", test_serial_CSR_cage10);
+    CU_add_test(suite, "Power method venkat01", test_serial_CSR_venkat01);
     CU_add_test(suite, "Power method arc130", test_serial_CSR_arc130);
     CU_add_test(suite, "Power method ex19", test_serial_CSR_ex19);
     CU_add_test(suite, "Power method S80PI_n", test_serial_CSR_S80PI_n);
-    /*
-    CU_add_test(suite, "Power method cage10", test_serial_CSR_cage10);
-    CU_add_test(suite, "Power method 1138_bus", test_serial_CSR_1138_bus);
-    CU_add_test(suite, "Power method SiO", test_serial_CSR_SiO);
     CU_add_test(suite, "Power method tub100", test_serial_CSR_tub100);
     CU_add_test(suite, "Power method siH4", test_serial_CSR_siH4);
     CU_add_test(suite, "Power method rdb3200l", test_serial_CSR_rdb3200l);
     CU_add_test(suite, "Power method jpwh_991", test_serial_CSR_jpwh_991);
-    
     CU_add_test(suite, "Power method bfwa782", test_serial_CSR_bfwa782);
     CU_add_test(suite, "Power method cage8", test_serial_CSR_cage8);
     CU_add_test(suite, "Power method cdde2", test_serial_CSR_cdde2);
@@ -585,7 +582,6 @@ int main(){
     CU_add_test(suite, "Power method ca-GrQc ", test_serial_CSR_ca_GrQc);
     CU_add_test(suite, "Power method web-Stanford ", test_serial_CSR_web_Stanford);
     CU_add_test(suite, "Power method pkustk13", test_serial_CSR_pkustk13);
-    CU_add_test(suite, "Power method bcsstk01", test_serial_CSR_bcsstk01);
     CU_add_test(suite, "Power method 494_bus", test_serial_CSR_494_bus);
     CU_add_test(suite, "Power method cit-HepTh ", test_serial_CSR_cit_HepTh);
     */

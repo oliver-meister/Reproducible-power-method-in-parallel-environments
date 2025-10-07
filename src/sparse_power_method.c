@@ -103,6 +103,7 @@ Res sparse_power_method(const SparseMatrixAny *A, double threshold){
         //printf("Number of iterations: %d\n", iterations);
         //printf("Lambda: %.16f\n", lambda_new);
     }
+
     delete_vector(x);
     delete_vector(y);
     #ifdef USE_CUDA
